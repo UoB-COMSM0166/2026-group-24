@@ -27,12 +27,14 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 
 GROUP PHOTO. Add a group photo here.
 
-- Group member 1, Junjie Peng, email, role
-- Group member 2, Songyun Han, email, role
-- Group member 3, name, email, role
-- Group member 4, name, email, role
-- Group member 5, name, email, role
-- Group member 6, name, email, role
+| Name | Username | Email | Role |
+|------|----------|-------|------|
+| Junjie Peng | JAY-bru | sg25291@bristol.ac.uk | Role |
+| Songyun Han |  zhishihsy | bo24091@bristol.ac.uk | Role |
+| Jian Ye | yejian414-tech | ok25241@bristol.ac.uk | Role |
+| Junjian Cao | JulianC-2778 | nh25975@bristol.ac.uk | Role |
+| Xiaoyu Zhao | zongshifei | rc25481@bristol.ac.uk | Role |
+| Shangqing Li | shangqinglee123-create | pd25964@bristol.ac.uk | Role |
 
 ## Project Report
 
