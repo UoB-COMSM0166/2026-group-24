@@ -25,7 +25,7 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 
 ## Your Group
 
-![group](./groupphoto)
+![group](./groupphoto.jpg)
 
 
 | Name | Username | Email | Role |
