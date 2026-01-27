@@ -25,7 +25,7 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 
 ## Your Group
 
-<img src="./groupphoto.jpg" width="300" height="200">
+<img src="./groupphoto.jpg" width="600" height="800">
 
 
 | Name | Username | Email | Role |
