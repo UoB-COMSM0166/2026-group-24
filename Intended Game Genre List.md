@@ -1,9 +1,9 @@
 # Intended Game Genre List
 game genre|reason
 |---|---|
-game genre 1|reason 1
-game genre 2|reason 2
-game genre 3|reason 3
-game genre 4|reason 4
-game genre 5|reason 5
-game genre 6|reason 6
+Monopoly-style Board Game Simulation|This project is a turn-based Monopoly-style board game simulation that strongly emphasizes randomness and uncertainty. Players move by rolling dice, purchase properties, and collect rent to accumulate wealth. Random dice outcomes and event mechanics create unpredictable game situations, while financial planning and investment decisions add strategic depth. Players must balance luck with strategy to outlast opponents and win.
+Roguelike|The gameplay of Roguelike significantly enhances the randomness and irreversibility of the game. Through the generation of completely random option types, players can explore different gameplay combinations in each game session. The thrill of having to start over from the beginning upon failure makes players think carefully before making decisions, greatly increasing the game's playability and the sense of achievement when they finally clear it.
+Factory Simulation|We want to write code that makes chaotic objects “get in line” and move in perfect synchronization. It’s very satisfying to watch
+Tower defence|The gameplay is similar to Forts. On a 2D vertical plane, players design fortresses and configure weapons, while making strategic trade-offs among funds, stability, and attack power. By defeating enemies, players can get materials to upgrade their fortress. This makes players plan carefully while still dealing with randomness.
+Management Simulation Game|This project is a management simulation game inspired by classic real-time strategy games such as Red Alert. Players are tasked with constructing and operating a base, harvesting resources, and producing combat units and structural facilities to boost their overall strength. The core of the game lies in its long-term development and progression-upgrade system: players need to allocate limited resources rationally among base expansion, defensive deployment, and technological R&D, which aligns well with the realities of actual warfare instead of focusing merely on blind attacks and destruction. We can introduce random events and resource volatility to inject uncertainty into the game and adjust its difficulty, requiring players to adapt their strategies as the situation evolves. Success in the game hinges not on fast operational reflexes, but on thorough planning and layout, efficient resource management, and strategic upgrade decisions.
+hardcore 2D side-scrolling action game|A hardcore 2D side-scrolling action game that fuses Sekiro-style precision combat—centered on parrying, dodging, and strategic posture-breaking—with a modern 'Phone System' for RPG-style gear and health upgrades, challenging players to conquer high-intensity boss encounters through a loop of tactical reflexes and digital character progression
