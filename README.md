@@ -45,7 +45,7 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 - Describe your game, what is based on, what makes it novel? (what's the "twist"?) 
 
 ### Requirements 
-
+<img src="./documents/paper_prototypes.gif" width="600" height="800">
 - 15% ~750 words
 - Early stages design. Ideation process. How did you decide as a team what to develop? Use case diagrams, user stories. 
 
