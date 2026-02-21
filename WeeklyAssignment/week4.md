@@ -1,4 +1,14 @@
 ## Epcis and Userstories
+For stakeholders involved in the For The Treasure game, we have identified several target groups (Figure 5) and created user stories accordingly, categorising them into epics. Here, we endeavour to encompass a broad and diverse range of user personas to maximise the game's appeal and meet the needs of the widest possible audience. These epics, along with their corresponding user stories and acceptance criteria, are presented below .
+## Stakeholders and User Stories
+
+For stakeholders involved in the **Treasure Hunt** game, we have identified several target groups (Figure 5) and created user stories accordingly, categorising them into epics. 
+
+![Figure 5: Stakeholder ](stakeholder .png)
+
+*Figure 5: Stakeholder Map illustrating the four layers of engagement: Game, Production Team, Wider Environment, and External Environment.*
+
+Here, we endeavour to encompass a broad and diverse range of user personas to maximise the game's appeal and meet the needs of the widest possible audience. These epics, along with their corresponding user stories and acceptance criteria.
 ### Epic 1: Dynamic Exploration & Randomized Loot
 **User Story:** As a player who enjoys exploration, I want randomized treasure chests to appear on the map so that every session feels fresh and rewarding.
 
