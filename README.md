@@ -71,6 +71,7 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 - Description of how code was tested. 
 
 ### Process 
+[kanboard](https://caojunjian2025.atlassian.net/jira/software/projects/KAN/boards/1)
 
 - 15% ~750 words
 
