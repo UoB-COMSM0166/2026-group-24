@@ -1,5 +1,13 @@
 ## Epcis and Userstories
-For stakeholders involved in the For The Treasure game, we have identified several target groups (Figure 5) and created user stories accordingly, categorising them into epics. Here, we endeavour to encompass a broad and diverse range of user personas to maximise the game's appeal and meet the needs of the widest possible audience. These epics, along with their corresponding user stories and acceptance criteria, are presented below .
+## Stakeholders and User Stories
+
+For stakeholders involved in the **FOR THE TREASURE** game, we have identified several target groups (Figure 5) and created user stories accordingly, categorising them into epics.
+
+![Figure 5: Onion model diagram of stakeholders](Onion_model_diagram_of_stakeholders.png)
+
+*Figure 5: Onion model diagram of stakeholders illustrating the four layers of engagement: Game, Production Team, Wider Environment, and External Environment.*
+
+Here, we endeavour to encompass a broad and diverse range of user personas to maximise the game's appeal and meet the needs of the widest possible audience. These epics, along with their corresponding user stories and acceptance criteria, are presented below in Table 1.
 ## Stakeholders and User Stories
 
 For stakeholders involved in the **Treasure Hunt** game, we have identified several target groups (Figure 5) and created user stories accordingly, categorising them into epics. 
