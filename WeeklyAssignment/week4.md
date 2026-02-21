@@ -8,15 +8,6 @@ For stakeholders involved in the **FOR THE TREASURE** game, we have identified s
 *Figure 1: Onion model diagram of stakeholders illustrating the four layers of engagement: Game, Production Team, Wider Environment, and External Environment.*
 
 To ensure the game appeals to a diverse audience, we have defined a wide range of users. The following content details the specific epics, user stories, and acceptance criteria designed to meet these varied player needs.
-## Stakeholders and User Stories
-
-For stakeholders involved in the **Treasure Hunt** game, we have identified several target groups (Figure 1) and created user stories accordingly, categorising them into epics. 
-
-[Figure 1: Stakeholder ](stakeholder .png)
-
-*Figure 1: Stakeholder Map illustrating the four layers of engagement: Game, Production Team, Wider Environment, and External Environment.*
-
-Here, we endeavour to encompass a broad and diverse range of user personas to maximise the game's appeal and meet the needs of the widest possible audience. These epics, along with their corresponding user stories and acceptance criteria.
 ### Epic 1: Dynamic Exploration & Randomized Loot
 **User Story:** As a player who enjoys exploration, I want randomized treasure chests to appear on the map so that every session feels fresh and rewarding.
 
