@@ -12,7 +12,7 @@ To ensure the game appeals to a diverse audience, we have defined a wide range o
 
 For stakeholders involved in the **Treasure Hunt** game, we have identified several target groups (Figure 1) and created user stories accordingly, categorising them into epics. 
 
-![Figure 1: Stakeholder ](stakeholder .png)
+[Figure 1: Stakeholder ](stakeholder .png)
 
 *Figure 1: Stakeholder Map illustrating the four layers of engagement: Game, Production Team, Wider Environment, and External Environment.*
 
