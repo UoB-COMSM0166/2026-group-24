@@ -34,6 +34,28 @@ if (!document.getElementById('combat-ui-style')) {
       position: relative;
       margin-bottom: 10px;
     }
+      .pixel-content {
+      position: absolute;
+      bottom: 0px; /* 默认底端对齐 */
+      left: 0px;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center; /* 水平居中 */
+      align-items: flex-end;    /* 内容底端对齐 */
+    }
+    /* 模拟 SVG 的脚底阴影，也需要精确定位 */
+    .unit-shadow {
+      position: absolute;
+      bottom: 0px;
+      left: 50%;
+      transform: translateX(-50%); /* 水平居中 */
+      width: 60px;
+      height: 12px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 50%;
+      z-index: -1;
+    }
   `;
   document.head.appendChild(s);
 }
@@ -266,7 +288,7 @@ const AnimatedSprite = ({ unit }) => {
           backgroundSize: `${sheet.width}px ${sheet.height}px`,
           backgroundRepeat: 'no-repeat',
           /* 👇 修改此处的 scale 数值（如 4.8 -> 5.5）来改变法师大小 */
-          transform: 'scale(2.5) translateY(4px)', 
+          transform: 'scale(2.2) translateY(47px) translateX(-40px)', 
           transformOrigin: 'bottom center',
           imageRendering: 'pixelated',
           marginBottom: '-5px'
