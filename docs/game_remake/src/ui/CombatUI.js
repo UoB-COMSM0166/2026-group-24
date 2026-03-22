@@ -277,12 +277,27 @@ const getFigure = (unit, action = 'idle') => {
 };
 
 // ─── Compact HP bar ──────────────────────────────────────────────────────────
-const HpBar = ({ current, max, isEnemy, name }) => {
+const STATUS_ICONS = {
+  burn:        { icon: '🔥', color: '#f97316', label: 'Burn' },
+  frozen:      { icon: '❄️', color: '#93c5fd', label: 'Frozen' },
+  shock:       { icon: '⚡', color: '#fbbf24', label: 'Shock' },
+  poison:      { icon: '☠️', color: '#4ade80', label: 'Poison' },
+  entangle:    { icon: '🌿', color: '#86efac', label: 'Entangle' },
+  rock_shield: { icon: '🛡️', color: '#94a3b8', label: 'Shield' },
+  warcry:      { icon: '📣', color: '#f87171', label: 'WarCry' },
+  heal_aura:   { icon: '💚', color: '#34d399', label: 'Regen' },
+};
+
+const HpBar = ({ current, max, isEnemy, name, statusEffects }) => {
   const pct = Math.max(0, (current / max) * 100);
   const isLow = pct <= 30;
   const color = isEnemy
     ? (isLow ? '#dc2626' : '#ef4444')
     : (pct <= 30 ? '#ef4444' : pct <= 60 ? '#eab308' : '#22c55e');
+
+  const activeStatuses = Object.entries(statusEffects || {})
+    .filter(([, turns]) => turns > 0);
+
   return (
     <div style={{ width: '100%', textAlign: 'center' }}>
       <div style={{ fontSize: '11px', fontWeight: 'bold', color: isEnemy ? '#fca5a5' : '#d1fae5',
@@ -303,6 +318,28 @@ const HpBar = ({ current, max, isEnemy, name }) => {
       <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)', marginTop: '2px', fontFamily: 'monospace' }}>
         {current} / {max}
       </div>
+      {/* Status icons */}
+      {activeStatuses.length > 0 && (
+        <div style={{ display:'flex', gap:'3px', justifyContent:'center', marginTop:'4px', flexWrap:'wrap' }}>
+          {activeStatuses.map(([key, turns]) => {
+            const s = STATUS_ICONS[key];
+            if (!s) return null;
+            return (
+              <div key={key} style={{
+                display:'flex', alignItems:'center', gap:'2px',
+                background:`${s.color}22`, border:`1px solid ${s.color}66`,
+                borderRadius:'4px', padding:'1px 4px',
+                fontSize:'10px', color: s.color,
+                animation: key==='burn'||key==='poison' ? 'hp-pulse 1s ease-in-out infinite' : 'none',
+              }}
+                title={`${s.label}: ${turns} turn${turns>1?'s':''} left`}>
+                <span style={{ fontSize:'11px' }}>{s.icon}</span>
+                <span style={{ fontFamily:'monospace', fontSize:'9px' }}>{turns}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
@@ -450,7 +487,7 @@ const UnitDisplay = ({ unit, isEnemy, isActive, canTarget, onTarget, shakingId }
       )}
 
       <div style={{ width: barW, marginBottom:'4px' }}>
-        <HpBar current={unit.hp} max={unit.maxHp} isEnemy={isEnemy} name={unit.name}/>
+        <HpBar current={unit.hp} max={unit.maxHp} isEnemy={isEnemy} name={unit.name} statusEffects={unit.statusEffects}/>
       </div>
 
       <div style={{ position:'relative' }}>
