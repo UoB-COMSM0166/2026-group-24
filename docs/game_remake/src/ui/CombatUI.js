@@ -17,7 +17,7 @@ if (!document.getElementById('combat-ui-style')) {
     .unit-shake { animation: shake 0.35s ease; }
     .float-text { position:absolute; left:50%; pointer-events:none; font-weight:900; font-size:1.4rem;
                   animation: float-up 1s ease-out forwards; text-shadow:2px 2px 6px rgba(0,0,0,0.9); z-index:20; }
-    
+
     /* 像素风格渲染样式 */
     .pixel-art {
       image-rendering: pixelated;
@@ -29,7 +29,7 @@ if (!document.getElementById('combat-ui-style')) {
       width: 140px;
       height: 196px;
       display: flex;
-      align-items: flex-end; 
+      align-items: flex-end;
       justify-content: center;
       position: relative;
       margin-bottom: 10px;
@@ -192,7 +192,7 @@ const getRogueFigure = () => (
 // ─── 像素动画核心组件 ───────────────────────────────────────────────────
 const AnimatedSprite = ({ unit, action = 'idle' }) => {
   const [frame, setFrame] = useState(0);
-  const heroId = unit.id; 
+  const heroId = unit.id;
 
   useEffect(() => {
     // 对应各角色的帧数和播放间隔
@@ -223,7 +223,7 @@ const AnimatedSprite = ({ unit, action = 'idle' }) => {
   if (heroId === 'wizard') {
     const sheet = DataLoader.getAnim('wizard', action);
     if (!sheet) return <MageFigure />;
-    
+
     // 假设横向排列的 6 帧精灵图
     const totalFrames = 6;
     const frameW = sheet.width / totalFrames;
@@ -231,14 +231,14 @@ const AnimatedSprite = ({ unit, action = 'idle' }) => {
       <div className="sprite-container">
         <div className="unit-shadow" />
         <div style={{
-          width: `${frameW}px`, 
+          width: `${frameW}px`,
           height: `${sheet.height}px`,
           backgroundImage: `url(${sheet.src})`,
           backgroundPosition: `-${frame * frameW}px 0px`,
           backgroundSize: `${sheet.width}px ${sheet.height}px`,
           backgroundRepeat: 'no-repeat',
           /* 👇 修改此处的 scale 数值（如 4.8 -> 5.5）来改变法师大小 */
-          transform: 'scale(2.2) translateY(47px) translateX(-40px)', 
+          transform: 'scale(2.2) translateY(47px) translateX(-40px)',
           transformOrigin: 'bottom center',
           imageRendering: 'pixelated',
           marginBottom: '-5px'
@@ -263,7 +263,7 @@ const AnimatedSprite = ({ unit, action = 'idle' }) => {
 // ─── 重写：getFigure 函数 ──────────────────────────────────────────────
 const getFigure = (unit, action = 'idle') => {
   if (unit.type === 'enemy') return unit.monsterType === 'boss' ? <BossFigure/> : <GoblinFigure/>;
-  
+
   // 映射角色 ID 到像素动画
   const supportedHeroes = ['knight', 'priest', 'ranger', 'wizard'];
   if (supportedHeroes.includes(unit.id)) {
@@ -480,7 +480,7 @@ const CombatApp = ({ state, callbacks }) => {
   const [diceValue, setDiceValue]         = useState(1);
   const [floatingTexts, setFloatingTexts] = useState([]);
   const [shakingId, setShakingId]         = useState(null);
-  const [modal, setModal]                 = useState(null); 
+  const [modal, setModal]                 = useState(null);
 
   const addFloat = (value, type, unitId) => {
     const id = Date.now() + Math.random();
@@ -532,7 +532,9 @@ const CombatApp = ({ state, callbacks }) => {
       {modal?.type === 'item'   && <ItemModal   hero={modal.hero} onUse={onUseItem}         onClose={() => setModal(null)}/>}
 
       <div style={{ flex:1, position:'relative', overflow:'hidden',
-        background:'linear-gradient(to bottom, #0f172a 0%, #1c1917 65%, #1a0f0a 100%)' }}>
+        backgroundImage:'url("./resource/img/map/chapter1/battleback1.png")',
+        backgroundSize:'cover',
+        backgroundPosition:'center' }}>
 
         <svg style={{ position:'absolute', inset:0, width:'100%', height:'100%', opacity:0.06, pointerEvents:'none' }}>
           <defs>
@@ -555,7 +557,7 @@ const CombatApp = ({ state, callbacks }) => {
           alignItems:'center', justifyContent:'space-around', padding:'40px 40px 10px' }}>
 
           {(() => {
-            const isCaster = h => h.id === 'mage' || h.id === 'ranger';
+          const isCaster = h => h.id === 'wizard' || h.id === 'priest';
             const sorted = [...heroes].sort((a, b) =>
               isCaster(a) && !isCaster(b) ? -1 : !isCaster(a) && isCaster(b) ? 1 : 0
             );
@@ -597,7 +599,7 @@ const CombatApp = ({ state, callbacks }) => {
                 <div style={{ color:'#57534e', fontSize:'9px', fontFamily:'monospace', marginTop:'2px' }}>[ {diceValue} ]</div>
               </div>
             ) : (phase==='WIN' || phase==='LOSE') ? (
-              <div style={{ textAlign:'center' }}>
+              <div style={{ textAlign:'center', position:'relative', zIndex:20 }}>
                 <div style={{ fontSize:'3rem', fontWeight:'900', marginBottom:'8px',
                   color: phase==='WIN'?'#fbbf24':'#ef4444',
                   textShadow:`0 0 30px ${phase==='WIN'?'#fbbf24':'#ef4444'}` }}>
@@ -638,7 +640,7 @@ const CombatApp = ({ state, callbacks }) => {
         </div>
       </div>
 
-      <div style={{ height:'110px', background:'rgba(12,10,9,0.97)',
+      <div style={{ height:'150px', background:'rgba(12,10,9,0.97)',
         borderTop:'2px solid #292524', display:'flex', boxShadow:'0 -8px 24px rgba(0,0,0,0.6)' }}>
 
         <div style={{ flex:1, padding:'6px 10px', borderRight:'1px solid #292524',
@@ -678,15 +680,15 @@ const CombatApp = ({ state, callbacks }) => {
               </button>
             </div>
           ) : (
-            <div style={{ flex:1, display:'flex', gap:'6px', overflow:'hidden' }}>
-              <div style={{ flex:1, display:'grid', gridTemplateColumns:'1fr 1fr', gap:'5px', overflow:'hidden' }}>
+            <div style={{ flex:1, display:'flex', gap:'6px', overflow:'visible' }}>
+              <div style={{ width:'55%', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'5px', overflow:'hidden' }}>
                 {isPlayerTurn && activeHero ? (
                   activeSkills.length > 0 ? activeSkills.map((skill, idx) => {
                     const sc = SKILL_COLOR[skill.type] || SKILL_COLOR.attack;
                     return (
                       <button key={skill.id||idx} onClick={() => onSkillSelect(skill)}
                         style={{
-                          display:'flex', alignItems:'center', gap:'6px', padding:'6px 8px',
+                          display:'flex', alignItems:'center', gap:'6px', padding:'12px 10px',
                           borderRadius:'8px', border:`1.5px solid ${sc.border}`,
                           background: sc.bg, cursor:'pointer', textAlign:'left',
                           boxShadow:`0 2px 8px ${sc.border}28`, transition:'all 0.15s',
@@ -700,10 +702,10 @@ const CombatApp = ({ state, callbacks }) => {
                         <div style={{ flex:1, minWidth:0 }}>
                           <div style={{ fontWeight:'bold', fontSize:'11px', color:'#f5f5f4',
                             whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{skill.name}</div>
-                          <div style={{ fontSize:'9px', color:'rgba(255,255,255,0.4)', marginTop:'1px',
+                          <div style={{ fontSize:'11px', color:'rgba(255,255,255,0.4)', marginTop:'1px',
                             whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{skill.desc}</div>
                         </div>
-                        <div style={{ fontSize:'9px', fontWeight:'bold', color: sc.border,
+                        <div style={{ fontSize:'11px', fontWeight:'bold', color: sc.border,
                           fontFamily:'monospace', flexShrink:0, opacity:0.75, textAlign:'right' }}>
                           {sc.label}<br/>{skill.power}
                         </div>
