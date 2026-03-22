@@ -6,7 +6,7 @@ import {
   TileContentType,
   makeDungeon, makeBoss, makeTreasure,
   makeAltar, makeLighthouse, makeNPC,
-  makeVillage, makeMerchant, makeRuin, makeCorruptedDeer
+  makeVillage, makeMerchant, makeRuin, makeCorruptedDeer, makeInjuredVillager
 } from '../world/Tile.js';
 import { GameState } from '../core/Constants.js';
 import { rollSpeed } from '../core/Dice.js';

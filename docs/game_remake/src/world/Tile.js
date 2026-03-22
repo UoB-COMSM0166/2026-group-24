@@ -77,6 +77,9 @@ export function makeRuin(name = '古代遗迹入口', enemyName = '腐化守卫'
 export function makeCorruptedDeer(name = '被腐化的鹿') {
   return { type: TileContentType.CORRUPTED_DEER, name, iconType: 'blackCircle' };
 }
+export function makeInjuredVillager(name = '受伤的村民', dialogue = '') {
+  return { type: TileContentType.NPC, name, dialogue, iconType: 'redCircle' };
+}
 
 // ── Tile 类 ──────────────────────────────────────────────────────
 export class Tile {
