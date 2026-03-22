@@ -7,14 +7,14 @@
       "maxHp": 140,
       "desc": "High HP, melee expert, impenetrable defense",
       "stats": {
-        "strength": 22,
+        "strength": 24,
         "vitality": 20,
         "intellect": 6,
-        "awareness": 10,
+        "awareness": 8,
         "talent": 8,
         "agility": 10
       },
-      "weaponSlots": ["iron_sword", "great_axe"],
+      "weaponSlots": ["iron_sword", null],
       "equippedWeaponIndex": 0,
       "equipSlots": [null, null]
     },
@@ -27,48 +27,48 @@
       "stats": {
         "strength": 6,
         "vitality": 6,
-        "intellect": 28,
-        "awareness": 18,
-        "talent": 20,
+        "intellect": 30,
+        "awareness": 14,
+        "talent": 18,
         "agility": 10
       },
-      "weaponSlots": ["ice_rod", "wand_of_flames"],
+      "weaponSlots": ["old_staff", null],
       "equippedWeaponIndex": 0,
       "equipSlots": [null, null]
     },
     {
       "id": "priest",
       "name": "Priest",
-      "hp": 100,
-      "maxHp": 100,
-      "desc": "Balanced, ranged expert, high awareness",
+      "hp": 110,
+      "maxHp": 110,
+      "desc": "Support fighter, earth fist master, healer",
       "stats": {
-        "strength": 14,
-        "vitality": 12,
-        "intellect": 10,
-        "awareness": 20,
-        "talent": 12,
-        "agility": 18
+        "strength": 12,
+        "vitality": 14,
+        "intellect": 8,
+        "awareness": 14,
+        "talent": 22,
+        "agility": 16
       },
-      "weaponSlots": ["longbow", "daggers"],
+      "weaponSlots": ["bare_fist", null],
       "equippedWeaponIndex": 0,
       "equipSlots": [null, null]
     },
     {
       "id": "ranger",
       "name": "Ranger",
-      "hp": 90,
-      "maxHp": 90,
-      "desc": "Highest speed, high crit rate, ambush specialist",
+      "hp": 95,
+      "maxHp": 95,
+      "desc": "Highest speed, precision archer, ambush specialist",
       "stats": {
-        "strength": 16,
+        "strength": 12,
         "vitality": 8,
         "intellect": 8,
-        "awareness": 16,
+        "awareness": 24,
         "talent": 14,
-        "agility": 24
+        "agility": 22
       },
-      "weaponSlots": ["daggers", "longbow"],
+      "weaponSlots": ["hunter_bow", null],
       "equippedWeaponIndex": 0,
       "equipSlots": [null, null]
     }

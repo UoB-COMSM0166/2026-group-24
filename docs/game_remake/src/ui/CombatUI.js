@@ -565,6 +565,7 @@ const CombatApp = ({ state, callbacks }) => {
               <div style={{ display:'flex', gap:'80px', alignItems:'flex-end' }}>
                 {sorted.map(h => {
                   const isActive = activeUnit?.id === h.id && !['WIN','LOSE','START'].includes(phase);
+                  const canTargetAlly = phase==='AWAIT_ALLY_TARGET' && h.hp > 0;
                   return (
                     <div key={h.id} style={{ position:'relative' }}
                       className={shakingId === h.id ? 'unit-shake' : ''}>
@@ -576,7 +577,7 @@ const CombatApp = ({ state, callbacks }) => {
                         </div>
                       ))}
                       <UnitDisplay unit={h} isEnemy={false} isActive={isActive}
-                        canTarget={false} onTarget={()=>{}} shakingId={shakingId}/>
+                        canTarget={canTargetAlly} onTarget={onTargetSelect} shakingId={shakingId}/>
                     </div>
                   );
                 })}
