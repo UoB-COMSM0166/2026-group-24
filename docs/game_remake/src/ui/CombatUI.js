@@ -92,64 +92,6 @@ const DiceSVG = ({ value, rolling }) => {
 };
 
 // ─── SVG character figures (Fallbacks) ─────────────────────────────────────────
-const KnightFigure = () => (
-  <svg viewBox="0 0 100 140" width="140" height="196">
-    <defs>
-      <linearGradient id="kArmor" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor="#94a3b8"/><stop offset="100%" stopColor="#334155"/>
-      </linearGradient>
-      <radialGradient id="kGlow" cx="50%" cy="90%" r="40%">
-        <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.35"/>
-        <stop offset="100%" stopColor="#fbbf24" stopOpacity="0"/>
-      </radialGradient>
-    </defs>
-    <ellipse cx="50" cy="132" rx="32" ry="8" fill="url(#kGlow)"/>
-    <ellipse cx="50" cy="130" rx="22" ry="5" fill="rgba(0,0,0,0.3)"/>
-    <rect x="30" y="58" width="40" height="52" rx="6" fill="url(#kArmor)" stroke="#1e293b" strokeWidth="1.5"/>
-    <rect x="22" y="58" width="14" height="10" rx="3" fill="#64748b" stroke="#334155" strokeWidth="1"/>
-    <rect x="64" y="58" width="14" height="10" rx="3" fill="#64748b" stroke="#334155" strokeWidth="1"/>
-    <circle cx="50" cy="40" r="22" fill="#94a3b8" stroke="#475569" strokeWidth="2"/>
-    <rect x="36" y="30" width="28" height="16" rx="4" fill="#475569" stroke="#334155" strokeWidth="1.5"/>
-    <rect x="38" y="34" width="24" height="6" rx="2" fill="#1e293b"/>
-    <rect x="10" y="60" width="18" height="26" rx="5" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="1.5"/>
-    <line x1="19" y1="62" x2="19" y2="84" stroke="#93c5fd" strokeWidth="1"/>
-    <line x1="11" y1="73" x2="27" y2="73" stroke="#93c5fd" strokeWidth="1"/>
-    <rect x="88" y="52" width="5" height="44" rx="2" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1"/>
-    <rect x="82" y="62" width="17" height="4" rx="2" fill="#fbbf24"/>
-    <rect x="33" y="106" width="14" height="22" rx="4" fill="#475569" stroke="#334155" strokeWidth="1"/>
-    <rect x="53" y="106" width="14" height="22" rx="4" fill="#475569" stroke="#334155" strokeWidth="1"/>
-  </svg>
-);
-
-const MageFigure = () => (
-  <svg viewBox="0 0 100 140" width="140" height="196">
-    <defs>
-      <radialGradient id="mGlow" cx="50%" cy="90%" r="50%">
-        <stop offset="0%" stopColor="#818cf8" stopOpacity="0.4"/>
-        <stop offset="100%" stopColor="#818cf8" stopOpacity="0"/>
-      </radialGradient>
-      <radialGradient id="mOrb" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="#c7d2fe"/>
-        <stop offset="100%" stopColor="#4338ca"/>
-      </radialGradient>
-    </defs>
-    <ellipse cx="50" cy="132" rx="28" ry="7" fill="url(#mGlow)"/>
-    <ellipse cx="50" cy="130" rx="18" ry="4" fill="rgba(0,0,0,0.25)"/>
-    <path d="M28 58 Q50 50 72 58 L76 118 Q50 126 24 118 Z" fill="#312e81" stroke="#4338ca" strokeWidth="1.5"/>
-    <path d="M50 60 L50 115" stroke="#4338ca" strokeWidth="1" strokeDasharray="3,4" opacity="0.5"/>
-    <circle cx="50" cy="38" r="20" fill="#4338ca" stroke="#312e81" strokeWidth="2"/>
-    <path d="M50 4 L62 28 L38 28 Z" fill="#1e1b4b" stroke="#312e81" strokeWidth="1.5"/>
-    <rect x="32" y="26" width="36" height="6" rx="3" fill="#312e81" stroke="#4338ca" strokeWidth="1"/>
-    <ellipse cx="43" cy="38" rx="4" ry="4" fill="#e0e7ff"/>
-    <ellipse cx="57" cy="38" rx="4" ry="4" fill="#e0e7ff"/>
-    <ellipse cx="43" cy="38" rx="2" ry="2.5" fill="#1e1b4b"/>
-    <ellipse cx="57" cy="38" rx="2" ry="2.5" fill="#1e1b4b"/>
-    <line x1="80" y1="120" x2="88" y2="28" stroke="#92400e" strokeWidth="4" strokeLinecap="round"/>
-    <circle cx="89" cy="24" r="8" fill="url(#mOrb)" stroke="#818cf8" strokeWidth="1.5"/>
-    <circle cx="89" cy="24" r="4" fill="#e0e7ff" opacity="0.6"/>
-    <path d="M28 58 L14 80 Q18 84 24 80 L32 64" fill="#312e81" stroke="#4338ca" strokeWidth="1.5"/>
-  </svg>
-);
 
 const GoblinFigure = () => (
   <svg viewBox="0 0 100 140" width="140" height="196">
@@ -248,30 +190,38 @@ const getRogueFigure = () => (
 );
 
 // ─── 像素动画核心组件 ───────────────────────────────────────────────────
-const AnimatedSprite = ({ unit }) => {
+const AnimatedSprite = ({ unit, action = 'idle' }) => {
   const [frame, setFrame] = useState(0);
   const heroId = unit.id; 
 
   useEffect(() => {
     // 对应各角色的帧数和播放间隔
-    const config = {
-      knight: { frames: 8, interval: 120 },
-      priest: { frames: 6, interval: 150 },
-      ranger: { frames: 12, interval: 80 },
-      wizard: { frames: 6, interval: 180}
+    const configs = {
+      knight: { idle: { f: 8, i: 120 }, hit: { f: 6, i: 70 },  death: { f: 13, i: 100 } },
+      priest: { idle: { f: 6, i: 150 }, hit: { f: 6, i: 70 },  death: { f: 18, i: 100 } },
+      ranger: { idle: { f: 12, i: 80 }, hit: { f: 6, i: 70 },  death: { f: 19, i: 100 } },
+      wizard: { idle: { f: 6, i: 180 }, hit: { f: 1, i: 400 }, death: { f: 1, i: 1000 } }
     };
 
-    const charConfig = config[heroId] || { frames: 1, interval: 1000 };
+    const config = configs[heroId]?.[action] || { f: 1, i: 1000 };
+    setFrame(0);
+
     const timer = setInterval(() => {
-      setFrame(f => (f + 1) % charConfig.frames);
-    }, charConfig.interval);
+      setFrame(f => {
+        // 3. 死亡动画逻辑：播放到最后一帧停止
+        if (action === 'death') {
+          return f >= config.f - 1 ? config.f - 1 : f + 1;
+        }
+        return (f + 1) % config.f;
+      });
+    }, config.i);
 
     return () => clearInterval(timer);
-  }, [heroId]);
+  }, [heroId, action]);
 
   // Wizard 特殊逻辑：单精灵图裁剪
   if (heroId === 'wizard') {
-    const sheet = DataLoader.getAnim('wizard');
+    const sheet = DataLoader.getAnim('wizard', action);
     if (!sheet) return <MageFigure />;
     
     // 假设横向排列的 6 帧精灵图
@@ -298,32 +248,32 @@ const AnimatedSprite = ({ unit }) => {
   }
 
   // 其他英雄逻辑：序列帧切换
-  const animFrames = DataLoader.getAnim(heroId);
-  if (!animFrames || animFrames.length === 0) return <KnightFigure />;
+  const animFrames = DataLoader.getAnim(heroId, action);
+  if (!animFrames || animFrames.length === 0) return null;
 
   const currentImg = animFrames[frame] || animFrames[0];
   return (
     <div className="sprite-container">
+      <div className="unit-shadow" /> {/* 建议加上阴影保持视觉对齐 */}
       <img src={currentImg.src} className="pixel-art" 
            style={{ height: '42px', transform: 'scale(12.0)', transformOrigin: 'bottom center' }} />
     </div>
-  );
-};
+  );};
 
 // ─── 重写：getFigure 函数 ──────────────────────────────────────────────
-const getFigure = (unit) => {
+const getFigure = (unit, action = 'idle') => {
   if (unit.type === 'enemy') return unit.monsterType === 'boss' ? <BossFigure/> : <GoblinFigure/>;
   
   // 映射角色 ID 到像素动画
   const supportedHeroes = ['knight', 'priest', 'ranger', 'wizard'];
   if (supportedHeroes.includes(unit.id)) {
-    return <AnimatedSprite unit={unit} />;
+    return <AnimatedSprite unit={unit} action={action} />; // 传递 action
   }
 
   // 兜底逻辑
   if (unit.id === 'mage')   return <MageFigure/>;
   if (unit.id === 'rogue')  return getRogueFigure();
-  return <KnightFigure/>;
+  return <div style={{ fontSize: '2rem' }}>👤</div>;
 };
 
 // ─── Compact HP bar ──────────────────────────────────────────────────────────
@@ -460,11 +410,17 @@ const ItemModal = ({ hero, onUse, onClose }) => {
 };
 
 // ─── Unit display ─────────────────────────────────────────────────────────────
-const UnitDisplay = ({ unit, isEnemy, isActive, canTarget, onTarget, phase }) => {
+const UnitDisplay = ({ unit, isEnemy, isActive, canTarget, onTarget, shakingId }) => {
   const isDead = unit.hp <= 0;
   const activeColor = isEnemy ? '#f87171' : '#fbbf24';
   const barW = isEnemy && unit.monsterType === 'boss' ? '130px' : '110px';
 
+  let currentAction = 'idle';
+  if (isDead) {
+    currentAction = 'death';
+  } else if (shakingId === unit.id) {
+    currentAction = 'hit';
+  }
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center',
       opacity: isDead ? 0.3 : 1, filter: isDead ? 'grayscale(1)' : 'none',
@@ -504,7 +460,7 @@ const UnitDisplay = ({ unit, isEnemy, isActive, canTarget, onTarget, phase }) =>
             background:`radial-gradient(ellipse, ${activeColor}55 0%, transparent 70%)`,
             filter:'blur(4px)' }}/>
         )}
-        {getFigure(unit)}
+        {getFigure(unit, currentAction)}
         {isDead && (
           <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center',
             justifyContent:'center', fontSize:'2.5rem' }}>💀</div>
@@ -618,7 +574,7 @@ const CombatApp = ({ state, callbacks }) => {
                         </div>
                       ))}
                       <UnitDisplay unit={h} isEnemy={false} isActive={isActive}
-                        canTarget={false} onTarget={()=>{}} phase={phase}/>
+                        canTarget={false} onTarget={()=>{}} shakingId={shakingId}/>
                     </div>
                   );
                 })}
@@ -674,7 +630,7 @@ const CombatApp = ({ state, callbacks }) => {
                     </div>
                   ))}
                   <UnitDisplay unit={e} isEnemy={true} isActive={isActive}
-                    canTarget={canTarget} onTarget={onTargetSelect} phase={phase}/>
+                    canTarget={canTarget} onTarget={onTargetSelect} shakingId={shakingId}/>
                 </div>
               );
             })}
