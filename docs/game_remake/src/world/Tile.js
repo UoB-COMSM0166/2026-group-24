@@ -66,13 +66,13 @@ export function makeLighthouse(level = 1) {
   return { type: TileContentType.LIGHTHOUSE, name: 'Ancient Lighthouse', level };
 }
 export function makeVillage(name = '村庄') {
-  return { type: TileContentType.VILLAGE, name, dialogue: '欢迎来到村庄。', iconType: 'greenCircle' };
+  return { type: TileContentType.VILLAGE, name, dialogue: '欢迎来到村庄。' };
 }
 export function makeMerchant(name = '旅商') {
-  return { type: TileContentType.MERCHANT, name, iconType: 'blueCircle' };
+  return { type: TileContentType.MERCHANT, name };
 }
 export function makeRuin(name = '古代遗迹入口', enemyName = '腐化守卫') {
-  return { type: TileContentType.RUIN, name, enemyName, iconType: 'purpleCircle' };
+  return { type: TileContentType.RUIN, name, enemyName };
 }
 export function makeCorruptedDeer(name = '被腐化的鹿') {
   return { type: TileContentType.CORRUPTED_DEER, name, iconType: 'blackCircle' };
@@ -222,7 +222,7 @@ export class Tile {
       } else {
         const contentImg = DataLoader.getImage(this.content.type);
         if (contentImg) {
-          const scale = 0.92;
+          const scale = 0.98;
           const iw = size * 2 * scale;
           const ih = size * Math.SQRT3 * scale;
           ctx.drawImage(contentImg, x - iw / 2, y - ih / 2, iw, ih);

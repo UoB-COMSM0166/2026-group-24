@@ -40,6 +40,10 @@ export class DataLoader {
 
     // 2. 预加载基础图像资源
     const imagePaths = {
+      'village': 'resource/img/map/chapter1/village.png',
+      'merchant': 'resource/img/map/chapter1/merchant.png',
+      'ruin': 'resource/img/map/chapter1/ruins.png',
+      'portal': 'resource/img/map/chapter1/portal.png',
       'hero': './resource/img/normal/hero.png',
       'altar': './resource/img/map/chapter1/altar.png',
       'boss': './resource/img/map/chapter1/boss.png',
