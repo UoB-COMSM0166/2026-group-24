@@ -1,7 +1,7 @@
 // src/core/GameController.js
 import { GameState, MapConfig, TurnConfig, MapPresets } from './Constants.js';
 import { HexMap, createMapByPreset } from '../world/HexMap.js';
-import { TileContentType, makePortal, hexToPixel, makeBoss, TileType, makeNPC, makeVillage, makeMerchant, makeRuin, makeCorruptedDeer } from '../world/Tile.js';
+import { TileContentType, makePortal, hexToPixel, makeBoss, TileType, makeNPC, makeVillage, makeMerchant, makeRuin, makeCorruptedDeer, makeInjuredVillager } from '../world/Tile.js';
 import { NPC_LIST, VILLAGE_LIST, MERCHANT_LIST, RUIN_LIST, CORRUPTED_DEER_LIST } from '../data/EventTable.js';
 import { StateMachine } from './StateMachine.js';
 import { CombatManager } from './CombatManager.js';
@@ -81,7 +81,13 @@ export class GameController {
           const targetMap = npc.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(npc.q, npc.r);
           if (tile && tile.type === TileType.GRASS) {
-            targetMap.placeContent(npc.q, npc.r, makeNPC(npc.name, npc.dialogue, npc.options || {}), 0);
+            let content;
+            if (npc.name === '受伤的村民') {
+              content = makeInjuredVillager(npc.name, npc.dialogue);
+            } else {
+              content = makeNPC(npc.name, npc.dialogue, npc.options || {});
+            }
+            targetMap.placeContent(npc.q, npc.r, content, 0);
           }
         }
 
