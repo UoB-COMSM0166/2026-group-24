@@ -557,12 +557,12 @@ const CombatApp = ({ state, callbacks }) => {
           alignItems:'center', justifyContent:'space-around', padding:'40px 40px 10px' }}>
 
           {(() => {
-          const isCaster = h => h.id === 'wizard' || h.id === 'priest';
+          const isCaster = h => h.id === 'wizard' || h.id === 'priest' || h.id === 'ranger';
             const sorted = [...heroes].sort((a, b) =>
               isCaster(a) && !isCaster(b) ? -1 : !isCaster(a) && isCaster(b) ? 1 : 0
             );
             return (
-              <div style={{ display:'flex', gap:'24px', alignItems:'flex-end' }}>
+              <div style={{ display:'flex', gap:'80px', alignItems:'flex-end' }}>
                 {sorted.map(h => {
                   const isActive = activeUnit?.id === h.id && !['WIN','LOSE','START'].includes(phase);
                   return (
@@ -584,7 +584,7 @@ const CombatApp = ({ state, callbacks }) => {
             );
           })()}
 
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', minWidth:'120px', gap:'8px' }}>
+          <div style={{ display:'flex', gap:'80px', alignItems:'flex-end', minWidth:'200px' }}>
             {showDice ? (
               <div style={{ textAlign:'center' }}>
                 <DiceSVG value={diceValue} rolling={phase==='ROLLING'}/>
@@ -599,7 +599,7 @@ const CombatApp = ({ state, callbacks }) => {
                 <div style={{ color:'#57534e', fontSize:'9px', fontFamily:'monospace', marginTop:'2px' }}>[ {diceValue} ]</div>
               </div>
             ) : (phase==='WIN' || phase==='LOSE') ? (
-              <div style={{ textAlign:'center', position:'relative', zIndex:20 }}>
+              <div style={{ textAlign:'center', position:'absolute', left:'50%', top:'50%', transform:'translate(-50%,-50%)', zIndex:20 }}>
                 <div style={{ fontSize:'3rem', fontWeight:'900', marginBottom:'8px',
                   color: phase==='WIN'?'#fbbf24':'#ef4444',
                   textShadow:`0 0 30px ${phase==='WIN'?'#fbbf24':'#ef4444'}` }}>
@@ -617,7 +617,7 @@ const CombatApp = ({ state, callbacks }) => {
             )}
           </div>
 
-          <div style={{ display:'flex', gap:'32px', alignItems:'flex-end' }}>
+          <div style={{ display:'flex', gap:'32px', alignItems:'flex-end', minWidth:'200px', justifyContent:'center' }}>
             {enemies.map(e => {
               const isActive = activeUnit?.id === e.id && !['WIN','LOSE','START'].includes(phase);
               const canTarget = phase==='AWAIT_TARGET' && e.hp > 0;
