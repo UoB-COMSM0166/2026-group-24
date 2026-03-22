@@ -58,7 +58,11 @@ export class InventoryUI {
     toggle() {
         this.isOpen = !this.isOpen;
         this.panel.style.display = this.isOpen ? "block" : "none";
-        if (this.isOpen) this.render();
+        if (this.isOpen) {
+            this.render();
+            // 通知教程系统背包已打开
+            window._gameController?.tutorial?.complete('opened_inventory');
+        }
     }
 
     close() {

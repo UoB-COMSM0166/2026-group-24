@@ -1,8 +1,9 @@
 // src/core/GameController.js
 import { GameState, MapConfig, TurnConfig, MapPresets } from './Constants.js';
 import { HexMap, createMapByPreset } from '../world/HexMap.js';
-import { TileContentType, makePortal, hexToPixel, makeBoss, TileType, makeNPC, makeVillage, makeMerchant, makeRuin, makeCorruptedDeer } from '../world/Tile.js';
-import { NPC_LIST, VILLAGE_LIST, MERCHANT_LIST, RUIN_LIST, CORRUPTED_DEER_LIST } from '../data/EventTable.js';
+import { TileContentType, makePortal, hexToPixel, makeBoss, TileType, makeNPC, makeVillage, makeMerchant, makeRuin, makeCorruptedDeer, makeDungeon, makeTreasure, makeAltar } from '../world/Tile.js';
+import { NPC_LIST, VILLAGE_LIST, MERCHANT_LIST, RUIN_LIST, CORRUPTED_DEER_LIST, NOVICE_DUNGEON_LIST, NOVICE_TREASURE_LIST, NOVICE_ALTAR_LIST } from '../data/EventTable.js';
+import { TutorialManager } from './TutorialManager.js';
 import { StateMachine } from './StateMachine.js';
 import { CombatManager } from './CombatManager.js';
 import { Enemy } from '../entities/Enemy.js';
@@ -125,6 +126,32 @@ export class GameController {
         this.currentMapName = '新手村';
         this.player.setGridPos(noviceQ, noviceR, this.noviceVillage);
         this.noviceVillage.revealAround(noviceQ, noviceR, 5);
+        // ── 放置新手村怪物 ──────────────────────────────────────
+        for (const ev of NOVICE_DUNGEON_LIST) {
+          const tile = this.noviceVillage.getTile(ev.q, ev.r);
+          if (tile) {
+            tile.type = TileType.GRASS;
+            this.noviceVillage.placeContent(ev.q, ev.r, makeDungeon(ev.name, ev.level, ev.difficulty), 0);
+          }
+        }
+        // ── 放置新手村宝箱 ──────────────────────────────────────
+        for (const ev of NOVICE_TREASURE_LIST) {
+          const tile = this.noviceVillage.getTile(ev.q, ev.r);
+          if (tile) {
+            tile.type = TileType.GRASS;
+            this.noviceVillage.placeContent(ev.q, ev.r, makeTreasure(ev.lootTier), 0);
+          }
+        }
+        // ── 放置新手村祭坛 ──────────────────────────────────────
+        for (const ev of NOVICE_ALTAR_LIST) {
+          const tile = this.noviceVillage.getTile(ev.q, ev.r);
+          if (tile) {
+            tile.type = TileType.GRASS;
+            this.noviceVillage.placeContent(ev.q, ev.r, makeAltar(), 0);
+          }
+        }
+        // ── 启动教程系统 ────────────────────────────────────────
+        this.tutorial = new TutorialManager(this);
         this.fsm.transition(GameState.MAP_EXPLORATION);
       }),
       exit: () => this.ui.hideMapGeneration(),
