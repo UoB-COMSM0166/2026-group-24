@@ -101,8 +101,11 @@ function startGame() {
         },
         {
             onCombatEnd: (result) => {
-                console.log(`[Main] 战斗结束: ${result}`);
+              if (result === 'lose') {
+                location.reload();
+              } else {
                 gameController.fsm.transition(GameState.MAP_EXPLORATION);
+              }
             }
         }
     );

@@ -609,7 +609,7 @@ const CombatApp = ({ state, callbacks }) => {
                   background:'#e7e5e4', color:'#1c1917', padding:'8px 24px', borderRadius:'999px',
                   fontWeight:'bold', border:'none', cursor:'pointer', fontSize:'13px',
                   boxShadow:'0 4px 14px rgba(0,0,0,0.5)' }}>
-                  ← Back to Map
+                {phase==='WIN' ? '← Back to Map' : '↺ Restart Adventure'}
                 </button>
               </div>
             ) : (
