@@ -1,0 +1,67 @@
+{
+  "skills": [
+    {
+      "id": "slash",
+      "name": "Slash",
+      "type": "attack",
+      "target": "single",
+      "power": 120,
+      "cooldown": 0,
+      "desc": "Deals 120% ATK physical damage to a single enemy"
+    },
+    {
+      "id": "shield_bash",
+      "name": "Shield Bash",
+      "type": "attack",
+      "target": "single",
+      "power": 80,
+      "cooldown": 2,
+      "desc": "Attacks and stuns target for 1 turn"
+    },
+    {
+      "id": "fireball",
+      "name": "Fireball",
+      "type": "magic",
+      "target": "aoe",
+      "power": 150,
+      "cooldown": 1,
+      "desc": "Deals 150% MAG damage to all enemies"
+    },
+    {
+      "id": "frost_nova",
+      "name": "Frost Nova",
+      "type": "magic",
+      "target": "aoe",
+      "power": 100,
+      "cooldown": 3,
+      "desc": "Freezes all enemies for 2 turns"
+    },
+    {
+      "id": "arrow_shot",
+      "name": "Arrow Shot",
+      "type": "attack",
+      "target": "single",
+      "power": 110,
+      "cooldown": 0,
+      "desc": "Ranged attack on a single enemy"
+    },
+    {
+      "id": "backstab",
+      "name": "Backstab",
+      "type": "attack",
+      "target": "single",
+      "power": 200,
+      "cooldown": 3,
+      "desc": "Crit rate +50%, deals 200% ATK damage"
+    },
+    {
+      "id": "evasion",
+      "name": "Evasion",
+      "type": "buff",
+      "target": "self",
+      "power": 0,
+      "cooldown": 2,
+      "desc": "Evasion rate +60% this turn"
+    }
+  ]
+}
