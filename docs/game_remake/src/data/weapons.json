@@ -3,243 +3,737 @@
     {
       "id": "iron_sword",
       "name": "Iron Sword",
+      "owner": "knight",
       "type": "blade",
       "rarity": "common",
-      "statBonus": { "strength": 8 },
+      "statBonus": {
+        "strength": 6
+      },
       "skills": [
         {
           "id": "slash",
           "name": "Slash",
           "type": "attack",
           "target": "single",
-          "power": 120,
-          "cooldown": 0,
-          "desc": "120% STR physical damage",
-          "statKey": "strength"
+          "power": 110,
+          "statKey": "strength",
+          "statusEffect": null,
+          "desc": "110% STR physical damage"
         },
         {
           "id": "heavy_strike",
           "name": "Heavy Strike",
           "type": "attack",
           "target": "single",
-          "power": 180,
-          "cooldown": 2,
-          "desc": "180% STR, chance to stun",
-          "statKey": "strength"
-        }
-      ]
-    },
-    {
-      "id": "great_axe",
-      "name": "Great Axe",
-      "type": "axe",
-      "rarity": "common",
-      "statBonus": { "strength": 14 },
-      "skills": [
-        {
-          "id": "chop",
-          "name": "Chop",
-          "type": "attack",
-          "target": "single",
-          "power": 130,
-          "cooldown": 0,
-          "desc": "130% STR cleave",
-          "statKey": "strength"
-        },
-        {
-          "id": "heavy_cleave",
-          "name": "Heavy Cleave",
-          "type": "attack",
-          "target": "aoe",
-          "power": 100,
-          "cooldown": 3,
-          "desc": "100% STR to all enemies",
-          "statKey": "strength"
-        },
-        {
-          "id": "armor_smash",
-          "name": "Armor Smash",
-          "type": "attack",
-          "target": "single",
-          "power": 140,
-          "cooldown": 2,
-          "desc": "Reduces enemy defense",
-          "statKey": "strength"
-        }
-      ]
-    },
-    {
-      "id": "ice_rod",
-      "name": "Ice Rod",
-      "type": "wand",
-      "rarity": "uncommon",
-      "statBonus": { "intellect": 16 },
-      "skills": [
-        {
-          "id": "ice_bolt",
-          "name": "Ice Bolt",
-          "type": "magic",
-          "target": "single",
-          "power": 130,
-          "cooldown": 0,
-          "desc": "130% INT ice damage",
-          "statKey": "intellect"
-        },
-        {
-          "id": "ice_shock",
-          "name": "Ice Shock",
-          "type": "magic",
-          "target": "single",
-          "power": 110,
-          "cooldown": 1,
-          "desc": "110% INT + slows target",
-          "statKey": "intellect"
-        },
-        {
-          "id": "armor_regen",
-          "name": "Armor Regen",
-          "type": "buff",
-          "target": "self",
-          "power": 60,
-          "cooldown": 3,
-          "desc": "Restore 60% INT as HP",
-          "statKey": "vitality"
-        }
-      ]
-    },
-    {
-      "id": "magic_staff",
-      "name": "Magic Staff",
-      "type": "staff",
-      "rarity": "uncommon",
-      "statBonus": { "intellect": 12, "talent": 6 },
-      "skills": [
-        {
-          "id": "arcane_snap",
-          "name": "Arcane Snap",
-          "type": "magic",
-          "target": "single",
-          "power": 110,
-          "cooldown": 0,
-          "desc": "110% INT arcane hit",
-          "statKey": "intellect"
-        },
-        {
-          "id": "lightning_rune",
-          "name": "Lightning Rune",
-          "type": "magic",
-          "target": "single",
           "power": 160,
-          "cooldown": 2,
-          "desc": "160% INT lightning",
-          "statKey": "intellect"
+          "statKey": "strength",
+          "statusEffect": null,
+          "desc": "160% STR, high damage"
+        }
+      ]
+    },
+    {
+      "id": "knight_sword",
+      "name": "Knight Longsword",
+      "owner": "knight",
+      "type": "blade",
+      "rarity": "common",
+      "statBonus": {
+        "strength": 10,
+        "vitality": 4
+      },
+      "skills": [
+        {
+          "id": "slash",
+          "name": "Slash",
+          "type": "attack",
+          "target": "single",
+          "power": 110,
+          "statKey": "strength",
+          "statusEffect": null,
+          "desc": "110% STR physical damage"
         },
         {
-          "id": "pull",
-          "name": "Pull",
-          "type": "debuff",
+          "id": "shield_bash",
+          "name": "Shield Bash",
+          "type": "attack",
           "target": "single",
           "power": 80,
-          "cooldown": 2,
-          "desc": "80% INT + disrupts target",
-          "statKey": "intellect"
+          "statKey": "strength",
+          "statusEffect": null,
+          "desc": "80% STR, stuns target"
+        },
+        {
+          "id": "battle_cry",
+          "name": "Battle Cry",
+          "type": "buff",
+          "target": "self",
+          "power": 0,
+          "statKey": "strength",
+          "statusEffect": "warcry",
+          "desc": "Boost own ATK +25% for 2 turns"
         }
       ]
     },
     {
-      "id": "wand_of_flames",
-      "name": "Wand of Flames",
-      "type": "wand",
+      "id": "lava_sword",
+      "name": "Lava Sword",
+      "owner": "knight",
+      "type": "blade",
       "rarity": "uncommon",
-      "statBonus": { "intellect": 14, "talent": 8 },
+      "statBonus": {
+        "strength": 16
+      },
       "skills": [
         {
-          "id": "flame_bolt",
-          "name": "Flame Bolt",
-          "type": "magic",
+          "id": "flame_slash",
+          "name": "Flame Slash",
+          "type": "attack",
           "target": "single",
-          "power": 140,
-          "cooldown": 0,
-          "desc": "140% INT fire damage",
-          "statKey": "intellect"
+          "power": 120,
+          "statKey": "strength",
+          "statusEffect": "burn",
+          "statusChance": {
+            "3": 0.2,
+            "4": 0.4,
+            "5": 0.7,
+            "6": 1.0
+          },
+          "desc": "120% STR + chance to Burn"
         },
         {
-          "id": "rask_cluster",
-          "name": "Rask Cluster",
-          "type": "magic",
-          "target": "aoe",
+          "id": "scorch",
+          "name": "Scorch",
+          "type": "attack",
+          "target": "single",
+          "power": 90,
+          "statKey": "strength",
+          "statusEffect": "burn",
+          "statusChance": {
+            "3": 0.4,
+            "4": 0.6,
+            "5": 0.9,
+            "6": 1.0
+          },
+          "desc": "90% STR, high burn chance"
+        },
+        {
+          "id": "slash",
+          "name": "Slash",
+          "type": "attack",
+          "target": "single",
           "power": 110,
-          "cooldown": 3,
-          "desc": "110% INT to all enemies",
-          "statKey": "intellect"
+          "statKey": "strength",
+          "statusEffect": null,
+          "desc": "110% STR physical damage"
+        }
+      ]
+    },
+    {
+      "id": "dragon_sword",
+      "name": "Flame Dragon Sword",
+      "owner": "knight",
+      "type": "blade",
+      "rarity": "rare",
+      "statBonus": {
+        "strength": 24
+      },
+      "skills": [
+        {
+          "id": "dragon_slash",
+          "name": "Dragon Slash",
+          "type": "attack",
+          "target": "single",
+          "power": 180,
+          "statKey": "strength",
+          "statusEffect": "burn",
+          "statusChance": {
+            "3": 0.5,
+            "4": 0.7,
+            "5": 1.0,
+            "6": 1.0
+          },
+          "desc": "180% STR fire damage + Burn"
         },
         {
           "id": "firestorm",
           "name": "Firestorm",
-          "type": "magic",
+          "type": "attack",
           "target": "aoe",
-          "power": 160,
-          "cooldown": 4,
-          "desc": "160% INT devastating fire AOE",
-          "statKey": "intellect"
+          "power": 130,
+          "statKey": "strength",
+          "statusEffect": "burn",
+          "statusChance": {
+            "3": 0.3,
+            "4": 0.5,
+            "5": 0.8,
+            "6": 1.0
+          },
+          "desc": "130% STR AOE fire + Burn all"
+        },
+        {
+          "id": "burning_ground",
+          "name": "Burning Ground",
+          "type": "debuff",
+          "target": "aoe",
+          "power": 60,
+          "statKey": "strength",
+          "statusEffect": "burn",
+          "statusChance": {
+            "3": 1.0,
+            "4": 1.0,
+            "5": 1.0,
+            "6": 1.0
+          },
+          "desc": "Apply Burn to all enemies"
         }
       ]
     },
     {
-      "id": "longbow",
-      "name": "Longbow",
+      "id": "old_staff",
+      "name": "Old Staff",
+      "owner": "wizard",
+      "type": "staff",
+      "rarity": "common",
+      "statBonus": {
+        "intellect": 8
+      },
+      "skills": [
+        {
+          "id": "magic_bolt",
+          "name": "Magic Bolt",
+          "type": "magic",
+          "target": "single",
+          "power": 110,
+          "statKey": "intellect",
+          "statusEffect": null,
+          "desc": "110% INT magic damage"
+        },
+        {
+          "id": "ice_spike",
+          "name": "Ice Spike",
+          "type": "magic",
+          "target": "single",
+          "power": 100,
+          "statKey": "intellect",
+          "statusEffect": "frozen",
+          "statusChance": {
+            "3": 0.2,
+            "4": 0.4,
+            "5": 0.7,
+            "6": 1.0
+          },
+          "desc": "100% INT + chance to Freeze"
+        }
+      ]
+    },
+    {
+      "id": "element_staff",
+      "name": "Element Staff",
+      "owner": "wizard",
+      "type": "staff",
+      "rarity": "common",
+      "statBonus": {
+        "intellect": 14,
+        "awareness": 4
+      },
+      "skills": [
+        {
+          "id": "ice_freeze",
+          "name": "Ice Freeze",
+          "type": "magic",
+          "target": "single",
+          "power": 110,
+          "statKey": "intellect",
+          "statusEffect": "frozen",
+          "statusChance": {
+            "3": 0.3,
+            "4": 0.5,
+            "5": 0.8,
+            "6": 1.0
+          },
+          "desc": "110% INT + Freeze"
+        },
+        {
+          "id": "thunder_strike",
+          "name": "Thunder Strike",
+          "type": "magic",
+          "target": "single",
+          "power": 120,
+          "statKey": "intellect",
+          "statusEffect": "shock",
+          "statusChance": {
+            "3": 0.2,
+            "4": 0.4,
+            "5": 0.7,
+            "6": 1.0
+          },
+          "desc": "120% INT + Shock"
+        },
+        {
+          "id": "magic_shield",
+          "name": "Magic Shield",
+          "type": "buff",
+          "target": "self",
+          "power": 0,
+          "statKey": "intellect",
+          "statusEffect": "rock_shield",
+          "desc": "Reduce next damage by 50%"
+        }
+      ]
+    },
+    {
+      "id": "thunder_staff",
+      "name": "Thunder Staff",
+      "owner": "wizard",
+      "type": "staff",
+      "rarity": "uncommon",
+      "statBonus": {
+        "intellect": 20
+      },
+      "skills": [
+        {
+          "id": "lightning_chain",
+          "name": "Lightning Chain",
+          "type": "magic",
+          "target": "aoe",
+          "power": 110,
+          "statKey": "intellect",
+          "statusEffect": "shock",
+          "statusChance": {
+            "3": 0.3,
+            "4": 0.5,
+            "5": 0.8,
+            "6": 1.0
+          },
+          "desc": "110% INT AOE + Shock all"
+        },
+        {
+          "id": "thunderstorm",
+          "name": "Thunderstorm",
+          "type": "magic",
+          "target": "aoe",
+          "power": 150,
+          "statKey": "intellect",
+          "statusEffect": "shock",
+          "statusChance": {
+            "3": 0.5,
+            "4": 0.7,
+            "5": 1.0,
+            "6": 1.0
+          },
+          "desc": "150% INT AOE thunder"
+        },
+        {
+          "id": "electrify",
+          "name": "Electrify",
+          "type": "debuff",
+          "target": "single",
+          "power": 70,
+          "statKey": "intellect",
+          "statusEffect": "shock",
+          "statusChance": {
+            "3": 1.0,
+            "4": 1.0,
+            "5": 1.0,
+            "6": 1.0
+          },
+          "desc": "Apply Shock, amplify damage taken"
+        }
+      ]
+    },
+    {
+      "id": "abyss_tome",
+      "name": "Abyss Tome",
+      "owner": "wizard",
+      "type": "tome",
+      "rarity": "rare",
+      "statBonus": {
+        "intellect": 28,
+        "talent": 8
+      },
+      "skills": [
+        {
+          "id": "black_hole",
+          "name": "Black Hole",
+          "type": "magic",
+          "target": "aoe",
+          "power": 170,
+          "statKey": "intellect",
+          "statusEffect": "frozen",
+          "statusChance": {
+            "3": 0.4,
+            "4": 0.6,
+            "5": 0.9,
+            "6": 1.0
+          },
+          "desc": "170% INT AOE dark damage"
+        },
+        {
+          "id": "curse",
+          "name": "Curse",
+          "type": "debuff",
+          "target": "single",
+          "power": 80,
+          "statKey": "intellect",
+          "statusEffect": "shock",
+          "statusChance": {
+            "3": 1.0,
+            "4": 1.0,
+            "5": 1.0,
+            "6": 1.0
+          },
+          "desc": "Curse target, amplify all damage"
+        },
+        {
+          "id": "soul_harvest",
+          "name": "Soul Harvest",
+          "type": "attack",
+          "target": "single",
+          "power": 200,
+          "statKey": "intellect",
+          "statusEffect": null,
+          "desc": "200% INT, damage scales with missing HP"
+        }
+      ]
+    },
+    {
+      "id": "bare_fist",
+      "name": "Bare Fist",
+      "owner": "priest",
+      "type": "fist",
+      "rarity": "common",
+      "statBonus": {
+        "talent": 4
+      },
+      "skills": [
+        {
+          "id": "combo_strike",
+          "name": "Combo Strike",
+          "type": "attack",
+          "target": "single",
+          "power": 100,
+          "statKey": "talent",
+          "statusEffect": null,
+          "desc": "100% TAL, 2-hit combo"
+        },
+        {
+          "id": "heal_prayer",
+          "name": "Heal Prayer",
+          "type": "heal",
+          "target": "self",
+          "power": 80,
+          "statKey": "talent",
+          "statusEffect": null,
+          "desc": "Restore 80% TAL as HP"
+        }
+      ]
+    },
+    {
+      "id": "iron_gauntlet",
+      "name": "Iron Gauntlet",
+      "owner": "priest",
+      "type": "fist",
+      "rarity": "common",
+      "statBonus": {
+        "talent": 10,
+        "vitality": 6
+      },
+      "skills": [
+        {
+          "id": "heavy_punch",
+          "name": "Heavy Punch",
+          "type": "attack",
+          "target": "single",
+          "power": 140,
+          "statKey": "talent",
+          "statusEffect": null,
+          "desc": "140% TAL heavy blow"
+        },
+        {
+          "id": "heal_aura",
+          "name": "Heal Aura",
+          "type": "buff",
+          "target": "self",
+          "power": 0,
+          "statKey": "talent",
+          "statusEffect": "heal_aura",
+          "desc": "Regen 8% max HP per turn for 3 turns"
+        },
+        {
+          "id": "block",
+          "name": "Block",
+          "type": "buff",
+          "target": "self",
+          "power": 0,
+          "statKey": "talent",
+          "statusEffect": "rock_shield",
+          "desc": "Reduce next hit by 50%"
+        }
+      ]
+    },
+    {
+      "id": "earth_gauntlet",
+      "name": "Earth Gauntlet",
+      "owner": "priest",
+      "type": "fist",
+      "rarity": "uncommon",
+      "statBonus": {
+        "talent": 16,
+        "vitality": 10
+      },
+      "skills": [
+        {
+          "id": "quake_punch",
+          "name": "Quake Punch",
+          "type": "attack",
+          "target": "single",
+          "power": 140,
+          "statKey": "talent",
+          "statusEffect": null,
+          "desc": "140% TAL earth punch"
+        },
+        {
+          "id": "rock_shield_skill",
+          "name": "Rock Shield",
+          "type": "buff",
+          "target": "self",
+          "power": 0,
+          "statKey": "talent",
+          "statusEffect": "rock_shield",
+          "desc": "Shield absorbs 50% of next hit"
+        },
+        {
+          "id": "earth_attr",
+          "name": "Earth Smash",
+          "type": "attack",
+          "target": "aoe",
+          "power": 110,
+          "statKey": "talent",
+          "statusEffect": null,
+          "desc": "110% TAL AOE earth damage"
+        }
+      ]
+    },
+    {
+      "id": "mountain_fist",
+      "name": "Mountain Sacred Fist",
+      "owner": "priest",
+      "type": "fist",
+      "rarity": "rare",
+      "statBonus": {
+        "talent": 24,
+        "vitality": 16
+      },
+      "skills": [
+        {
+          "id": "earth_crack",
+          "name": "Earth Crack",
+          "type": "attack",
+          "target": "aoe",
+          "power": 160,
+          "statKey": "talent",
+          "statusEffect": null,
+          "desc": "160% TAL massive AOE"
+        },
+        {
+          "id": "landslide",
+          "name": "Landslide",
+          "type": "attack",
+          "target": "single",
+          "power": 220,
+          "statKey": "talent",
+          "statusEffect": null,
+          "desc": "220% TAL ultimate strike"
+        },
+        {
+          "id": "earth_heal",
+          "name": "Earth Heal",
+          "type": "heal",
+          "target": "self",
+          "power": 120,
+          "statKey": "talent",
+          "statusEffect": "heal_aura",
+          "desc": "120% TAL heal + Regen 3 turns"
+        }
+      ]
+    },
+    {
+      "id": "hunter_bow",
+      "name": "Hunter Bow",
+      "owner": "ranger",
       "type": "bow",
       "rarity": "common",
-      "statBonus": { "awareness": 10 },
+      "statBonus": {
+        "awareness": 6
+      },
       "skills": [
         {
           "id": "arrow_shot",
           "name": "Arrow Shot",
           "type": "attack",
           "target": "single",
-          "power": 120,
-          "cooldown": 0,
-          "desc": "120% AWR ranged shot",
-          "statKey": "awareness"
+          "power": 110,
+          "statKey": "awareness",
+          "statusEffect": null,
+          "desc": "110% AWR ranged shot"
         },
         {
-          "id": "piercing_arrow",
-          "name": "Piercing Arrow",
+          "id": "quick_shot",
+          "name": "Quick Shot",
           "type": "attack",
           "target": "single",
-          "power": 160,
-          "cooldown": 2,
-          "desc": "160% AWR ignores armor",
-          "statKey": "awareness"
+          "power": 80,
+          "statKey": "awareness",
+          "statusEffect": null,
+          "desc": "80% AWR fast attack, goes first"
         }
       ]
     },
     {
-      "id": "daggers",
-      "name": "Twin Daggers",
-      "type": "blade",
+      "id": "elf_bow",
+      "name": "Elf Longbow",
+      "owner": "ranger",
+      "type": "bow",
       "rarity": "common",
-      "statBonus": { "agility": 10, "talent": 4 },
+      "statBonus": {
+        "awareness": 12,
+        "agility": 6
+      },
       "skills": [
         {
-          "id": "backstab",
-          "name": "Backstab",
+          "id": "pierce_arrow",
+          "name": "Pierce Arrow",
           "type": "attack",
           "target": "single",
-          "power": 200,
-          "cooldown": 3,
-          "desc": "200% TAL crit damage",
-          "statKey": "talent"
+          "power": 140,
+          "statKey": "awareness",
+          "statusEffect": null,
+          "desc": "140% AWR ignores armor"
         },
         {
-          "id": "quick_slash",
-          "name": "Quick Slash",
+          "id": "multi_shot",
+          "name": "Multi Shot",
+          "type": "attack",
+          "target": "aoe",
+          "power": 90,
+          "statKey": "awareness",
+          "statusEffect": null,
+          "desc": "90% AWR hits all enemies"
+        },
+        {
+          "id": "evasion",
+          "name": "Evasion",
+          "type": "buff",
+          "target": "self",
+          "power": 0,
+          "statKey": "agility",
+          "statusEffect": null,
+          "desc": "Dodge next attack"
+        }
+      ]
+    },
+    {
+      "id": "vine_bow",
+      "name": "Vine Bow",
+      "owner": "ranger",
+      "type": "bow",
+      "rarity": "uncommon",
+      "statBonus": {
+        "awareness": 18,
+        "talent": 6
+      },
+      "skills": [
+        {
+          "id": "entangle_arrow",
+          "name": "Entangle Arrow",
           "type": "attack",
           "target": "single",
-          "power": 110,
-          "cooldown": 0,
-          "desc": "110% AGI fast strike",
-          "statKey": "agility"
+          "power": 100,
+          "statKey": "awareness",
+          "statusEffect": "entangle",
+          "statusChance": {
+            "3": 0.3,
+            "4": 0.5,
+            "5": 0.8,
+            "6": 1.0
+          },
+          "desc": "100% AWR + Entangle target"
+        },
+        {
+          "id": "nature_heal",
+          "name": "Nature Heal",
+          "type": "heal",
+          "target": "self",
+          "power": 70,
+          "statKey": "awareness",
+          "statusEffect": "heal_aura",
+          "desc": "Heal + Regen for 2 turns"
+        },
+        {
+          "id": "poison_arrow",
+          "name": "Poison Arrow",
+          "type": "attack",
+          "target": "single",
+          "power": 80,
+          "statKey": "awareness",
+          "statusEffect": "poison",
+          "statusChance": {
+            "3": 0.4,
+            "4": 0.6,
+            "5": 0.9,
+            "6": 1.0
+          },
+          "desc": "80% AWR + Poison"
+        }
+      ]
+    },
+    {
+      "id": "world_tree_bow",
+      "name": "World Tree Bow",
+      "owner": "ranger",
+      "type": "bow",
+      "rarity": "rare",
+      "statBonus": {
+        "awareness": 26,
+        "talent": 10
+      },
+      "skills": [
+        {
+          "id": "forest_storm",
+          "name": "Forest Storm",
+          "type": "attack",
+          "target": "aoe",
+          "power": 150,
+          "statKey": "awareness",
+          "statusEffect": "entangle",
+          "statusChance": {
+            "3": 0.3,
+            "4": 0.5,
+            "5": 0.8,
+            "6": 1.0
+          },
+          "desc": "150% AWR AOE + Entangle all"
+        },
+        {
+          "id": "life_drain",
+          "name": "Life Drain",
+          "type": "attack",
+          "target": "single",
+          "power": 160,
+          "statKey": "awareness",
+          "statusEffect": null,
+          "desc": "160% AWR, steal 30% dealt as HP"
+        },
+        {
+          "id": "nature_guard",
+          "name": "Nature Guard",
+          "type": "buff",
+          "target": "self",
+          "power": 0,
+          "statKey": "awareness",
+          "statusEffect": "rock_shield",
+          "desc": "Nature barrier, reduce next hit 50%"
         }
       ]
     }
