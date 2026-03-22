@@ -28,7 +28,51 @@ export class UIManager {
     };
     this.onCombatEnd = callbacks.onCombatEnd ?? (() => { });
     this.inventoryUI = new InventoryUI();
+    this.animFrameReq = null;
   }
+
+  _drawHeroPreview(ctx, heroId, width, height, time) {
+    const anim = DataLoader.animations[heroId];
+    if (!anim || !anim.idle) return;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // --- 在这里定义每个英雄的微调参数 ---
+    const configs = {
+        'wizard': { size: 220, offsetX: 20, offsetY: -10, frameCount: 6 },
+        'knight': { size: 280, offsetX: 12, offsetY: -95 },
+        'priest': { size: 280, offsetX: 12, offsetY: -90 },
+        'ranger': { size: 280, offsetX: 12, offsetY: -95 },
+        'default': { size: 150, offsetX: 0, offsetY: 0 }
+    };
+
+    const cfg = configs[heroId] || configs['default'];
+    const drawSize = cfg.size;
+    // 居中计算公式：(画布宽度 - 绘制宽度) / 2 + 偏移量
+    const dx = (width - drawSize) / 2 + cfg.offsetX;
+    const dy = (height - drawSize) / 2 + cfg.offsetY;
+
+    if (heroId === 'wizard') {
+        const img = anim.idle;
+        const frameCount = cfg.frameCount; 
+        const frameWidth = img.width / frameCount;
+        const frameHeight = img.height;
+        const frameIdx = Math.floor(time / 100) % frameCount;
+
+        ctx.drawImage(
+            img,
+            frameIdx * frameWidth, 0, frameWidth, frameHeight, // 切片源
+            dx, dy, drawSize, drawSize                        // 绘制目标
+        );
+    } else {
+        const frames = anim.idle;
+        if (frames.length === 0) return;
+        const frameIdx = Math.floor(time / 100) % frames.length;
+        const img = frames[frameIdx];
+        
+        ctx.drawImage(img, dx, dy, drawSize, drawSize);
+    }
+}
 
   updatePartyStatus(heroes) {
     this.inventoryUI?.update(heroes);
@@ -69,7 +113,7 @@ export class UIManager {
     charSelectScreen.style.display = 'flex';
     heroSlots.innerHTML = '';
     const selected = [];
-    let selectedDifficulty = 'normal'; // 默认难度
+    let selectedDifficulty = 'normal';
 
     // 设置难度按钮
     if (difficultyButtons) {
@@ -84,24 +128,63 @@ export class UIManager {
         };
       });
     }
+    const cardContexts = [];
 
     DataLoader.getAllHeroes().forEach(hero => {
       const card = document.createElement('div');
-      card.className = 'hero-card';
-      card.innerHTML = `<div style="font-weight:bold;margin-bottom:5px;">${hero.name}</div><div style="font-size:12px;color:#aaa;margin-bottom:4px;">${hero.desc ?? ''}</div><div>HP ${hero.hp}</div>`;
+      card.className = 'hero-card vivid-card';
+      card.innerHTML = `
+        <div class="hero-preview-container">
+            <canvas class="hero-preview-canvas" width="120" height="120"></canvas>
+            <div class="hero-glow"></div>
+        </div>
+        <div class="hero-card-name">${hero.name}</div>
+        <div class="hero-card-desc">${hero.desc ?? ''}</div>
+        <div class="hero-card-stats">
+            <span>❤️ ${hero.hp}</span>
+            <span>⚔️ ${hero.stats?.strength || 10}</span>
+            <span>✨ ${hero.stats?.intellect || 10}</span>
+        </div>
+      `;
+      const canvas = card.querySelector('.hero-preview-canvas');
+      cardContexts.push({ ctx: canvas.getContext('2d'), id: hero.id });
+
       card.onclick = () => {
         const idx = selected.indexOf(hero);
-        if (idx !== -1) { selected.splice(idx, 1); card.classList.remove('selected'); }
-        else if (selected.length < 2) { selected.push(hero); card.classList.add('selected'); }
+        if (idx !== -1) { 
+            selected.splice(idx, 1); 
+            card.classList.remove('selected'); 
+        } else if (selected.length < 2) { 
+            selected.push(hero); 
+            card.classList.add('selected'); 
+        }
         charConfirmBtn.disabled = selected.length !== 2;
-        charSelectedInfo.innerText = `Selected ${selected.length}/2 Heroes`;
+        charSelectedInfo.innerText = `已选择 ${selected.length}/2 位英雄`;
       };
       heroSlots.appendChild(card);
     });
+
+    const animate = (now) => {
+      cardContexts.forEach(item => {
+        this._drawHeroPreview(item.ctx, item.id, 120, 120, now);
+      });
+      this.animFrameReq = requestAnimationFrame(animate);
+    };
+    this.animFrameReq = requestAnimationFrame(animate);
+
+    charConfirmBtn.onclick = () => {
+      cancelAnimationFrame(this.animFrameReq);
+      onConfirm([...selected], selectedDifficulty);
+    };
+  
+
     charConfirmBtn.onclick = () => onConfirm([...selected], selectedDifficulty);
   }
 
-  hideCharacterSelect() { this.els.charSelectScreen.style.display = 'none'; }
+  hideCharacterSelect() { 
+    this.els.charSelectScreen.style.display = 'none'; 
+    if(this.animFrameReq) cancelAnimationFrame(this.animFrameReq);
+  }
   showMapGeneration(_heroes, onReady) { this.els.mapGenScreen.style.display = 'flex'; setTimeout(onReady, 1000); }
   hideMapGeneration() { this.els.mapGenScreen.style.display = 'none'; }
   showMapUI() {
