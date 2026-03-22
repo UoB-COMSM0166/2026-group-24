@@ -62,7 +62,18 @@ export const RUIN_LIST = [
     q: 6,
     r: 1,
     name: '古代遗迹入口',
-    enemyName: '腐化守卫'
+    enemyName: '腐化守卫',
+    description: '巨大的石门矣立在森林中。\n\n门上刘撂着古老符文。\n\n突然，一个腐化的身影从阴影中走出来......',
+    postCombatMessage: '你扔了口气，旧遗迹的閒池中淡水波澁。\n\n也许走向东方是不是有了新的发现。'
+  },
+  {
+    map: 'main',
+    q: 5,
+    r: -6,
+    name: '深渊遗迹',
+    enemyName: '深渊看守者',
+    description: '苔藻覆盖的石阶延伸向地下。\n\n潮湿的空气带着腐朜的气味，仿佛这里已经沉睡了数百年。\n\n墙壁上的符文隐隐发光，像是在回应你的靠近。\n\n黑暗深处，一双眼睛缓缓睬开……',
+    postCombatMessage: '敌人的身躯缓缓倒下，遗迹重新归于寂静。\n\n你在四周简单搜寻了一番，却没有发现更多入口。\n\n就在准备离开时，你注意到——\n南方的地面上似乎残留着一串新鲜的脚印。\n\n也许，真正的宝藏就在南边等待着你。'
   }
   // 后续可继续添加更多遗迹
 ];
@@ -216,11 +227,14 @@ export class EventTable {
    * @param {Object} gameController
    */
   static handleTrapDamage(gameController) {
-    const hero = gameController.selectedHeroes[0];
-    const dmg = Math.floor(hero.maxHp * 0.15);
-    hero.hp = Math.max(0, hero.hp - dmg);
+    let totalDmg = 0;
+    for (const hero of gameController.selectedHeroes) {
+      const dmg = Math.floor(hero.maxHp * 0.15);
+      hero.hp = Math.max(0, hero.hp - dmg);
+      totalDmg += dmg;
+    }
     gameController.ui.updatePartyStatus(gameController.selectedHeroes);
-    gameController.ui.showEvent('💥 Trap Sprung', `Took ${dmg} damage!`, [{ text: 'OK' }]);
+    gameController.ui.showEvent('💥 Trap Sprung', `全体角色受伤！\n总伤害: ${totalDmg} HP`, [{ text: 'OK' }]);
   }
 
   // ── 事件处理：战斗 ───────────────────────────────────────────────
@@ -330,11 +344,14 @@ export class EventTable {
    * @param {Object} gameController
    */
   static applyAltarHealing(gameController) {
-    const hero = gameController.selectedHeroes[0];
-    const heal = Math.floor(hero.maxHp * 0.4);
-    hero.hp = Math.min(hero.maxHp, hero.hp + heal);
+    let totalHeal = 0;
+    for (const hero of gameController.selectedHeroes) {
+      const heal = Math.floor(hero.maxHp * 0.3);
+      hero.hp = Math.min(hero.maxHp, hero.hp + heal);
+      totalHeal += heal;
+    }
     gameController.ui.updatePartyStatus(gameController.selectedHeroes);
-    gameController.ui.showEvent('✨ Divine Light', `Healed ${heal} HP`, [{ text: 'Continue', onClick: () => { } }]);
+    gameController.ui.showEvent('✨ Divine Light', `全体角色被圣光治疗！\n总治疗: ${totalHeal} HP`, [{ text: 'Continue', onClick: () => { } }]);
   }
 
   // ── 事件处理：灯塔 ───────────────────────────────────────────────
@@ -564,16 +581,20 @@ export class EventTable {
   static handleRuin(gameController, tile, content) {
     const ruinName = content.name || '古代遗迹入口';
     const enemyName = content.enemyName || '腐化守卫';
+    const description = content.description || '巨大的石门矗立在森林中。\n\n门上刻着古老符文。\n\n突然，一个腐化的身影从阴影中走出来......';
+    const postCombatMessage = content.postCombatMessage;
 
     gameController.ui.showEvent(
       `📍 ${ruinName}`,
-      '巨大的石门矗立在森林中。\n\n门上刻着古老符文。\n\n突然，一个腐化的身影从阴影中走出来......',
+      description,
       [
         {
           text: '⚔️ 战斗',
           onClick: () => {
             tile.content = null;
             const bossContent = makeBoss(enemyName, 3, 'HARD');
+            // 保存战斗后的对话
+            bossContent.postCombatMessage = postCombatMessage;
             gameController.fsm.transition(GameState.COMBAT, bossContent);
           }
         },
