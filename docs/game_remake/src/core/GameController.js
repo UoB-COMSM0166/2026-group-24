@@ -25,6 +25,7 @@ export class GameController {
     this.camera = camera;
     this.selectedHeroes = [];
     this.combatManager = null;
+    this.currentBossContent = null;
     this.turnCount = 0;
     this.trapCooldown = 0;
     this.bossMode = false;
@@ -72,6 +73,20 @@ export class GameController {
         const noviceSpawnTile = this.noviceVillage.getTile(noviceQ, noviceR);
         if (noviceSpawnTile) noviceSpawnTile.type = TileType.GRASS;
 
+        // ── 强制所有固定事件坐标为草地，防止被山脉/森林挤占 ─────────────
+        const ensureGrass = (map, items) => {
+          items?.forEach(item => {
+            const targetMap = item.map === 'main' ? this.map : this.noviceVillage;
+            const tile = targetMap.getTile(item.q, item.r);
+            if (tile && tile.type !== TileType.GRASS) tile.type = TileType.GRASS;
+          });
+        };
+        ensureGrass(this.map, NPC_LIST);
+        ensureGrass(this.map, VILLAGE_LIST);
+        ensureGrass(this.map, MERCHANT_LIST);
+        ensureGrass(this.map, RUIN_LIST);
+        ensureGrass(this.map, CORRUPTED_DEER_LIST);
+
         // 双向传送阵
         this.map.placeContent(mainQ, mainR, makePortal('新手村', noviceQ, noviceR), 0);
         this.noviceVillage.placeContent(noviceQ, noviceR, makePortal('主地图', mainQ, mainR), 0);
@@ -114,7 +129,10 @@ export class GameController {
           const targetMap = ruin.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(ruin.q, ruin.r);
           if (tile && tile.type === TileType.GRASS) {
-            targetMap.placeContent(ruin.q, ruin.r, makeRuin(ruin.name, ruin.enemyName), 0);
+            const content = makeRuin(ruin.name, ruin.enemyName);
+            content.description = ruin.description;
+            content.postCombatMessage = ruin.postCombatMessage;
+            targetMap.placeContent(ruin.q, ruin.r, content, 0);
           }
         }
 
@@ -148,17 +166,44 @@ export class GameController {
         this.ui.updatePartyStatus(this.selectedHeroes);
         if (won) {
           const loot = rollRandomItem();
-          setTimeout(() => {
-            this.ui.showChestReward(loot, () => {
-              this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
-                const hero = this.selectedHeroes?.[heroIndex];
-                if (!hero) return;
-                if (action === 'put') hero.inventory.push(loot);
-                else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
-                this.ui.updatePartyStatus(this.selectedHeroes);
+          
+          // 先显示战斗后的故事对话（如果存在）
+          if (this.currentBossContent?.postCombatMessage) {
+            this.ui.showEvent(
+              '📖 故事',
+              this.currentBossContent.postCombatMessage,
+              [{ text: '继续', onClick: () => {
+                // 故事对话结束后，再显示战利品流程
+                setTimeout(() => {
+                  this.ui.showChestReward(loot, () => {
+                    this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
+                      const hero = this.selectedHeroes?.[heroIndex];
+                      if (!hero) return;
+                      if (action === 'put') hero.inventory.push(loot);
+                      else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                      this.ui.updatePartyStatus(this.selectedHeroes);
+                    });
+                  });
+                }, 300);
+              } }]
+            );
+            this.currentBossContent = null;
+          } else {
+            // 没有故事对话，直接显示战利品流程
+            setTimeout(() => {
+              this.ui.showChestReward(loot, () => {
+                this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
+                  const hero = this.selectedHeroes?.[heroIndex];
+                  if (!hero) return;
+                  if (action === 'put') hero.inventory.push(loot);
+                  else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                  this.ui.updatePartyStatus(this.selectedHeroes);
+                });
               });
-            });
-          }, 300);
+            }, 300);
+          }
+        } else {
+          this.currentBossContent = null;
         }
       },
     });
@@ -170,6 +215,7 @@ export class GameController {
   }
 
   _enterCombat(contentData) {
+    this.currentBossContent = contentData;
     const isBoss = contentData.type === TileContentType.BOSS || contentData.type === 'boss';
     const level = contentData.level ?? 1;
     const enemy = new Enemy(
@@ -224,15 +270,17 @@ export class GameController {
 
     // Boss 惩罚阶段：每回合扣除英雄最大血量的 5%
     if (this.bossModePenaltyActive) {
-      const damage = Math.max(1, Math.floor(this.selectedHeroes[0]?.maxHp || 100) * 0.05);
+      let totalDamage = 0;
       for (const hero of this.selectedHeroes) {
+        const damage = Math.max(1, Math.floor(hero.maxHp * 0.05));
         hero.hp = Math.max(0, hero.hp - damage);
+        totalDamage += damage;
       }
       if (!this.bossModePenaltyWarned) {
         this.bossModePenaltyWarned = true;
         this.ui.showEvent(
           '⚠️ 威胁',
-          `每一刻的耽搁都在削弱你的生命力！\n每名英雄扣除 -${damage} HP (最大生命值的5%)`,
+          `每一刻的耽搁都在削弱你的生命力！\n全体英雄每人扣除最大生命值的 5%`,
           [{ text: '继续', onClick: () => { } }]
         );
       }
@@ -416,6 +464,13 @@ export class GameController {
     this.currentMissionName = missionName;
     this.currentMaxTurns = maxTurns;
     this.turnCount = 0;
+    // 重置惩罚状态
+    this.bossMode = false;
+    this.bossModePenaltyActive = false;
+    this.bossModePenaltyWarned = false;
+    // 移除屏幕闪烁效果
+    document.body.classList.remove('screen-flare');
+    this.ui.setProgressBarNormal();
     this.ui.updateProgressBar(0, maxTurns);
     this.ui.updateProgressBarTitle(`🎯 ${missionName}`);
   }

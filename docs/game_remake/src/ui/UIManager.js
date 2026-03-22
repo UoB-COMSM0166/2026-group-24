@@ -217,7 +217,7 @@ export class UIManager {
     <div style="padding:10px;border:1px solid rgba(255,255,255,0.10);border-radius:12px;"><div style="font-weight:700;">${item?.name ?? "Item"}</div><div style="opacity:.75;font-size:12px;margin-top:4px;">${item?.desc ?? ""}</div><div style="opacity:.7;font-size:12px;margin-top:6px;">Rarity: ${item?.rarity ?? "common"} | Slot: ${item?.slot ?? 0}</div><div style="opacity:.65;font-size:12px;margin-top:6px;">"Equip Now" will assign the item to its slot (0/1) and refresh stats.</div></div>
     <div style="margin-top:10px;">${heroBtns || `<div style="opacity:.75;">No heroes available</div>`}</div>`;
     overlay.appendChild(card); document.body.appendChild(overlay);
-    card.querySelector("#loot-close")?.addEventListener("click", () => overlay.remove());
+    card.querySelector("#loot-close")?.addEventListener("click", () => { onPick?.({ heroIndex: 0, action: "put" }); overlay.remove(); });
     card.querySelectorAll(".loot-put").forEach(btn => btn.addEventListener("click", () => { onPick?.({ heroIndex: Number(btn.dataset.i), action: "put" }); overlay.remove(); }));
     card.querySelectorAll(".loot-equip").forEach(btn => btn.addEventListener("click", () => { onPick?.({ heroIndex: Number(btn.dataset.i), action: "equip" }); overlay.remove(); }));
   }
