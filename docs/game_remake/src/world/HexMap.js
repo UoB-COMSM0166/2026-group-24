@@ -9,10 +9,7 @@ import { hexToPixel } from './Tile.js';
 export function createMapByPreset(presetName) {
   const preset = MapPresets[presetName];
   if (!preset) throw new Error('地图预设未找到: ' + presetName);
-  const seed = presetName === 'novice' ? 42 : SeededRandom.randomSeed();
-  // 新手村跳过随机事件生成，由 TutorialManager 手动放置
-  const skipEvents = presetName === 'novice';
-  return new HexMap(preset.radius, preset.tileSize, seed, skipEvents);
+  return new HexMap(preset.radius, preset.tileSize, SeededRandom.randomSeed());
 }
 
 /**
@@ -32,18 +29,20 @@ export class HexMap {
   static KEY_OFFSET = 100;
   static KEY_STRIDE = 200; // 2 * KEY_OFFSET
 
-  constructor(radius, tileSize = 30, seed = SeededRandom.randomSeed(), skipEvents = false) {
+  constructor(radius, tileSize = 30, seed = SeededRandom.randomSeed()) {
     this.radius = radius;
     this.tileSize = tileSize;
     this.rng = new SeededRandom(seed);
-    this.tiles = new Map();
+    this.tiles = new Map();   // key: integer → Tile
 
     const gen = new MapGenerator(this.rng);
     gen.generateTerrain(this);
-    if (!skipEvents) gen.generateEvents(this);
+    gen.generateEvents(this);
 
+    // 预计算世界边界（供相机边界钳位）
     this.worldBounds = this._computeWorldBounds();
   }
+
   // ── Key 编码 ───────────────────────────────────────────────────
   /** 将 (q, r) 轴坐标编码为单个整数 key，避免字符串分配。 */
   static encodeKey(q, r) {

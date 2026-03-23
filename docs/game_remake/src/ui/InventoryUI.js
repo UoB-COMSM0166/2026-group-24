@@ -58,31 +58,7 @@ export class InventoryUI {
     toggle() {
         this.isOpen = !this.isOpen;
         this.panel.style.display = this.isOpen ? "block" : "none";
-        if (this.isOpen) {
-            this.render();
-            const tutorial = window._gameController?.tutorial;
-            if (tutorial && !tutorial._inventoryIntroduced) {
-                tutorial._inventoryIntroduced = true;
-                this.panel.style.display = 'none';
-                this.isOpen = false;
-                tutorial._dialogue.show(
-                    { name: '老向导', avatar: '🧙', lines: [
-                            '哦你打开背包了！来来来，让老夫给你讲讲怎么用！',
-                            '你看左边那一栏，是你捡到的所有东西。右边是每个英雄自己的装备栏。',
-                            '想给英雄装备东西很简单——把装备从左边拖到右边的槽里就行了，或者直接双击也可以！',
-                            '卸装备也一样，双击已装备的东西就会回到存放区。记住，装备认主人，别硬给Knight塞法杖！',
-                            '道具嘛就更简单了，拖过去或者双击，谁都能用！',
-                            '好了，自己研究一下吧，老夫腰不好就不给你演示了！',
-                        ]},
-                    () => {
-                        tutorial.complete('opened_inventory');
-                        this.toggle();
-                    }
-                );
-            } else {
-                tutorial?.complete('opened_inventory');
-            }
-        }
+        if (this.isOpen) this.render();
     }
 
     close() {

@@ -47,9 +47,8 @@ export function makeNPC(name, dialogue = '你好，旅行者！', options = {}) 
   return { type: TileContentType.NPC, name, dialogue, ...options };
 }
 export function makePortal(targetMap, targetQ, targetR) {
-  return { type: TileContentType.PORTAL, name: '传送阵', targetMap, targetQ, targetR, iconType: 'portal' };
+  return { type: TileContentType.PORTAL, name: '传送阵', targetMap, targetQ, targetR };
 }
-
 export function makeDungeon(name, level = 1, difficulty = 'NORMAL') {
   return { type: TileContentType.DUNGEON, name, level, difficulty };
 }
@@ -120,7 +119,6 @@ export class Tile {
     blueCircle: 'blue',
     purpleCircle: 'purple',
     blackCircle: 'black',
-    portal: 'cyan',
   });
 
   /**
