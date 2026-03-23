@@ -34,7 +34,7 @@ export class Enemy extends Character {
     const defMulti = difficultyMode === 'hell' ? 1.2 : 0.6;
 
     // Calculate scaled HP
-    const hp = Math.floor((30 + level * 20) * hpMulti);
+    const hp = Math.floor((300 + level * 20) * hpMulti);
     super(name, hp, hp);
 
     this.type = 'enemy';     // Keep consistent with CombatManager checks
@@ -43,7 +43,7 @@ export class Enemy extends Character {
     this.difficulty = difficultyMode; // Save difficulty for rendering
 
     // Apply ATTACK multipliers to offensive stats
-    this.strength = Math.floor((statOverrides.strength ?? (12 + (level - 1) * 4)) * atkMulti);
+    this.strength = Math.floor((statOverrides.strength ?? (90 + (level - 1) * 4)) * atkMulti);
     this.intellect = Math.floor((statOverrides.intellect ?? (6 + (level - 1) * 2)) * atkMulti);
 
     // Apply DEFENSE multipliers to defensive stats (Heavily nerfed base scaling)

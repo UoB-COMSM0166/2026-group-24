@@ -28,7 +28,51 @@ export class UIManager {
     };
     this.onCombatEnd = callbacks.onCombatEnd ?? (() => { });
     this.inventoryUI = new InventoryUI();
+    this.animFrameReq = null;
   }
+
+  _drawHeroPreview(ctx, heroId, width, height, time) {
+    const anim = DataLoader.animations[heroId];
+    if (!anim || !anim.idle) return;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // --- 在这里定义每个英雄的微调参数 ---
+    const configs = {
+        'wizard': { size: 220, offsetX: 20, offsetY: -10, frameCount: 6 },
+        'knight': { size: 280, offsetX: 12, offsetY: -95 },
+        'priest': { size: 280, offsetX: 12, offsetY: -90 },
+        'ranger': { size: 280, offsetX: 12, offsetY: -95 },
+        'default': { size: 150, offsetX: 0, offsetY: 0 }
+    };
+
+    const cfg = configs[heroId] || configs['default'];
+    const drawSize = cfg.size;
+    // 居中计算公式：(画布宽度 - 绘制宽度) / 2 + 偏移量
+    const dx = (width - drawSize) / 2 + cfg.offsetX;
+    const dy = (height - drawSize) / 2 + cfg.offsetY;
+
+    if (heroId === 'wizard') {
+        const img = anim.idle;
+        const frameCount = cfg.frameCount; 
+        const frameWidth = img.width / frameCount;
+        const frameHeight = img.height;
+        const frameIdx = Math.floor(time / 100) % frameCount;
+
+        ctx.drawImage(
+            img,
+            frameIdx * frameWidth, 0, frameWidth, frameHeight, // 切片源
+            dx, dy, drawSize, drawSize                        // 绘制目标
+        );
+    } else {
+        const frames = anim.idle;
+        if (frames.length === 0) return;
+        const frameIdx = Math.floor(time / 100) % frames.length;
+        const img = frames[frameIdx];
+        
+        ctx.drawImage(img, dx, dy, drawSize, drawSize);
+    }
+}
 
   updatePartyStatus(heroes) {
     this.inventoryUI?.update(heroes);
@@ -69,7 +113,7 @@ export class UIManager {
     charSelectScreen.style.display = 'flex';
     heroSlots.innerHTML = '';
     const selected = [];
-    let selectedDifficulty = 'normal'; // 默认难度
+    let selectedDifficulty = 'normal';
 
     // 设置难度按钮
     if (difficultyButtons) {
@@ -84,24 +128,63 @@ export class UIManager {
         };
       });
     }
+    const cardContexts = [];
 
     DataLoader.getAllHeroes().forEach(hero => {
       const card = document.createElement('div');
-      card.className = 'hero-card';
-      card.innerHTML = `<div style="font-weight:bold;margin-bottom:5px;">${hero.name}</div><div style="font-size:12px;color:#aaa;margin-bottom:4px;">${hero.desc ?? ''}</div><div>HP ${hero.hp}</div>`;
+      card.className = 'hero-card vivid-card';
+      card.innerHTML = `
+        <div class="hero-preview-container">
+            <canvas class="hero-preview-canvas" width="120" height="120"></canvas>
+            <div class="hero-glow"></div>
+        </div>
+        <div class="hero-card-name">${hero.name}</div>
+        <div class="hero-card-desc">${hero.desc ?? ''}</div>
+        <div class="hero-card-stats">
+            <span>❤️ ${hero.hp}</span>
+            <span>⚔️ ${hero.stats?.strength || 10}</span>
+            <span>✨ ${hero.stats?.intellect || 10}</span>
+        </div>
+      `;
+      const canvas = card.querySelector('.hero-preview-canvas');
+      cardContexts.push({ ctx: canvas.getContext('2d'), id: hero.id });
+
       card.onclick = () => {
         const idx = selected.indexOf(hero);
-        if (idx !== -1) { selected.splice(idx, 1); card.classList.remove('selected'); }
-        else if (selected.length < 2) { selected.push(hero); card.classList.add('selected'); }
+        if (idx !== -1) { 
+            selected.splice(idx, 1); 
+            card.classList.remove('selected'); 
+        } else if (selected.length < 2) { 
+            selected.push(hero); 
+            card.classList.add('selected'); 
+        }
         charConfirmBtn.disabled = selected.length !== 2;
-        charSelectedInfo.innerText = `Selected ${selected.length}/2 Heroes`;
+        charSelectedInfo.innerText = `已选择 ${selected.length}/2 位英雄`;
       };
       heroSlots.appendChild(card);
     });
+
+    const animate = (now) => {
+      cardContexts.forEach(item => {
+        this._drawHeroPreview(item.ctx, item.id, 120, 120, now);
+      });
+      this.animFrameReq = requestAnimationFrame(animate);
+    };
+    this.animFrameReq = requestAnimationFrame(animate);
+
+    charConfirmBtn.onclick = () => {
+      cancelAnimationFrame(this.animFrameReq);
+      onConfirm([...selected], selectedDifficulty);
+    };
+  
+
     charConfirmBtn.onclick = () => onConfirm([...selected], selectedDifficulty);
   }
 
-  hideCharacterSelect() { this.els.charSelectScreen.style.display = 'none'; }
+  hideCharacterSelect() { 
+    this.els.charSelectScreen.style.display = 'none'; 
+    if(this.animFrameReq) cancelAnimationFrame(this.animFrameReq);
+  }
   showMapGeneration(_heroes, onReady) { this.els.mapGenScreen.style.display = 'flex'; setTimeout(onReady, 1000); }
   hideMapGeneration() { this.els.mapGenScreen.style.display = 'none'; }
   showMapUI() {
@@ -201,72 +284,24 @@ export class UIManager {
   }
   showLootAssign(item, heroes, onPick) {
     const overlay = document.createElement("div");
-    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:220;display:flex;align-items:center;justify-content:center;font-family:sans-serif;backdrop-filter:blur(4px);";
-
-    const rarityColor = {
-      common: '#9ca3af',
-      uncommon: '#4ade80',
-      rare: '#60a5fa',
-      epic: '#c084fc',
-      legendary: '#fbbf24',
-    }[item?.rarity ?? 'common'] ?? '#9ca3af';
-
-    const equipBtns = (heroes ?? []).map((h, i) => `
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;background:rgba(255,255,255,0.03);margin-bottom:8px;">
-        <div>
-          <div style="font-weight:600;font-size:14px;">${h.name ?? `Hero${i + 1}`}</div>
-          <div style="font-size:11px;color:#6b7280;margin-top:2px;">HP ${h.hp ?? 0} / ${h.maxHp ?? 0}</div>
-        </div>
-        <button class="loot-equip" data-i="${i}" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(74,222,128,0.4);background:rgba(74,222,128,0.12);color:#4ade80;font-size:12px;cursor:pointer;">
-          ⚔️ 立即装备
-        </button>
-      </div>
-    `).join("");
-
+    overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:220; display:flex; align-items:center; justify-content:center; font-family:sans-serif;";
     const card = document.createElement("div");
-    card.style.cssText = "width:500px;max-width:92vw;background:rgba(10,10,25,0.97);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:20px;color:white;box-shadow:0 20px 60px rgba(0,0,0,0.8);";
+    card.style.cssText = "width:460px; max-width:92vw; background:rgba(10,10,25,0.95); border:1px solid rgba(255,255,255,0.18); border-radius:14px; padding:14px; color:white;";
+    const heroBtns = (heroes ?? []).map((h, i) => {
+      return `
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
+        <div style="flex:1;opacity:.9;">${h.name ?? `Hero${i + 1}`}</div>
+        <button class="loot-put" data-i="${i}" style="padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.06); color:white; cursor:pointer;">Store in Bag</button>
+        <button class="loot-equip" data-i="${i}" style="padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.18); background:rgba(46,204,113,0.18); color:white; cursor:pointer;">Equip Now</button>
+      </div>`;
+    }).join("");
     card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div style="font-weight:700;font-size:16px;">🎁 获得物品</div>
-        <button id="loot-close" style="background:transparent;border:none;color:#6b7280;cursor:pointer;font-size:18px;">✕</button>
-      </div>
-
-      <div style="padding:14px;border:1px solid ${rarityColor}44;border-radius:12px;background:${rarityColor}11;margin-bottom:16px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <div style="font-size:28px;">
-            ${{ sword:'⚔️', shield:'🛡️', potion:'🧪', boots:'👟', clover:'🍀' }[item?.icon] ?? '📦'}
-          </div>
-          <div>
-            <div style="font-weight:700;font-size:15px;">${item?.name ?? 'Item'}</div>
-            <div style="font-size:12px;color:${rarityColor};margin-top:2px;text-transform:uppercase;letter-spacing:0.05em;">${item?.rarity ?? 'common'}</div>
-          </div>
-        </div>
-        <div style="font-size:12px;color:#9ca3af;line-height:1.5;">${item?.desc ?? ''}</div>
-        ${item?.statBonus && Object.keys(item.statBonus).length > 0
-        ? `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">
-              ${Object.entries(item.statBonus).map(([k,v]) => `
-                <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(251,191,36,0.15);color:#fbbf24;">+${v} ${k}</span>
-              `).join('')}
-            </div>`
-        : ''
-    }
-      </div>
-
-      <div style="display:flex;gap:12px;align-items:stretch;">
-        <div style="flex:1;">
-          ${equipBtns || `<div style="opacity:.75;">No heroes available</div>`}
-        </div>
-        <button id="loot-put" style="width:120px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#d1d5db;font-size:13px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
-          <span style="font-size:28px;">📦</span>
-          <span>存入背包</span>
-        </button>
-      </div>
-    `;
-
-    overlay.appendChild(card);
-    document.body.appendChild(overlay);
-    card.querySelector("#loot-close")?.addEventListener("click", () => overlay.remove());
-    card.querySelector("#loot-put")?.addEventListener("click", () => { onPick?.({ heroIndex: 0, action: "put" }); overlay.remove(); });
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-weight:700;">Assign to Hero</div><button id="loot-close" style="background:transparent;border:none;color:#aaa;cursor:pointer;">✕</button></div>
+    <div style="padding:10px;border:1px solid rgba(255,255,255,0.10);border-radius:12px;"><div style="font-weight:700;">${item?.name ?? "Item"}</div><div style="opacity:.75;font-size:12px;margin-top:4px;">${item?.desc ?? ""}</div><div style="opacity:.7;font-size:12px;margin-top:6px;">Rarity: ${item?.rarity ?? "common"} | Slot: ${item?.slot ?? 0}</div><div style="opacity:.65;font-size:12px;margin-top:6px;">"Equip Now" will assign the item to its slot (0/1) and refresh stats.</div></div>
+    <div style="margin-top:10px;">${heroBtns || `<div style="opacity:.75;">No heroes available</div>`}</div>`;
+    overlay.appendChild(card); document.body.appendChild(overlay);
+    card.querySelector("#loot-close")?.addEventListener("click", () => { onPick?.({ heroIndex: 0, action: "put" }); overlay.remove(); });
+    card.querySelectorAll(".loot-put").forEach(btn => btn.addEventListener("click", () => { onPick?.({ heroIndex: Number(btn.dataset.i), action: "put" }); overlay.remove(); }));
     card.querySelectorAll(".loot-equip").forEach(btn => btn.addEventListener("click", () => { onPick?.({ heroIndex: Number(btn.dataset.i), action: "equip" }); overlay.remove(); }));
   }
 

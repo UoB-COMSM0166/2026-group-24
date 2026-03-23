@@ -19,7 +19,7 @@ STRAPLINE. Add an exciting one sentence description of your game here.
 
 IMAGE. Add an image of your game here, keep this updated with a snapshot of your latest development.
 
-LINK. GAME LINK: https://yejian414-tech.github.io/game_remake/
+LINK. GAME LINK: https://uob-comsm0166.github.io/2026-group-24/
 
 VIDEO. Include a demo video of your game here (you don't have to wait until the end, you can insert a work in progress video)
 
