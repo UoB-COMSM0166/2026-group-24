@@ -2,8 +2,9 @@
 // 采用 p5.js 绘制像素奇幻风背景，叠加 HTML/CSS 响应式 UI 菜单
 
 export class TitleScreen {
-  constructor(onStart) {
+  constructor(onStart, onContinue) {
     this.onStart = onStart;
+    this.onContinue = onContinue;
     this._overlay = null;
     this._p5inst = null;
     this.globalVolume = 0.5;
@@ -166,7 +167,21 @@ export class TitleScreen {
     btnCloseSettings.addEventListener('click', () => modalSettings.style.display = 'none');
     
     btnContinue.addEventListener('click', () => {
-      alert("COMING SOON - Feature implemented later!");
+      if (localStorage.getItem('for_the_treasure_save')) {
+        if (isStarting) return;
+        isStarting = true;
+        uiLayer.style.transition = 'opacity 0.5s ease-out';
+        uiLayer.style.opacity = '0';
+        
+        if (this._p5inst) this._p5inst.triggerStart();
+        
+        setTimeout(() => {
+          this.onContinue();
+          if (this._overlay) this._overlay.remove();
+        }, 1000);
+      } else {
+        alert("未找到存档！(No save data found!)");
+      }
     });
 
     let isStarting = false;
