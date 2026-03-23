@@ -159,7 +159,7 @@ export class UIManager {
             card.classList.add('selected'); 
         }
         charConfirmBtn.disabled = selected.length !== 2;
-        charSelectedInfo.innerText = `已选择 ${selected.length}/2 位英雄`;
+        charSelectedInfo.innerText = `Selected ${selected.length}/2 heroes`;
       };
       heroSlots.appendChild(card);
     });
@@ -212,7 +212,7 @@ export class UIManager {
     const title = document.querySelector('#top-progress-header span:first-child');
     const desc = document.querySelector('#top-progress-header span:last-child');
     if (title) title.textContent = '⚔️ Boss Battle';
-    if (desc) desc.textContent = '在十回合内击败boss否则结束游戏';
+    if (desc) desc.textContent = 'Defeat the boss within 10 turns or the game ends';
   }
 
   setProgressBarCritical() {
