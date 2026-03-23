@@ -121,7 +121,7 @@ export class InventoryUI {
                             <div style="opacity:.6;font-size:11px;">${w.rarity ?? ''} — double-click to unequip</div>
                         </div>
                     </div>`
-            : `<span style="opacity:.4;font-size:13px;">⚔️ Weapon Slots ${i + 1}：空</span>`
+            : `<span style="opacity:.4;font-size:13px;">⚔️ Weapon Slots ${i + 1}: Empty</span>`
         }
             </div>
         `).join('')}

@@ -8,7 +8,7 @@ import { hexToPixel } from './Tile.js';
 // ── 地图工厂（按预设名创建）────────────────────────────────────────
 export function createMapByPreset(presetName) {
   const preset = MapPresets[presetName];
-  if (!preset) throw new Error('地图预设未找到: ' + presetName);
+  if (!preset) throw new Error('Map preset not found: ' + presetName);
   return new HexMap(preset.radius, preset.tileSize, SeededRandom.randomSeed());
 }
 
