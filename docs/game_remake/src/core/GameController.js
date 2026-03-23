@@ -88,8 +88,8 @@ export class GameController {
         ensureGrass(this.map, CORRUPTED_DEER_LIST);
 
         // 双向传送阵
-        this.map.placeContent(mainQ, mainR, makePortal('Novice Village', noviceQ, noviceR), 0);
-        this.noviceVillage.placeContent(noviceQ, noviceR, makePortal('Main Map', mainQ, mainR), 0);
+        this.map.placeContent(mainQ, mainR, makePortal('新手村', noviceQ, noviceR), 0);
+        this.noviceVillage.placeContent(noviceQ, noviceR, makePortal('主地图', mainQ, mainR), 0);
 
         // 批量放置 NPC
         for (const npc of NPC_LIST) {
@@ -97,7 +97,7 @@ export class GameController {
           const tile = targetMap.getTile(npc.q, npc.r);
           if (tile && tile.type === TileType.GRASS) {
             let content;
-            if (npc.name === 'Injured Villager') {
+            if (npc.name === '受伤的村民') {
               content = makeInjuredVillager(npc.name, npc.dialogue);
             } else {
               content = makeNPC(npc.name, npc.dialogue, npc.options || {});
@@ -146,7 +146,7 @@ export class GameController {
         }
 
         // 玩家出生在新手村
-        this.currentMapName = 'Novice Village';
+        this.currentMapName = '新手村';
         this.player.setGridPos(noviceQ, noviceR, this.noviceVillage);
         this.noviceVillage.revealAround(noviceQ, noviceR, 5);
         this.fsm.transition(GameState.MAP_EXPLORATION);
@@ -170,10 +170,10 @@ export class GameController {
           // 先显示战斗后的故事对话（如果存在）
           if (this.currentBossContent?.postCombatMessage) {
             this.ui.showEvent(
-              '📖 Story',
+              '📖 故事',
               this.currentBossContent.postCombatMessage,
-              [{ text: 'Continue', onClick: () => {
-                // Story dialogue ends, then show loot process
+              [{ text: '继续', onClick: () => {
+                // 故事对话结束后，再显示战利品流程
                 setTimeout(() => {
                   this.ui.showChestReward(loot, () => {
                     this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
@@ -246,7 +246,7 @@ export class GameController {
 
   render(ctx, camera) {
     if (this.fsm.currentState === GameState.MAP_EXPLORATION) {
-      const currentMap = this.currentMapName === 'Novice Village' ? this.noviceVillage : this.map;
+      const currentMap = this.currentMapName === '新手村' ? this.noviceVillage : this.map;
       Renderer.renderExploration(ctx, camera, currentMap, this.player, this.rangeHighlight);
     } else if (this.fsm.currentState === GameState.COMBAT) {
       Renderer.renderCombat(ctx, this.selectedHeroes, this.combatManager);
@@ -279,9 +279,9 @@ export class GameController {
       if (!this.bossModePenaltyWarned) {
         this.bossModePenaltyWarned = true;
         this.ui.showEvent(
-          '⚠️ Threat',
-          `Every moment of delay weakens your vitality!\nAll heroes lose 5% of their maximum health.`,
-          [{ text: 'Continue', onClick: () => { } }]
+          '⚠️ 威胁',
+          `每一刻的耽搁都在削弱你的生命力！\n全体英雄每人扣除最大生命值的 5%`,
+          [{ text: '继续', onClick: () => { } }]
         );
       }
       this.ui.updatePartyStatus(this.selectedHeroes);
@@ -332,7 +332,7 @@ export class GameController {
     if (q === this.player.q && r === this.player.r) return;
     if (this._isMoving) return; // 动画进行中，忽略新点击
 
-    const curMap = this.currentMapName === 'Novice Village' ? this.noviceVillage : this.map;
+    const curMap = this.currentMapName === '新手村' ? this.noviceVillage : this.map;
 
     // 目标格地形必须可通行
     const tile = curMap.getTile(q, r);
@@ -446,7 +446,7 @@ export class GameController {
 
   _switchMap(targetMapName, q, r) {
     if (targetMapName === this.currentMapName) return;
-    const targetMap = targetMapName === 'Novice Village' ? this.noviceVillage : this.map;
+    const targetMap = targetMapName === '新手村' ? this.noviceVillage : this.map;
     if (!targetMap) return;
     this.currentMapName = targetMapName;
     this.player.setGridPos(q, r, targetMap);
