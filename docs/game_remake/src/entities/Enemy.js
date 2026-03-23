@@ -43,7 +43,7 @@ export class Enemy extends Character {
     this.difficulty = difficultyMode; // Save difficulty for rendering
 
     // Apply ATTACK multipliers to offensive stats
-    this.strength = Math.floor((statOverrides.strength ?? (90 + (level - 1) * 4)) * atkMulti);
+    this.strength = Math.floor((statOverrides.strength ?? (15 + (level - 1) * 4)) * atkMulti);
     this.intellect = Math.floor((statOverrides.intellect ?? (6 + (level - 1) * 2)) * atkMulti);
 
     // Apply DEFENSE multipliers to defensive stats (Heavily nerfed base scaling)
