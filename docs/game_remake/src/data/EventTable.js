@@ -150,7 +150,7 @@ export class EventTable {
     },
     PORTAL: {
       id: 'portal',
-      title: '🌀 传送阵',
+      title: '🌀 Teleportation array',
       spawnChance: 0,
       description: 'Teleport?',
       tileContentType: TileContentType.PORTAL,
@@ -158,9 +158,9 @@ export class EventTable {
     },
     VILLAGE: {
       id: 'village',
-      title: '🏘️ 村庄',
+      title: '🏘️ Village',
       spawnChance: 0,
-      description: '欢迎来到村庄。',
+      description: 'Welcome to the village.',
       tileContentType: 'village',
       handler: 'handleVillage'
     },
