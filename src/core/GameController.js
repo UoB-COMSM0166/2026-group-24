@@ -13,7 +13,7 @@ import { Renderer } from '../rendering/Renderer.js';
 import { rollRandomItem } from '../data/items.js';
 import { GameStory } from './GameStory.js';
 import { EventTable } from '../data/EventTable.js';
-import { findPath, getReachableTiles } from '../utils/Pathfinder.js';
+import { findPath, getReachableTiles } from '../utils/Pathfinder.js';   // ← 新增：A* 寻路
 import { rollEncounter, ENEMY_TYPES } from '../data/EncounterTable.js';
 
 export class GameController {
@@ -35,13 +35,8 @@ export class GameController {
     this.currentMaxTurns = TurnConfig.MAX_TURNS;
     this.currentMissionName = null;
     this.merchantEncountered = false;
-    this._isMoving = false;
+    this._isMoving = false;   // ← 新增：路径动画锁，移动中屏蔽新点击
     this.rangeHighlight = null;
-    // ── 两步移动新增状态 ──────────────────────────────────────────
-    this.pendingPath = null;      // A* 算出的待确认路径
-    this.pendingTarget = null;    // 待确认目标格 {q, r}
-    this.pathHighlight = null;    // 路径格 Set<"q,r">，供 Renderer 绘制
-    // ─────────────────────────────────────────────────────────────
     this.gameStory = new GameStory(ui);
     this.fsm = new StateMachine(GameState.INITIALIZING);
     this._setupStates();
@@ -172,30 +167,30 @@ export class GameController {
         this.ui.updatePartyStatus(this.selectedHeroes);
         if (won) {
           const loot = rollRandomItem();
-
+          
           // 先显示战斗后的故事对话（如果存在）
           if (this.currentBossContent?.postCombatMessage) {
             this.ui.showEvent(
               '📖 Story',
               this.currentBossContent.postCombatMessage,
-              [{
-                text: 'Continue', onClick: () => {
-                  setTimeout(() => {
-                    this.ui.showChestReward(loot, () => {
-                      this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
-                        const hero = this.selectedHeroes?.[heroIndex];
-                        if (!hero) return;
-                        if (action === 'put') hero.inventory.push(loot);
-                        else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
-                        this.ui.updatePartyStatus(this.selectedHeroes);
-                      });
+              [{ text: 'Continue', onClick: () => {
+                // 故事对话结束后，再显示战利品流程
+                setTimeout(() => {
+                  this.ui.showChestReward(loot, () => {
+                    this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
+                      const hero = this.selectedHeroes?.[heroIndex];
+                      if (!hero) return;
+                      if (action === 'put') hero.inventory.push(loot);
+                      else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                      this.ui.updatePartyStatus(this.selectedHeroes);
                     });
-                  }, 300);
-                }
-              }]
+                  });
+                }, 300);
+              } }]
             );
             this.currentBossContent = null;
           } else {
+            // 没有故事对话，直接显示战利品流程
             setTimeout(() => {
               this.ui.showChestReward(loot, () => {
                 this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
@@ -221,32 +216,32 @@ export class GameController {
   }
 
   _enterCombat(contentData) {
-    this.currentBossContent = contentData;
-    const isBoss = contentData.type === TileContentType.BOSS || contentData.type === 'boss';
-    const level = contentData.level ?? 1;
-    const enemies = [];
+      this.currentBossContent = contentData;
+      const isBoss = contentData.type === TileContentType.BOSS || contentData.type === 'boss';
+      const level = contentData.level ?? 1;
+      const enemies = [];
 
-    if (isBoss) {
-      const enemy = new Enemy(
-        contentData.name || 'Elite Boss', 'boss', level,
-        { strength: 20 + level * 6, toughness: 16 + level * 5, agility: 10 + level * 2 }
-      );
-      enemy.id = 'e1_' + Date.now();
-      enemies.push(enemy);
-    } else {
-      const group = rollEncounter(level);
-      group.forEach((typeKey, i) => {
-        const def = ENEMY_TYPES[typeKey];
-        const e = new Enemy(def.name, def.type, level, def.statMod);
-        e.id = `e${i + 1}_` + Date.now() + i;
-        enemies.push(e);
-      });
+      if (isBoss) {
+        const enemy = new Enemy(
+          contentData.name || 'Elite Boss', 'boss', level,
+          { strength: 20 + level*6, toughness: 16 + level*5, agility: 10 + level*2 }
+        );
+        enemy.id = 'e1_' + Date.now();
+        enemies.push(enemy);
+      } else {
+        const group = rollEncounter(level);
+        group.forEach((typeKey, i) => {
+          const def = ENEMY_TYPES[typeKey];
+          const e = new Enemy(def.name, def.type, level, def.statMod);
+          e.id = `e${i+1}_` + Date.now() + i;
+          enemies.push(e);
+        });
+      }
+
+      this.combatManager = new CombatManager(this.selectedHeroes, enemies, this.ui);
+      this.combatManager.init();
+      this.ui.showCombatOverlay(this.combatManager);
     }
-
-    this.combatManager = new CombatManager(this.selectedHeroes, enemies, this.ui);
-    this.combatManager.init();
-    this.ui.showCombatOverlay(this.combatManager);
-  }
 
   _exitCombat() {
     this.combatManager = null;
@@ -264,9 +259,8 @@ export class GameController {
 
   render(ctx, camera) {
     if (this.fsm.currentState === GameState.MAP_EXPLORATION) {
-      const currentMap = this.currentMapName === 'Novice Village'
-        ? this.noviceVillage : this.map;
-      Renderer.renderExploration(ctx, camera, currentMap, this.player, this.rangeHighlight, this.pathHighlight);
+      const currentMap = this.currentMapName === 'Novice Village' ? this.noviceVillage : this.map;
+      Renderer.renderExploration(ctx, camera, currentMap, this.player, this.rangeHighlight);
     } else if (this.fsm.currentState === GameState.COMBAT) {
       Renderer.renderCombat(ctx, this.selectedHeroes, this.combatManager);
     }
@@ -274,9 +268,6 @@ export class GameController {
 
   _startTurn() {
     this.rangeHighlight = null;
-    this.pendingPath = null;
-    this.pendingTarget = null;
-    this.pathHighlight = null;
     this.turnCount += 1;
     this.ui.updateProgressBar(this.turnCount, this.currentMaxTurns);
 
@@ -310,6 +301,7 @@ export class GameController {
     }
 
     if (!this.bossMode && this.turnCount === this.currentMaxTurns) {
+      // 进入 boss 模式
       this.bossMode = true;
       this.bossModePenaltyActive = true;
       this.turnCount = 0;
@@ -338,50 +330,28 @@ export class GameController {
 
   onEndTurnBtnClick() { this._startTurn(); }
 
-  // ── 两步移动：第一次点击显示路径，第二次点击执行移动 ──────────────
+  // ── 寻路移动（替换旧的直线限制移动）────────────────────────────
 
   /**
-   * 第一次点击目标格 → A* 寻路，显示蓝色路径预览。
-   * 第二次点击同一目标格 → 执行移动。
-   * 点击其他格 → 切换路径预览到新目标。
-   * 点击自身格 → 取消路径预览。
+   * 玩家点击目标格后触发，使用 A* 寻路并逐步动画移动。
    *
    * 寻路规则：
    *   - moveCost = Infinity 的地形（森林/山脉/屏障）不可通行
-   *   - 带事件内容的格子不能作为途经点，只能作为终点
+   *   - 带事件内容的格子（地牢/宝箱/灯塔…）不能作为途经点，只能作为终点
    *   - 总路径代价不能超过当前移动力
    */
   movePlayer(q, r) {
     if (this.fsm.currentState !== GameState.MAP_EXPLORATION) return;
-    if (this._isMoving) return;
+    if (q === this.player.q && r === this.player.r) return;
+    if (this._isMoving) return; // 动画进行中，忽略新点击
 
-    // 点击自身格：取消路径预览
-    if (q === this.player.q && r === this.player.r) {
-      this.pendingPath = null;
-      this.pendingTarget = null;
-      this.pathHighlight = null;
-      this.rangeHighlight = null;
-      return;
-    }
+    const curMap = this.currentMapName === 'Novice Village' ? this.noviceVillage : this.map;
 
-    const curMap = this.currentMapName === 'Novice Village'
-      ? this.noviceVillage : this.map;
-
+    // 目标格地形必须可通行
     const tile = curMap.getTile(q, r);
     if (!tile || !isFinite(tile.type.moveCost)) return;
 
-    // ── 二次点击同一目标格 → 执行移动 ──────────────────────────────
-    if (this.pendingTarget && this.pendingTarget.q === q && this.pendingTarget.r === r) {
-      const path = this.pendingPath;
-      this.pendingPath = null;
-      this.pendingTarget = null;
-      this.pathHighlight = null;
-      this.rangeHighlight = null;
-      this._walkPath(path, curMap);
-      return;
-    }
-
-    // ── 一次点击（或切换目标）→ A* 寻路并显示路径预览 ───────────────
+    // A* 寻路，受当前移动力约束
     const result = findPath(
       curMap,
       this.player.q, this.player.r,
@@ -389,13 +359,12 @@ export class GameController {
       this.player.movementPoints,
     );
 
+    // 不可达 / 移动力不足 → 忽略
     if (!result || result.path.length === 0) {
-      // 不可达：清除路径预览，显示可达范围红线
-      this.pendingPath = null;
-      this.pendingTarget = null;
-      this.pathHighlight = null;
+      // 判断目标格在无限移动力下是否可达（即：地形可通行但步数不足）
       const canReachUnlimited = findPath(curMap, this.player.q, this.player.r, q, r, Infinity);
       if (canReachUnlimited) {
+        // 步数不足：展示可移动范围红线
         this.rangeHighlight = getReachableTiles(
           curMap,
           this.player.q,
@@ -405,17 +374,8 @@ export class GameController {
       }
       return;
     }
+    this._walkPath(result.path, curMap);
 
-    // 保存路径，构建路径格高亮集合
-    this.pendingPath = result.path;
-    this.pendingTarget = { q, r };
-    this.rangeHighlight = null;
-
-    this.pathHighlight = new Set();
-    this.pathHighlight.add(`${this.player.q},${this.player.r}`);
-    for (const step of result.path) {
-      this.pathHighlight.add(`${step.q},${step.r}`);
-    }
   }
 
   /**
@@ -428,9 +388,6 @@ export class GameController {
   _walkPath(path, curMap) {
     this._isMoving = true;
     this.rangeHighlight = null;
-    this.pendingPath = null;
-    this.pendingTarget = null;
-    this.pathHighlight = null;
     let stepIndex = 0;
 
     const doStep = () => {
@@ -454,9 +411,9 @@ export class GameController {
       const isLast = stepIndex >= path.length;
       if (isLast) {
         this._isMoving = false;
-        this._handleTileContent(tile);
+        this._handleTileContent(tile); // 仅终点触发事件
       } else {
-        setTimeout(doStep, 150);
+        setTimeout(doStep, 150); // 每步间隔 150ms
       }
     };
 
@@ -467,6 +424,7 @@ export class GameController {
 
   _handleTileContent(tile) {
     if (!tile.content) {
+      // 随机陷阱事件
       if (this.trapCooldown === 0 && Math.random() <= EventTable.getTrapSpawnChance()) {
         this.trapCooldown = 2;
         EventTable.handleTrap(this);
@@ -501,8 +459,7 @@ export class GameController {
 
   _switchMap(targetMapName, q, r) {
     if (targetMapName === this.currentMapName) return;
-    const targetMap = targetMapName === 'Novice Village'
-      ? this.noviceVillage : this.map;
+    const targetMap = targetMapName === 'Novice Village' ? this.noviceVillage : this.map;
     if (!targetMap) return;
     this.currentMapName = targetMapName;
     this.player.setGridPos(q, r, targetMap);
@@ -520,9 +477,11 @@ export class GameController {
     this.currentMissionName = missionName;
     this.currentMaxTurns = maxTurns;
     this.turnCount = 0;
+    // 重置惩罚状态
     this.bossMode = false;
     this.bossModePenaltyActive = false;
     this.bossModePenaltyWarned = false;
+    // 移除屏幕闪烁效果
     document.body.classList.remove('screen-flare');
     this.ui.setProgressBarNormal();
     this.ui.updateProgressBar(0, maxTurns);
@@ -552,7 +511,7 @@ export class GameController {
     }
   }
 
-  // ── Hero creation — supports new weapon slots and legacy skill slots ──────
+// ── Hero creation — supports new weapon slots and legacy skill slots ──────
   _createHeroFromData(data) {
     const hero = new Player(data.name);
     hero.id = data.id;
@@ -560,23 +519,26 @@ export class GameController {
     hero.hp = hero.maxHp;
     hero.type = 'player';
 
+    // Six core stats (vitality replaces toughness; falls back for legacy data)
     if (data.stats) {
       const s = data.stats;
-      hero.strength = s.strength ?? hero.strength;
-      hero.vitality = s.vitality ?? s.toughness ?? hero.vitality;
+      hero.strength  = s.strength  ?? hero.strength;
+      hero.vitality  = s.vitality  ?? s.toughness ?? hero.vitality;
       hero.intellect = s.intellect ?? hero.intellect;
       hero.awareness = s.awareness ?? hero.awareness;
-      hero.talent = s.talent ?? hero.talent;
-      hero.agility = s.agility ?? hero.agility;
+      hero.talent    = s.talent    ?? hero.talent;
+      hero.agility   = s.agility   ?? hero.agility;
     }
 
-    hero._baseStrength = hero.strength;
-    hero._baseVitality = hero.vitality;
-    hero._baseAgility = hero.agility;
+    // Store base values so refreshDerivedStats can reset cleanly on weapon swap
+    hero._baseStrength  = hero.strength;
+    hero._baseVitality  = hero.vitality;
+    hero._baseAgility   = hero.agility;
     hero._baseIntellect = hero.intellect;
     hero._baseAwareness = hero.awareness;
-    hero._baseTalent = hero.talent;
+    hero._baseTalent    = hero.talent;
 
+    // New weapon slots system
     if (data.weaponSlots && Array.isArray(data.weaponSlots)) {
       hero.weaponSlots = [null, null];
       data.weaponSlots.forEach((weaponId, i) => {
@@ -587,6 +549,7 @@ export class GameController {
       });
       hero.equippedWeaponIndex = data.equippedWeaponIndex ?? 0;
     } else if (data.skillSlots) {
+      // Legacy fallback: load old-style skill slots
       data.skillSlots.forEach((sid, i) => {
         if (sid) {
           const skill = DataLoader.getSkill(sid);
