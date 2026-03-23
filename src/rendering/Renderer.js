@@ -12,9 +12,10 @@ export class Renderer {
    * @param {Camera}   camera
    * @param {HexMap}   map
    * @param {Player}   player
-   * @param {Set<string>|null} rangeHighlight  可达格 key 集合
+   * @param {Set<string>|null} rangeHighlight  可达格 key 集合（红线轮廓）
+   * @param {Set<string>|null} pathHighlight   路径格 key 集合（蓝色预览）
    */
-  static renderExploration(ctx, camera, map, player, rangeHighlight = null) {
+  static renderExploration(ctx, camera, map, player, rangeHighlight = null, pathHighlight = null) {
     // 1. 清理背景
     ctx.fillStyle = '#1a1a2e';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -27,7 +28,12 @@ export class Renderer {
     // 2. 绘制地图（内部含视口裁剪，仅渲染可见格子）
     map.draw(ctx, camera, Renderer.selectedKey, Renderer.debugMode);
 
-    // 3. 绘制可移动范围红线轮廓
+    // 3a. 绘制路径预览（蓝色半透明高亮）
+    if (pathHighlight && pathHighlight.size > 0) {
+      Renderer.drawPathHighlight(ctx, camera, map, pathHighlight);
+    }
+
+    // 3b. 绘制可移动范围红线轮廓
     if (rangeHighlight && rangeHighlight.size > 0) {
       Renderer.drawRangeBorder(ctx, camera, map, rangeHighlight);
     }
@@ -76,6 +82,80 @@ export class Renderer {
     ctx.strokeStyle = 'rgba(255,255,255,0.15)';
     ctx.lineWidth = 1;
     ctx.strokeRect(x, y, BAR_W, BAR_H);
+  }
+
+  // ── 路径预览高亮（蓝色半透明填充 + 呼吸灯描边）──────────────────
+  /**
+   * 在路径经过的每个格子上绘制蓝色半透明填充和发光描边。
+   * 终点格（路径末尾）使用稍高的不透明度，与其余格区分。
+   *
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {Camera} camera
+   * @param {HexMap} map
+   * @param {Set<string>} pathSet  路径格 "q,r" key 集合（含起点）
+   */
+  static drawPathHighlight(ctx, camera, map, pathSet) {
+    const size = map.tileSize;
+    const zoom = camera.zoom ?? 1;
+    const pulse = 0.45 + 0.3 * (0.5 + 0.5 * Math.sin(Date.now() / 250));
+
+    ctx.save();
+    ctx.translate(Math.round(camera.x), Math.round(camera.y));
+    ctx.scale(zoom, zoom);
+
+    // 把 pathSet 转为有序数组，让终点格可以特殊处理
+    const keys = [...pathSet];
+
+    for (let i = 0; i < keys.length; i++) {
+      const [q, r] = keys[i].split(',').map(Number);
+      const { x, y } = hexToPixel(q, r, size);
+      const isStart = (i === 0);
+      const isDestination = (i === keys.length - 1);
+
+      // flat-top 六边形路径
+      ctx.beginPath();
+      for (let v = 0; v < 6; v++) {
+        const angle = (Math.PI / 3) * v;
+        const px = x + size * Math.cos(angle);
+        const py = y + size * Math.sin(angle);
+        v === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+
+      // 终点格填充更亮
+      const fillAlpha = isDestination ? pulse * 0.55 : pulse * 0.28;
+      ctx.fillStyle = `rgba(80, 180, 255, ${fillAlpha})`;
+      ctx.fill();
+
+      // 描边（呼吸灯）
+      ctx.strokeStyle = `rgba(120, 210, 255, ${pulse * 0.95})`;
+      ctx.lineWidth = (isDestination ? 2.5 : 1.8) / zoom;
+      ctx.shadowColor = 'rgba(60, 180, 255, 0.85)';
+      ctx.shadowBlur = isDestination ? 12 : 6;
+      ctx.stroke();
+
+      // 步数编号（起点不显示，从第 1 步开始）
+      if (!isStart) {
+        const stepNum = String(i); // i=1 → "1", i=2 → "2" ...
+        const fontSize = Math.max(10, size * 0.45);
+        ctx.shadowBlur = 0;
+        ctx.font = `bold ${fontSize}px "Arial Black", Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // 描边（黑色轮廓，让数字在任何地形上都清晰）
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+        ctx.lineWidth = fontSize * 0.25;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(stepNum, x, y);
+
+        // 填充（白色或终点用亮蓝色）
+        ctx.fillStyle = isDestination ? '#7df4ff' : 'rgba(255, 255, 255, 0.95)';
+        ctx.fillText(stepNum, x, y);
+      }
+    }
+
+    ctx.restore();
   }
 
   // ── 可移动范围红线轮廓（呼吸灯）─────────────────────────────────
