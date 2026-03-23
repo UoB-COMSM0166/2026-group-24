@@ -3,6 +3,7 @@ export class DataLoader {
   static heroMap = null;
   static skillMap = null;
   static weaponMap = null;
+  static trinketMap = null;  // ★ 新增：饰品数据 Map ★
   static images = {};
   static audio = {};
 
@@ -71,6 +72,9 @@ export class DataLoader {
       'barrier_2': './resource/img/map/chapter1/barrier_2.png',
       'barrier_3': './resource/img/map/chapter1/barrier_3.png',
       'barrier_4': './resource/img/map/chapter1/barrier_4.png',
+      'bracelet':       './resource/img/items/daifu.png',
+      'ring_strength':  './resource/img/items/daifu.png',
+      'ring_intellect': './resource/img/items/daifu.png',
     };
 
     // --- 动画加载任务 (英雄序列帧) ---

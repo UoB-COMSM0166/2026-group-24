@@ -42,7 +42,7 @@ export class ChestAnimation {
       let textAlpha = 0;
       let glowPulse = 0;
 
-      const rarityColor = RARITY_COLORS[item.rarity] || RARITY_COLORS.common;
+      const rarityColor = RARITY_COLORS[item.rarity] || RARITY_COLORS.rare;
 
       sketch.setup = function () {
         const canvas = sketch.createCanvas(W, H);
@@ -276,6 +276,20 @@ function drawItemIcon(s, iconType, alpha, accentColor) {
     case 'potion': drawPotionIcon(s, a, accentColor); break;
     case 'boots': drawBootsIcon(s, a, accentColor); break;
     case 'clover': drawCloverIcon(s, a, accentColor); break;
+    case 'bracelet':
+    case 'ring_strength':
+    case 'ring_intellect': {
+      const img = window.DataLoader?.getImage(iconType);
+      if (img) {
+        s.drawingContext.save();
+        s.drawingContext.globalAlpha = a;
+        s.drawingContext.drawImage(img, -28, -28, 56, 56);
+        s.drawingContext.restore();
+      } else {
+        drawFallbackRingIcon(s, a, accentColor);
+      }
+      break;
+    }
     default:
       s.fill(200, 200, 200, alpha);
       s.noStroke();
@@ -382,4 +396,15 @@ function updateAndDrawRays(s, rays) {
     s.line(0, 0, 0, -r.length);
     s.pop();
   }
+}
+function drawFallbackRingIcon(s, a, accentColor) {
+  s.push();
+  s.noFill();
+  s.stroke(s.color(accentColor));
+  s.strokeWeight(5 * a);
+  s.ellipse(0, 0, 40, 40);
+  s.stroke(255, 255, 255, 160 * a);
+  s.strokeWeight(2 * a);
+  s.arc(0, 0, 28, 28, -s.PI * 0.9, -s.PI * 0.2);
+  s.pop();
 }
