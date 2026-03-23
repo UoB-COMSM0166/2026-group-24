@@ -78,12 +78,49 @@ export class HexMap {
 
   /**
    * 放置事件内容，并自动揭示该格 + 周围几圈战争迷雾。
+   * 同时确保周围至少有一个可通行的格子。
    */
   placeContent(q, r, content, revealRadius = 2) {
     const tile = this.getTile(q, r);
     if (!tile) return;
     tile.content = content;
     this.revealAround(q, r, revealRadius);
+    this._ensureAccessibilityAroundTile(q, r);
+  }
+
+  /**
+   * 确保指定格子周围至少有一个可通行的格子。
+   * 如果周围全是山脉/森林/边界，则随机选一个改为草地。
+   * @private
+   */
+  _ensureAccessibilityAroundTile(q, r) {
+    // 获取周围 6 个邻居
+    const directions = [
+      [1, 0], [1, -1], [0, -1],
+      [-1, 0], [-1, 1], [0, 1]
+    ];
+    const neighbors = [];
+    for (const [dq, dr] of directions) {
+      const tile = this.getTile(q + dq, r + dr);
+      if (tile) neighbors.push(tile);
+    }
+
+    // 检查是否至少有一个可通行的格子
+    const hasAccessible = neighbors.some(tile => tile.type.moveCost < Infinity);
+    
+    if (!hasAccessible && neighbors.length > 0) {
+      // 收集所有可以改为草地的格子
+      const modifiable = neighbors.filter(tile => 
+        tile.type.moveCost === Infinity &&  // 当前不可通行
+        !tile.content  // 没有其他事件内容
+      );
+      
+      if (modifiable.length > 0) {
+        // 随机选择一个改为草地
+        const idx = Math.floor(Math.random() * modifiable.length);
+        modifiable[idx].type = TileType.GRASS;
+      }
+    }
   }
 
   // ── 坐标转换 ───────────────────────────────────────────────────
