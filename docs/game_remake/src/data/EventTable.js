@@ -23,11 +23,8 @@ export const NPC_LIST = [
     name: '受伤的村民',
     dialogue: '求求你……森林变了……树在流血……怪物从地里爬出来。\n请求您带我去北边的村庄。',
     iconType: 'redCircle'
-  },
-
-
+  }
   // 后续可继续添加更多 NPC
-
 ];
 
 // 集中管理所有村庄配置
@@ -54,14 +51,7 @@ export const MERCHANT_LIST = [
     q: 4,
     r: 0,
     name: '游商'
-  },
-  // ── 新手村 ──
-  {
-    map: 'novice',
-    q:  0,
-    r: -3,
-    name: '训练营商人',
-  },
+  }
   // 后续可继续添加更多商人
 ];
 
@@ -104,19 +94,7 @@ export const CORRUPTED_DEER_LIST = [
   }
   // 后续可继续添加更多被腐化的鹿
 ];
-// ── 新手村专用列表 ──────────────────────────────────────────────────
 
-export const NOVICE_DUNGEON_LIST = [
-  { map: 'novice', q: 1, r: -2, name: '迷途哥布林', level: 1, difficulty: 'EASY' },
-];
-
-export const NOVICE_TREASURE_LIST = [
-  { map: 'novice', q: -2, r: 1, lootTier: 1 },
-];
-
-export const NOVICE_ALTAR_LIST = [
-  { map: 'novice', q: 2, r: 1 },
-];
 // ── EventTable 类 ───────────────────────────────────────────────────
 
 export class EventTable {
