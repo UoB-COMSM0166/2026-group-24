@@ -5,8 +5,8 @@ export class GameStory {
   // 故事内容定义
   static STORIES = {
     INTRO: {
-      title: '冒险开始',
-      text: '在遥远的森林中，一棵古老的黑暗古树正在侵蚀这片土地。勇士们，你们需要在20回合内探索这片大地，然后前往地图右下角的黑暗古树，击败它以获得翡翠钥匙，拯救这片土地。'
+      title: 'ADVENTURE BEGINS',
+      text: 'Deep within a distant forest, a forgotten ancient ruin has resurfaced.\nCountless treasures lie hidden within, but dark forces are awakening.\nAdventurers, ',
     }
   };
 
