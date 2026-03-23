@@ -2,57 +2,43 @@
 
 export const ItemDB = [
   {
-    id: 'shield_guardian',
-    name: 'Guardian Shield',
-    desc: 'Legendary shield of the Knight Captain, glowing with divine light',
+    id: 'swift_bracelet',
+    name: '极速脚镯',
+    desc: '刻有风纹的古代脚镯，佩戴时如风附体，大幅提升行动敏捷',
     rarity: 'rare',
-    icon: 'shield',
-    statBonus: { toughness: 8, strength: 2 },
-    slot: 0,
-  },
-  {
-    id: 'giant_sword',
-    name: 'Greatsword',
-    desc: 'Heavy and sharp two-handed sword, whistling through the air',
-    rarity: 'epic',
-    icon: 'sword',
-    statBonus: { strength: 12 },
-    slot: 0,
-  },
-  {
-    id: 'holy_water',
-    name: 'Holy Water',
-    desc: 'Holy water with healing power, restores HP on use',
-    rarity: 'common',
-    icon: 'potion',
-    statBonus: {},
-    slot: 1,
-  },
-  {
-    id: 'lightning_boots',
-    name: 'Lightning Boots',
-    desc: 'Light boots engraved with lightning patterns, move like the wind',
-    rarity: 'rare',
-    icon: 'boots',
+    icon: 'bracelet',
     statBonus: { agility: 10 },
     slot: 1,
+    type: 'trinket',
   },
   {
-    id: 'lucky_clover',
-    name: 'Lucky Clover Badge',
-    desc: 'Ancient clover-shaped badge, brings luck to the wearer',
-    rarity: 'common',
-    icon: 'clover',
-    statBonus: { talent: 6, awareness: 4 },
+    id: 'ring_of_strength',
+    name: '力量之戒',
+    desc: '以上古龙骨铸造而成的戒指，佩戴者力量得到大幅强化',
+    rarity: 'rare',
+    icon: 'ring_strength',
+    statBonus: { strength: 15 },
     slot: 1,
+    type: 'trinket',
+  },
+  {
+    id: 'ring_of_intellect',
+    name: '智慧之戒',
+    desc: '由奥术水晶精心雕刻而成，佩戴者的智慧与法力均得到提升',
+    rarity: 'rare',
+    icon: 'ring_intellect',
+    statBonus: { intellect: 15 },
+    slot: 1,
+    type: 'trinket',
   },
 ];
 
 export function rollRandomItem() {
   const weights = ItemDB.map(item => {
-    if (item.rarity === 'epic') return 1;
-    if (item.rarity === 'rare') return 3;
-    return 5;
+    if (item.rarity === 'legendary') return 1;
+    if (item.rarity === 'epic') return 2;
+    if (item.rarity === 'rare') return 4;
+    return 6;
   });
   const total = weights.reduce((a, b) => a + b, 0);
   let roll = Math.random() * total;
@@ -64,7 +50,7 @@ export function rollRandomItem() {
 }
 
 export const RARITY_COLORS = {
-  common: { main: '#a0a0a0', glow: '#cccccc', label: 'Common' },
-  rare:   { main: '#3b82f6', glow: '#60a5fa', label: 'Rare' },
-  epic:   { main: '#a855f7', glow: '#c084fc', label: 'Epic' },
+  rare:      { main: '#3b82f6', glow: '#60a5fa', label: 'Rare' },
+  epic:      { main: '#a855f7', glow: '#c084fc', label: 'Epic' },
+  legendary: { main: '#ef4444', glow: '#f87171', label: 'Legendary' },
 };

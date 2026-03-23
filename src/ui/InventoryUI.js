@@ -501,7 +501,7 @@ ${itemSlotsHTML}
 
     _showTooltip(e, item) {
         if (!this._tooltip) this._initTooltip();
-        const rarityColors = { common: '#aaa', rare: '#3b82f6', epic: '#a855f7', uncommon: '#22c55e' };
+        const rarityColors = { rare: '#3b82f6', epic: '#a855f7', uncommon: '#22c55e', legendary: '#ef4444' };
         const color = rarityColors[item.rarity] ?? '#aaa';
         this._tooltip.innerHTML = `
         <div style="font-weight:700;margin-bottom:4px;">${item.name}</div>
@@ -549,6 +549,12 @@ function _getItemEmoji(iconType) {
         case 'potion':  return '🧪';
         case 'boots':   return '👟';
         case 'clover':  return '🍀';
+        case 'bracelet':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🔮')">`;
+        case 'ring_strength':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('💪')">`;
+        case 'ring_intellect':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🔵')">`;
         default:        return '📦';
     }
 }
@@ -583,7 +589,21 @@ function drawItemIconMini(canvas, iconType) {
             ctx.closePath();
             ctx.fill();
             break;
-
+        case 'bracelet':
+        case 'ring_strength':
+        case 'ring_intellect': {
+            const img = window.DataLoader?.getImage(iconType);
+            if (img) {
+                ctx.drawImage(img, -16, -16, 32, 32);
+            } else {
+                ctx.strokeStyle = iconType === 'ring_intellect' ? '#c084fc' : '#60a5fa';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, 11, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            break;
+        }
         default:
             ctx.fillStyle = "#aaa";
             ctx.beginPath();
