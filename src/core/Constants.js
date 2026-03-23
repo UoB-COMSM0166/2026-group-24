@@ -30,14 +30,14 @@ export const CombatPhase = {
 // 注意：MapConfig 直接引用此处，不再另立一份，避免两处数值不同步。
 export const MapPresets = {
   main: {
-    name: '迷失森林',
+    name: 'Lost Forest',
     radius: 11,
     tileSize: 40,
     padding: 100,  // 初始相机边缘留白
     eventLogic: 'default',
   },
   novice: {
-    name: '新手村',
+    name: 'Novice Village',
     radius: 5,
     tileSize: 40,
     padding: 80,
