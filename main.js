@@ -59,11 +59,14 @@ async function init() {
     };
 
     // 3. 显示标题页面，点击 START 后进入游戏
-    const titleScreen = new TitleScreen(() => startGame());
+    const titleScreen = new TitleScreen(
+      () => startGame(false), // 新游戏
+      () => startGame(true)   // 读取存档
+    );
     titleScreen.show();
 }
 
-function startGame() {
+function startGame(isLoad = false) {
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
 
@@ -133,6 +136,14 @@ function startGame() {
     );
     inputHandler.bind(document.getElementById('end-turn-btn'));
 
+    // --- 在此处新增 Save 按钮的绑定逻辑 ---
+    const saveBtn = document.getElementById('save-game-btn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            gameController.saveGame();
+        });
+    }
+
     // 调试模式按钮
     const debugBtn = document.getElementById('debug-toggle-btn');
     debugBtn.addEventListener('click', () => {
@@ -142,7 +153,17 @@ function startGame() {
     });
 
     // 启动状态机进入角色选择
-    gameController.fsm.transition(GameState.CHARACTER_SELECT);
+    if (isLoad) {
+        if (gameController.loadGame()) {
+             // 读档成功，直接播放地图BGM进入游戏
+             window.BGMPlayer.play('resource/music/map.mp3');
+        } else {
+             alert("读取存档文件失败/损坏！");
+             gameController.fsm.transition(GameState.CHARACTER_SELECT);
+        }
+    } else {
+        gameController.fsm.transition(GameState.CHARACTER_SELECT);
+    }
 
     // 启动游戏主循环
     new GameLoop(

@@ -1,7 +1,7 @@
 // src/core/GameController.js
 import { GameState, MapConfig, TurnConfig, MapPresets } from './Constants.js';
 import { HexMap, createMapByPreset } from '../world/HexMap.js';
-import { TileContentType, makePortal, hexToPixel, makeBoss, TileType, makeNPC, makeVillage, makeMerchant, makeRuin, makeCorruptedDeer, makeInjuredVillager } from '../world/Tile.js';
+import { Tile, TileContentType, makePortal, hexToPixel, makeBoss, TileType, makeNPC, makeVillage, makeMerchant, makeRuin, makeCorruptedDeer, makeInjuredVillager } from '../world/Tile.js';
 import { NPC_LIST, VILLAGE_LIST, MERCHANT_LIST, RUIN_LIST, CORRUPTED_DEER_LIST } from '../data/EventTable.js';
 import { StateMachine } from './StateMachine.js';
 import { CombatManager } from './CombatManager.js';
@@ -597,5 +597,129 @@ export class GameController {
 
     hero.refreshDerivedStats();
     return hero;
+  }
+
+  saveGame() {
+    try {
+        const serializeMap = (m) => {
+            const tiles = [];
+            m.tiles.forEach(tile => {
+                tiles.push({
+                    q: tile.q, r: tile.r,
+                    typeId: tile.type.id,
+                    content: tile.content,
+                    isRevealed: tile.isRevealed,
+                    variant: tile.variant
+                });
+            });
+            return { radius: m.radius, tileSize: m.tileSize, tiles };
+        };
+
+        const data = {
+            player: {
+                q: this.player.q,
+                r: this.player.r,
+                movementPoints: this.player.movementPoints
+            },
+            heroes: this.selectedHeroes.map(h => ({
+                id: h.id,
+                name: h.name,
+                maxHp: h.maxHp,
+                hp: h.hp,
+                stats: {
+                    strength: h._baseStrength,
+                    vitality: h._baseVitality,
+                    agility: h._baseAgility,
+                    intellect: h._baseIntellect,
+                    awareness: h._baseAwareness,
+                    talent: h._baseTalent
+                },
+                weaponSlots: h.weaponSlots.map(w => w ? w.id : null),
+                equippedWeaponIndex: h.equippedWeaponIndex,
+                equipSlots: h.equipSlots,
+                inventory: h.inventory
+            })),
+            map: serializeMap(this.map),
+            noviceVillage: serializeMap(this.noviceVillage),
+            currentMapName: this.currentMapName,
+            turnCount: this.turnCount,
+            currentMaxTurns: this.currentMaxTurns,
+            bossMode: this.bossMode,
+            bossModePenaltyActive: this.bossModePenaltyActive
+        };
+
+        localStorage.setItem('for_the_treasure_save', JSON.stringify(data));
+        alert("游戏保存成功！(Game Saved Successfully!)");
+    } catch (e) {
+        console.error("Save error:", e);
+        alert("保存失败！(Failed to save game.)");
+    }
+  }
+
+  loadGame() {
+    const saved = localStorage.getItem('for_the_treasure_save');
+    if (!saved) return false;
+    
+    try {
+        const data = JSON.parse(saved);
+
+        // 1. 恢复英雄及背包装备
+        this.selectedHeroes = data.heroes.map(hd => {
+            const h = this._createHeroFromData(hd);
+            h.hp = hd.hp;
+            h.inventory = hd.inventory || [];
+            h.equipSlots = hd.equipSlots || [null, null];
+            h.refreshDerivedStats();
+            return h;
+        });
+
+        // 2. 恢复地图与格子状态
+        const restoreMap = (mapData) => {
+            const m = new HexMap(mapData.radius, mapData.tileSize);
+            m.tiles.clear(); // 清空随机生成的初始格子
+            mapData.tiles.forEach(td => {
+                const typeObj = Object.values(TileType).find(t => t.id === td.typeId) || TileType.GRASS;
+                const tile = new Tile(td.q, td.r, typeObj);
+                tile.content = td.content;
+                tile.isRevealed = td.isRevealed;
+                tile.variant = td.variant;
+                m.setTile(td.q, td.r, tile);
+            });
+            m.worldBounds = m._computeWorldBounds();
+            return m;
+        };
+
+        this.map = restoreMap(data.map);
+        this.noviceVillage = restoreMap(data.noviceVillage);
+
+        // 3. 恢复游戏进程
+        this.currentMapName = data.currentMapName;
+        this.turnCount = data.turnCount;
+        this.currentMaxTurns = data.currentMaxTurns || 20;
+        this.bossMode = data.bossMode;
+        this.bossModePenaltyActive = data.bossModePenaltyActive;
+
+        // 4. 恢复玩家位置和动作点
+        const curMap = this.currentMapName === 'Novice Village' ? this.noviceVillage : this.map;
+        this.player.setGridPos(data.player.q, data.player.r, curMap);
+        this.player.movementPoints = data.player.movementPoints;
+
+        // 5. 调整相机与复原UI状态（跳过重新生成的回调，直接强行切入探索状态）
+        const bottomLeft = hexToPixel(this.player.q, this.player.r, curMap.tileSize);
+        this.camera.x = MapConfig.PADDING - bottomLeft.x;
+        this.camera.y = window.innerHeight - MapConfig.PADDING - bottomLeft.y;
+
+        this.fsm.currentState = GameState.MAP_EXPLORATION;
+        this.ui.showMapUI();
+        this.ui.updateMovementUI(this.player.movementPoints);
+        this.ui.updatePartyStatus(this.selectedHeroes);
+        this.ui.updateProgressBar(this.turnCount, this.currentMaxTurns);
+        if (this.bossMode) this.ui.updateBossMode();
+
+        return true;
+    } catch (e) {
+        console.error("Save load error:", e);
+        return false;
+    }
   }
 }
