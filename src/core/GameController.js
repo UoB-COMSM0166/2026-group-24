@@ -14,7 +14,6 @@ import { rollRandomItem } from '../data/items.js';
 import { GameStory } from './GameStory.js';
 import { EventTable } from '../data/EventTable.js';
 import { findPath, getReachableTiles } from '../utils/Pathfinder.js';   // ← 新增：A* 寻路
-import { rollEncounter, ENEMY_TYPES } from '../data/EncounterTable.js';
 
 export class GameController {
   constructor(map, player, ui, camera) {
@@ -216,34 +215,20 @@ export class GameController {
   }
 
   _enterCombat(contentData) {
-      this.currentBossContent = contentData;
-      const isBoss = contentData.type === TileContentType.BOSS || contentData.type === 'boss';
-      const level = contentData.level ?? 1;
-      const enemies = [];
-
-      if (isBoss) {
-        // Determine whether it is a boss
-        const enemy = new Enemy(
-          contentData.name || 'Elite Boss', 'boss', level,
-          { strength: 20 + level*6, toughness: 16 + level*5, agility: 10 + level*2 }
-        );
-        enemy.id = 'e1_' + Date.now();
-        enemies.push(enemy);
-      } else {
-        // Generate random groups of mobs using an encounter table
-        const group = rollEncounter(level);
-        group.forEach((typeKey, i) => {
-          const def = ENEMY_TYPES[typeKey];
-          const e = new Enemy(def.name, def.type, level, def.statMod);
-          e.id = `e${i+1}_` + Date.now() + i;
-          enemies.push(e);
-        });
-      }
-
-      this.combatManager = new CombatManager(this.selectedHeroes, enemies, this.ui);
-      this.combatManager.init();
-      this.ui.showCombatOverlay(this.combatManager);
-    }
+    this.currentBossContent = contentData;
+    const isBoss = contentData.type === TileContentType.BOSS || contentData.type === 'boss';
+    const level = contentData.level ?? 1;
+    const enemy = new Enemy(
+      contentData.name || (isBoss ? 'Elite Boss' : 'Monster'),
+      isBoss ? 'boss' : 'dungeon',
+      level,
+      isBoss ? { strength: 20 + level * 6, toughness: 16 + level * 5, agility: 10 + level * 2 } : {}
+    );
+    enemy.id = 'e1_' + Date.now();
+    this.combatManager = new CombatManager(this.selectedHeroes, [enemy], this.ui);
+    this.combatManager.init();
+    this.ui.showCombatOverlay(this.combatManager);
+  }
 
   _exitCombat() {
     this.combatManager = null;
