@@ -3,8 +3,8 @@
 export const ItemDB = [
   {
     id: 'swift_bracelet',
-    name: '极速脚镯',
-    desc: '刻有风纹的古代脚镯，佩戴时如风附体，大幅提升行动敏捷',
+    name: 'Swift Bracelet',
+    desc: 'An ancient bracelet inscribed with wind runes. When worn, it grants the wearer extraordinary agility.',
     rarity: 'rare',
     icon: 'bracelet',
     statBonus: { agility: 10 },
@@ -13,8 +13,8 @@ export const ItemDB = [
   },
   {
     id: 'ring_of_strength',
-    name: '力量之戒',
-    desc: '以上古龙骨铸造而成的戒指，佩戴者力量得到大幅强化',
+    name: 'Ring of Strength',
+    desc: 'A ring forged from ancient dragon bone that greatly enhances the wearer\'s strength.',
     rarity: 'rare',
     icon: 'ring_strength',
     statBonus: { strength: 15 },
@@ -23,8 +23,8 @@ export const ItemDB = [
   },
   {
     id: 'ring_of_intellect',
-    name: '智慧之戒',
-    desc: '由奥术水晶精心雕刻而成，佩戴者的智慧与法力均得到提升',
+    name: 'Ring of Intellect',
+    desc: 'Carefully carved from arcane crystal to enhance both wisdom and magical power.',
     rarity: 'rare',
     icon: 'ring_intellect',
     statBonus: { intellect: 15 },

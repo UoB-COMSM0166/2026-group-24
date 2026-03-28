@@ -20,14 +20,11 @@ export const NPC_LIST = [
     map: 'main',
     q: -8,
     r: 7,
-    name: '受伤的村民',
-    dialogue: '求求你……森林变了……树在流血……怪物从地里爬出来。\n请求您带我去北边的村庄。',
+    name: 'INJURED VILLAGER',
+    dialogue: ' Please help me……The forest has changed……the trees are bleeding……Monsters are crawling out of the ground.\nPlease take me to the village in the north.',
     iconType: 'redCircle'
-  },
-
-
+  }
   // 后续可继续添加更多 NPC
-
 ];
 
 // 集中管理所有村庄配置
@@ -36,7 +33,7 @@ export const VILLAGE_LIST = [
     map: 'main',
     q: -6,
     r: 2,
-    name: '森林村庄'
+    name: 'FOREST VILLAGE'
   }
   // 后续可继续添加更多村庄
 ];
@@ -47,21 +44,14 @@ export const MERCHANT_LIST = [
     map: 'main',
     q: -2,
     r: -5,
-    name: '旅商'
+    name: 'TRAVELING MERCHANT'
   },
   {
     map: 'main',
     q: 4,
     r: 0,
-    name: '游商'
-  },
-  // ── 新手村 ──
-  {
-    map: 'novice',
-    q:  0,
-    r: -3,
-    name: '训练营商人',
-  },
+    name: 'WANDERING MERCHANT'
+  }
   // 后续可继续添加更多商人
 ];
 
@@ -71,19 +61,19 @@ export const RUIN_LIST = [
     map: 'main',
     q: 6,
     r: 1,
-    name: '古代遗迹入口',
-    enemyName: '腐化守卫',
-    description: '巨大的石门矣立在森林中。\n\n门上刘撂着古老符文。\n\n突然，一个腐化的身影从阴影中走出来......',
-    postCombatMessage: '你扔了口气，旧遗迹的閒池中淡水波澁。\n\n也许走向东方是不是有了新的发现。'
+    name: 'ANCIENT RUINS ENTRANCE',
+    enemyName: 'CORRUPTED GUARD',
+    description: 'A massive stone gate stands in the forest.\n\nAncient runes are carved into the door.\n\nSuddenly, a corrupted figure emerges from the shadows...',
+    postCombatMessage: 'You catch your breath, the old ruins return to silence.\n\nPerhaps heading east will lead to new discoveries.'
   },
   {
     map: 'main',
     q: 5,
     r: -6,
-    name: '深渊遗迹',
-    enemyName: '深渊看守者',
-    description: '苔藻覆盖的石阶延伸向地下。\n\n潮湿的空气带着腐朜的气味，仿佛这里已经沉睡了数百年。\n\n墙壁上的符文隐隐发光，像是在回应你的靠近。\n\n黑暗深处，一双眼睛缓缓睬开……',
-    postCombatMessage: '敌人的身躯缓缓倒下，遗迹重新归于寂静。\n\n你在四周简单搜寻了一番，却没有发现更多入口。\n\n就在准备离开时，你注意到——\n南方的地面上似乎残留着一串新鲜的脚印。\n\n也许，真正的宝藏就在南边等待着你。'
+    name: 'ABYSSAL RUINS',
+    enemyName: 'ABYSSAL GUARDIAN',
+    description: 'Moss-covered stone steps descend into the depths.\n\nThe damp air carries a musty scent, as if this place has been dormant for centuries.\n\nRunes on the walls faintly glow, responding to your approach.\n\nIn the darkness, a pair of eyes slowly opens...',
+    postCombatMessage: 'The enemy\'s body slowly collapses, and the ruins return to silence.\n\nYou search the surroundings briefly but find no additional entrances.\n\nAs you prepare to leave, you notice——\nA trail of fresh footprints seems to lead south.\n\nPerhaps the true treasure awaits you in the south.'
   }
   // 后续可继续添加更多遗迹
 ];
@@ -94,29 +84,32 @@ export const CORRUPTED_DEER_LIST = [
     map: 'main',
     q: 7,
     r: -7,
-    name: '被腐化的鹿'
+    name: 'CORRUPTED DEER'
   },
   {
     map: 'main',
     q: -5,
     r: -2,
-    name: '被腐化的鹿'
+    name: 'CORRUPTED DEER'
   }
   // 后续可继续添加更多被腐化的鹿
-];
-// ── 新手村专用列表 ──────────────────────────────────────────────────
 
+
+];
+
+// 新手村固定事件列表
 export const NOVICE_DUNGEON_LIST = [
-  { map: 'novice', q: 1, r: -2, name: '迷途哥布林', level: 1, difficulty: 'EASY' },
+  { q: 1, r: -2, name: '迷途哥布林', level: 1, difficulty: 'EASY' },
 ];
 
 export const NOVICE_TREASURE_LIST = [
-  { map: 'novice', q: -2, r: 1, lootTier: 1 },
+  { q: -2, r: 1, lootTier: 1 },
 ];
 
 export const NOVICE_ALTAR_LIST = [
-  { map: 'novice', q: 2, r: 1 },
+  { q: 2, r: 1 },
 ];
+
 // ── EventTable 类 ───────────────────────────────────────────────────
 
 export class EventTable {
@@ -172,7 +165,7 @@ export class EventTable {
     },
     PORTAL: {
       id: 'portal',
-      title: '🌀 传送阵',
+      title: '🌀 Teleportation array',
       spawnChance: 0,
       description: 'Teleport?',
       tileContentType: TileContentType.PORTAL,
@@ -180,9 +173,9 @@ export class EventTable {
     },
     VILLAGE: {
       id: 'village',
-      title: '🏘️ 村庄',
+      title: '🏘️ Village',
       spawnChance: 0,
-      description: '欢迎来到村庄。',
+      description: 'Welcome to the village.',
       tileContentType: 'village',
       handler: 'handleVillage'
     },
@@ -237,7 +230,7 @@ export class EventTable {
           if (rollValue <= 3) {
             this.handleTrapDamage(gameController);
           } else {
-            gameController.ui.showEvent('✨ Evaded', 'You dodged the trap!', [{ text: 'continue', onClick: () => { } }]);
+            gameController.ui.showEvent('✨ Evaded', 'You dodged the trap!', [{ text: 'Continue', onClick: () => { } }]);
           }
         }
       }]
@@ -256,7 +249,7 @@ export class EventTable {
       totalDmg += dmg;
     }
     gameController.ui.updatePartyStatus(gameController.selectedHeroes);
-    gameController.ui.showEvent('💥 Trap Sprung', `全体角色受伤！\n总伤害: ${totalDmg} HP`, [{ text: 'OK' }]);
+    gameController.ui.showEvent('💥 Trap Sprung', `All heroes took damage!\nTotal damage: ${totalDmg} HP`, [{ text: 'OK' }]);
   }
 
   // ── 事件处理：战斗 ───────────────────────────────────────────────
@@ -373,7 +366,7 @@ export class EventTable {
       totalHeal += heal;
     }
     gameController.ui.updatePartyStatus(gameController.selectedHeroes);
-    gameController.ui.showEvent('✨ Divine Light', `全体角色被圣光治疗！\n总治疗: ${totalHeal} HP`, [{ text: 'Continue', onClick: () => { } }]);
+    gameController.ui.showEvent('✨ Divine Light', `All heroes were healed by the divine light!\nTotal healing: ${totalHeal} HP`, [{ text: 'Continue', onClick: () => { } }]);
   }
 
   // ── 事件处理：灯塔 ───────────────────────────────────────────────
@@ -407,17 +400,17 @@ export class EventTable {
   static handlePortal(gameController, tile, content) {
     gameController.ui.showEvent(
       this.EVENTS.PORTAL.title,
-      `是否传送到${content.targetMap}？`,
+      `Do you want to teleport to ${content.targetMap}?`,
       [
         {
-          text: `传送到${content.targetMap}`,
+          text: `Teleport to ${content.targetMap}`,
           onClick: () => {
             tile.content = content;
             gameController._switchMap(content.targetMap, content.targetQ, content.targetR);
           }
         },
         {
-          text: '取消',
+          text: 'Cancel',
           onClick: () => { }
         }
       ]
@@ -450,39 +443,39 @@ export class EventTable {
    */
   static handleVillage(gameController, tile, content) {
     gameController.ui.showEvent(
-      '🏘️ 村庄',
-      '欢迎来到村庄。',
+      '🏘️ Village',
+      'Welcome to the village.',
       [
         {
-          text: '贸易',
+          text: 'Trade',
           onClick: () => {
             gameController.ui.showEvent(
-              '贸易',
-              '（此处可实现交易界面）',
-              [{ text: '返回', onClick: () => EventTable.handleVillage(gameController, tile, content) }]
+              'Trade',
+              '(Trading interface can be implemented here)',
+              [{ text: 'Back', onClick: () => EventTable.handleVillage(gameController, tile, content) }]
             );
           }
         },
         {
-          text: '任务',
+          text: 'Quests',
           onClick: () => {
             gameController.ui.showEvent(
-              '📋 任务',
-              '救援商队\n\n村长焦急地对你说：\n"冒险者，你来的正好。"\n"一支商队路过这里，他们的护卫在 村子东北方向 被怪物拖住了。"\n"如果他们死了，我们就彻底失去补给了。"',
+              '📋 Quests',
+              'Rescue the Caravan\n\nThe village chief urgently tells you:\n"Adventurer, you came just in time."\n"A caravan passing through here, their guards are held up by monsters in the northeast direction of the village."\n"If they die, we will completely lose our supplies."',
               [
                 {
-                  text: '接取',
+                  text: 'Accept',
                   onClick: () => {
-                    gameController._startMission('救援商队', 5);
+                    gameController._startMission('Rescue the Caravan', 5);
                     gameController.ui.showEvent(
-                      '✓ 任务已接取',
-                      '你已接取任务【救援商队】\n请前往村子东北方向救援商队护卫。\n\n回合限制: 5',
-                      [{ text: '返回', onClick: () => EventTable.handleVillage(gameController, tile, content) }]
+                      '✓ Quest Accepted',
+                      'You have accepted the quest [Rescue the Caravan]\nPlease head to the northeast direction of the village to rescue the caravan guards.\n\nTurn limit: 5',
+                      [{ text: 'Back', onClick: () => EventTable.handleVillage(gameController, tile, content) }]
                     );
                   }
                 },
                 {
-                  text: '返回',
+                  text: 'Back',
                   onClick: () => EventTable.handleVillage(gameController, tile, content)
                 }
               ]
@@ -490,21 +483,21 @@ export class EventTable {
           }
         },
         {
-          text: '休息',
+          text: 'Rest',
           onClick: () => {
             const hero = gameController.selectedHeroes[0] || gameController.player;
             const heal = Math.floor(hero.maxHp * 0.2);
             hero.hp = Math.min(hero.maxHp, hero.hp + heal);
             gameController.ui.updatePartyStatus(gameController.selectedHeroes);
             gameController.ui.showEvent(
-              '休息',
-              `你休息了一会，恢复了${heal}点生命值。`,
-              [{ text: '返回', onClick: () => EventTable.handleVillage(gameController, tile, content) }]
+              'Rest',
+              `You rested for a while and recovered ${heal} HP.`,
+              [{ text: 'Back', onClick: () => EventTable.handleVillage(gameController, tile, content) }]
             );
           }
         },
         {
-          text: '离开',
+          text: 'Leave',
           onClick: () => { }
         }
       ]
@@ -520,26 +513,26 @@ export class EventTable {
    * @param {Object} content
    */
   static handleMerchant(gameController, tile, content) {
-    const merchant = content.name || '旅商';
+    const merchant = content.name || 'Traveling Merchant';
 
     // 再次遇到商人：交易模式
     if (gameController.merchantEncountered) {
       gameController.ui.showEvent(
         `👤 ${merchant}`,
-        '"还没找到宝藏吗？"\n\n"如果你活着回来，我愿意用高价收购任何古代遗物。"',
+        '"Haven\'t found the treasure yet?"\n\n"If you come back alive, I\'ll buy any ancient relics at a high price."',
         [
           {
-            text: '贸易',
+            text: 'Trade',
             onClick: () => {
               gameController.ui.showEvent(
                 `👤 ${merchant}`,
-                '（此处可实现交易界面）',
-                [{ text: '离开', onClick: () => { } }]
+                '(Trading interface can be implemented here)',
+                [{ text: 'Leave', onClick: () => { } }]
               );
             }
           },
           {
-            text: '离开',
+            text: 'Leave',
             onClick: () => { }
           }
         ]
@@ -551,32 +544,32 @@ export class EventTable {
     const step1 = () => {
       gameController.ui.showEvent(
         `👤 ${merchant}`,
-        '"哦！感谢诸神！你就是那个救了我的护卫的人吗？"\n\n"这片森林已经疯了……树在腐烂，动物也变成了怪物。"\n\n"如果不是你，我们的货物早就被那些怪物抢光了。"',
-        [{ text: '继续', onClick: step2 }]
+        '"Oh! Thank the gods! You are the one who saved my guards?"\n\n"This forest has gone mad... the trees are rotting, and the animals have turned into monsters."\n\n"If it weren\'t for you, our goods would have been completely taken by those monsters."',
+        [{ text: 'Continue', onClick: step2 }]
       );
     };
 
     const step2 = () => {
       gameController.ui.showEvent(
         `👤 ${merchant}`,
-        '"几天前还不是这样。"\n\n"但突然之间，森林深处开始出现黑色的雾。"\n\n"所有靠近 古代遗迹 的生物都被腐化了。"',
-        [{ text: '继续', onClick: step3 }]
+        '"A few days ago, it wasn\'t like this."\n\n"But suddenly, a black mist began to appear deep in the forest."\n\n"All creatures near the Ancient Ruins have been corrupted."',
+        [{ text: 'Continue', onClick: step3 }]
       );
     };
 
     const step3 = () => {
       gameController.ui.showEvent(
         `👤 ${merchant}`,
-        '"不过……有一件事你可能会感兴趣。"\n\n"在遗迹深处，据说埋着一件 古老的宝藏。"\n\n"很多冒险者都是为了它来的。"\n\n"但很少有人活着回来。"',
-        [{ text: '继续', onClick: step4 }]
+        '"However... there is something you might be interested in."\n\n"Deep within the ruins, it is said that an ancient treasure is buried."\n\n"Many adventurers have come for it."\n\n"But few have returned alive."',
+        [{ text: 'Continue', onClick: step4 }]
       );
     };
 
     const step4 = () => {
       gameController.ui.showEvent(
         `👤 ${merchant}`,
-        '"如果你真的想找那宝藏。"\n\n"它大概在东边。"\n\n"你会看到一座 被藤蔓包围的遗迹入口。"\n\n"那就是一切麻烦的来源。"',
-        [{ text: '继续', onClick: step5 }]
+        '"If you really want to find that treasure..."\n\n"It\'s probably to the east."\n\n"You will see an entrance to the ruins covered in vines."\n\n"That is the source of all trouble."',
+        [{ text: 'Continue', onClick: step5 }]
       );
     };
 
@@ -584,8 +577,8 @@ export class EventTable {
       gameController.merchantEncountered = true;
       gameController.ui.showEvent(
         `👤 ${merchant}`,
-        '"拿着这些吧，算是感谢。"\n\n（商人递给你一个袋子）\n\n📢 提示：下次遇到商人可以进行交易。',
-        [{ text: '离开', onClick: () => { gameController._startMission('🎯 寻找遗迹', 10); } }]
+        '"Here, take these as a token of my gratitude."\n\n(The merchant hands you a bag)\n\n📢 Tip: Next time you encounter the merchant, you can trade.',
+        [{ text: 'Leave', onClick: () => { gameController._startMission('🎯 Search ruins', 10); } }]
       );
     };
 
@@ -601,9 +594,9 @@ export class EventTable {
    * @param {Object} content
    */
   static handleRuin(gameController, tile, content) {
-    const ruinName = content.name || '古代遗迹入口';
-    const enemyName = content.enemyName || '腐化守卫';
-    const description = content.description || '巨大的石门矗立在森林中。\n\n门上刻着古老符文。\n\n突然，一个腐化的身影从阴影中走出来......';
+    const ruinName = content.name || 'Ancient Ruins Entrance';
+    const enemyName = content.enemyName || 'Corrupted Guardian';
+    const description = content.description || 'A massive stone gate stands in the forest.\n\nAncient runes are carved on the gate.\n\nSuddenly, a corrupted figure emerges from the shadows...';
     const postCombatMessage = content.postCombatMessage;
 
     gameController.ui.showEvent(
@@ -611,7 +604,7 @@ export class EventTable {
       description,
       [
         {
-          text: '⚔️ 战斗',
+          text: '⚔️ Combat',
           onClick: () => {
             tile.content = null;
             const bossContent = makeBoss(enemyName, 3, 'HARD');
@@ -621,7 +614,7 @@ export class EventTable {
           }
         },
         {
-          text: '🏃 退避',
+          text: '🏃 Retreat',
           onClick: () => {
             gameController.player.movementPoints = 0;
             gameController.ui.updateMovementUI(0);
@@ -640,14 +633,14 @@ export class EventTable {
    * @param {Object} content
    */
   static handleCorruptedDeer(gameController, tile, content) {
-    const deerName = content.name || '被腐化的鹿';
+    const deerName = content.name || 'Corrupted Deer';
 
     gameController.ui.showEvent(
-      '📍 森林',
-      '一只巨大的鹿站在森林中。\n\n它的身体被黑色藤蔓缠绕。\n\n它看起来很痛苦，眼神中闪烁着理性的光芒......',
+      '📍 Forest',
+      'A massive deer stands in the forest.\n\nIts body is entwined with black vines.\n\nIt looks in pain, with a glimmer of rationality in its eyes...',
       [
         {
-          text: '⚔️ 攻击',
+          text: '⚔️ Attack',
           onClick: () => {
             tile.content = null;
             const combatContent = makeBoss(deerName, 2, 'NORMAL');
@@ -656,12 +649,12 @@ export class EventTable {
           }
         },
         {
-          text: '🚶 放过它',
+          text: '🚶 Spare it',
           onClick: () => {
             gameController.ui.showEvent(
-              '📍 森林',
-              '你放低了武器。\n\n鹿似乎明白了你的意思，转身逃入了森林深处。\n\n本次事件结束。',
-              [{ text: '继续', onClick: () => { } }]
+              '📍 Forest',
+              'You lower your weapon.\n\nThe deer seems to understand your intention and turns to flee into the depths of the forest.\n\nThis event has ended.',
+              [{ text: 'Continue', onClick: () => { } }]
             );
           }
         }

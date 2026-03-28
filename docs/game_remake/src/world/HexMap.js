@@ -8,11 +8,8 @@ import { hexToPixel } from './Tile.js';
 // ── 地图工厂（按预设名创建）────────────────────────────────────────
 export function createMapByPreset(presetName) {
   const preset = MapPresets[presetName];
-  if (!preset) throw new Error('地图预设未找到: ' + presetName);
-  const seed = presetName === 'novice' ? 42 : SeededRandom.randomSeed();
-  // 新手村跳过随机事件生成，由 TutorialManager 手动放置
-  const skipEvents = presetName === 'novice';
-  return new HexMap(preset.radius, preset.tileSize, seed, skipEvents);
+  if (!preset) throw new Error('Map preset not found: ' + presetName);
+  return new HexMap(preset.radius, preset.tileSize, SeededRandom.randomSeed());
 }
 
 /**
@@ -32,18 +29,20 @@ export class HexMap {
   static KEY_OFFSET = 100;
   static KEY_STRIDE = 200; // 2 * KEY_OFFSET
 
-  constructor(radius, tileSize = 30, seed = SeededRandom.randomSeed(), skipEvents = false) {
+  constructor(radius, tileSize = 30, seed = SeededRandom.randomSeed()) {
     this.radius = radius;
     this.tileSize = tileSize;
     this.rng = new SeededRandom(seed);
-    this.tiles = new Map();
+    this.tiles = new Map();   // key: integer → Tile
 
     const gen = new MapGenerator(this.rng);
     gen.generateTerrain(this);
-    if (!skipEvents) gen.generateEvents(this);
+    gen.generateEvents(this);
 
+    // 预计算世界边界（供相机边界钳位）
     this.worldBounds = this._computeWorldBounds();
   }
+
   // ── Key 编码 ───────────────────────────────────────────────────
   /** 将 (q, r) 轴坐标编码为单个整数 key，避免字符串分配。 */
   static encodeKey(q, r) {
@@ -79,12 +78,49 @@ export class HexMap {
 
   /**
    * 放置事件内容，并自动揭示该格 + 周围几圈战争迷雾。
+   * 同时确保周围至少有一个可通行的格子。
    */
   placeContent(q, r, content, revealRadius = 2) {
     const tile = this.getTile(q, r);
     if (!tile) return;
     tile.content = content;
     this.revealAround(q, r, revealRadius);
+    this._ensureAccessibilityAroundTile(q, r);
+  }
+
+  /**
+   * 确保指定格子周围至少有一个可通行的格子。
+   * 如果周围全是山脉/森林/边界，则随机选一个改为草地。
+   * @private
+   */
+  _ensureAccessibilityAroundTile(q, r) {
+    // 获取周围 6 个邻居
+    const directions = [
+      [1, 0], [1, -1], [0, -1],
+      [-1, 0], [-1, 1], [0, 1]
+    ];
+    const neighbors = [];
+    for (const [dq, dr] of directions) {
+      const tile = this.getTile(q + dq, r + dr);
+      if (tile) neighbors.push(tile);
+    }
+
+    // 检查是否至少有一个可通行的格子
+    const hasAccessible = neighbors.some(tile => tile.type.moveCost < Infinity);
+    
+    if (!hasAccessible && neighbors.length > 0) {
+      // 收集所有可以改为草地的格子
+      const modifiable = neighbors.filter(tile => 
+        tile.type.moveCost === Infinity &&  // 当前不可通行
+        !tile.content  // 没有其他事件内容
+      );
+      
+      if (modifiable.length > 0) {
+        // 随机选择一个改为草地
+        const idx = Math.floor(Math.random() * modifiable.length);
+        modifiable[idx].type = TileType.GRASS;
+      }
+    }
   }
 
   // ── 坐标转换 ───────────────────────────────────────────────────

@@ -310,11 +310,13 @@ export class CombatManager {
       }
       const healAmount = Math.max(1, Math.floor(statValue * (skill.power / 100) * multiplier));
       if (skill.power > 0) {
-        attacker.hp = Math.min(attacker.maxHp || 100, attacker.hp + healAmount);
-        this.diceInfo = { isHeal: true, damage: healAmount, targetId: attacker.id };
+        const healTarget = (target && target !== 'aoe') ? target : attacker;
+        healTarget.hp = Math.min(healTarget.maxHp || 100, healTarget.hp + healAmount);
+        this.diceInfo = { isHeal: true, damage: healAmount, targetId: healTarget.id };
         this.addLog(`Rolled [${rollVal}] → Restored ${healAmount} HP`);
       } else {
-        this.diceInfo = { isHeal: true, damage: 0, targetId: attacker.id };
+        const healTarget = (target && target !== 'aoe') ? target : attacker;
+        this.diceInfo = { isHeal: true, damage: 0, targetId: healTarget.id };
         this.addLog(`Rolled [${rollVal}] → ${skill.name} activated!`);
       }
     } else {

@@ -52,8 +52,8 @@ export class MapGenerator {
       for (let r = r1; r <= r2; r++) {
         let type = TileType.GRASS;
         const roll = this.rng.next();
-        if (roll > 0.90) type = TileType.MOUNTAIN;
-        else if (roll > 0.82) type = TileType.FOREST;
+        if (roll > 0.85) type = TileType.MOUNTAIN;
+        else if (roll > 0.75) type = TileType.FOREST;
 
         // 传入 rng 保证 variant 随种子确定，地图可复现
         const tile = new Tile(q, r, type, this.rng);
@@ -88,6 +88,8 @@ export class MapGenerator {
       if (tile && !tile.content) {
         tile.content = MapGenerator.createContent(eventType);
         generatedTypes.add(MapGenerator.getDedupeKey(tile.content));
+        // 确保事件周围至少有一个可通行的格子
+        this._ensureAccessibilityAroundEvent(map, tile);
       }
     });
 
@@ -108,6 +110,8 @@ export class MapGenerator {
       }
 
       tile.content = MapGenerator.createContent(eventType);
+      // 确保事件周围至少有一个可通行的格子
+      this._ensureAccessibilityAroundEvent(map, tile);
     }
   }
 
@@ -183,5 +187,47 @@ export class MapGenerator {
       Math.abs(tile.r - origin.r),
       Math.abs((tile.q + tile.r) - (origin.q + origin.r)),
     );
+  }
+
+  /** 获取周围一格范围内的所有邻居格子 */
+  _getNeighbors(map, q, r) {
+    const neighbors = [];
+    // 六边形周围 6 个邻居
+    const directions = [
+      [1, 0], [1, -1], [0, -1],
+      [-1, 0], [-1, 1], [0, 1]
+    ];
+    for (const [dq, dr] of directions) {
+      const nq = q + dq;
+      const nr = r + dr;
+      const tile = map.getTile(nq, nr);
+      if (tile) neighbors.push(tile);
+    }
+    return neighbors;
+  }
+
+  /**
+   * 确保事件周围至少有一个可通行的格子。
+   * 如果周围全是山脉/森林/边界，则随机选一个改为草地。
+   */
+  _ensureAccessibilityAroundEvent(map, eventTile) {
+    const neighbors = this._getNeighbors(map, eventTile.q, eventTile.r);
+    
+    // 检查是否至少有一个可通行的格子
+    const hasAccessible = neighbors.some(tile => tile.type.moveCost < Infinity);
+    
+    if (!hasAccessible) {
+      // 收集所有可以改为草地的格子（不是事件所在格和边界）
+      const modifiable = neighbors.filter(tile => 
+        tile.type !== TileType.BOUNDARY && 
+        !tile.content
+      );
+      
+      if (modifiable.length > 0) {
+        // 随机选择一个改为草地
+        const idx = Math.floor(this.rng.next() * modifiable.length);
+        modifiable[idx].type = TileType.GRASS;
+      }
+    }
   }
 }

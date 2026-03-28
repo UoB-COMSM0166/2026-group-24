@@ -7,11 +7,11 @@
  */
 
 export const RollGrade = {
-  CRITICAL_FAIL: { id: 0, label: '大失败', emoji: '💀' },
-  FAIL: { id: 1, label: '失败', emoji: '❌' },
-  NORMAL: { id: 2, label: '普通', emoji: '⚪' },
-  SUCCESS: { id: 3, label: '成功', emoji: '✅' },
-  CRITICAL_SUCCESS: { id: 4, label: '大成功', emoji: '🌟' },
+  CRITICAL_FAIL: { id: 0, label: 'Critical Failure', emoji: '💪' },
+  FAIL: { id: 1, label: 'Failure', emoji: '❌' },
+  NORMAL: { id: 2, label: 'Normal', emoji: '⚪' },
+  SUCCESS: { id: 3, label: 'Success', emoji: '✅' },
+  CRITICAL_SUCCESS: { id: 4, label: 'Critical Success', emoji: '🌟' },
 };
 
 /**

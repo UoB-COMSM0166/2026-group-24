@@ -43,13 +43,12 @@ Math.SQRT3 = Math.sqrt(3);
 Math.SQRT3_HALF = Math.SQRT3 / 2;
 
 // ── 内容生成器 ────────────────────────────────────────────────────
-export function makeNPC(name, dialogue = '你好，旅行者！', options = {}) {
+export function makeNPC(name, dialogue = 'Hello, traveler!', options = {}) {
   return { type: TileContentType.NPC, name, dialogue, ...options };
 }
 export function makePortal(targetMap, targetQ, targetR) {
-  return { type: TileContentType.PORTAL, name: '传送阵', targetMap, targetQ, targetR, iconType: 'portal' };
+  return { type: TileContentType.PORTAL, name: 'Portal', targetMap, targetQ, targetR };
 }
-
 export function makeDungeon(name, level = 1, difficulty = 'NORMAL') {
   return { type: TileContentType.DUNGEON, name, level, difficulty };
 }
@@ -66,19 +65,19 @@ export function makeAltar(level = 1) {
 export function makeLighthouse(level = 1) {
   return { type: TileContentType.LIGHTHOUSE, name: 'Ancient Lighthouse', level };
 }
-export function makeVillage(name = '村庄') {
-  return { type: TileContentType.VILLAGE, name, dialogue: '欢迎来到村庄。' };
+export function makeVillage(name = 'Village') {
+  return { type: TileContentType.VILLAGE, name, dialogue: 'Welcome to the village.' };
 }
-export function makeMerchant(name = '旅商') {
+export function makeMerchant(name = 'Traveling Merchant') {
   return { type: TileContentType.MERCHANT, name };
 }
-export function makeRuin(name = '古代遗迹入口', enemyName = '腐化守卫') {
+export function makeRuin(name = 'Ancient Ruin Entrance', enemyName = 'Corrupted Guardian') {
   return { type: TileContentType.RUIN, name, enemyName };
 }
-export function makeCorruptedDeer(name = '被腐化的鹿') {
+export function makeCorruptedDeer(name = 'Corrupted Deer') {
   return { type: TileContentType.CORRUPTED_DEER, name, iconType: 'blackCircle' };
 }
-export function makeInjuredVillager(name = '受伤的村民', dialogue = '') {
+export function makeInjuredVillager(name = 'INJURED VILLAGER', dialogue = '') {
   return { type: TileContentType.NPC, name, dialogue, iconType: 'redCircle' };
 }
 
@@ -120,7 +119,6 @@ export class Tile {
     blueCircle: 'blue',
     purpleCircle: 'purple',
     blackCircle: 'black',
-    portal: 'cyan',
   });
 
   /**
