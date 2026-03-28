@@ -93,6 +93,21 @@ export const CORRUPTED_DEER_LIST = [
     name: 'CORRUPTED DEER'
   }
   // 后续可继续添加更多被腐化的鹿
+
+
+];
+
+// 新手村固定事件列表
+export const NOVICE_DUNGEON_LIST = [
+  { q: 1, r: -2, name: '迷途哥布林', level: 1, difficulty: 'EASY' },
+];
+
+export const NOVICE_TREASURE_LIST = [
+  { q: -2, r: 1, lootTier: 1 },
+];
+
+export const NOVICE_ALTAR_LIST = [
+  { q: 2, r: 1 },
 ];
 
 // ── EventTable 类 ───────────────────────────────────────────────────
