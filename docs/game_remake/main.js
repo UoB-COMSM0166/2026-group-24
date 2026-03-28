@@ -115,7 +115,7 @@ function startGame(isLoad = false) {
 
     // 初始化控制器
     const gameController = new GameController(map, player, ui, camera);
-
+    window._gameController = gameController;
     // 监听状态切换，切换音乐
     const origTransition = gameController.fsm.transition.bind(gameController.fsm);
     gameController.fsm.transition = function (state, ...args) {

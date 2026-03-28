@@ -15,6 +15,9 @@ import { GameStory } from './GameStory.js';
 import { EventTable } from '../data/EventTable.js';
 import { findPath, getReachableTiles } from '../utils/Pathfinder.js';
 import { rollEncounter, ENEMY_TYPES } from '../data/EncounterTable.js';
+import { TutorialManager } from './TutorialManager.js';
+import { NOVICE_DUNGEON_LIST, NOVICE_TREASURE_LIST, NOVICE_ALTAR_LIST } from '../data/EventTable.js';
+import { makeDungeon, makeTreasure, makeAltar } from '../world/Tile.js';
 
 export class GameController {
   constructor(map, player, ui, camera) {
@@ -155,6 +158,34 @@ export class GameController {
         this.currentMapName = 'Novice Village';
         this.player.setGridPos(noviceQ, noviceR, this.noviceVillage);
         this.noviceVillage.revealAround(noviceQ, noviceR, 5);
+
+        // ── 放置新手村怪物 ──────────────────────────────────────
+        for (const ev of NOVICE_DUNGEON_LIST) {
+          const tile = this.noviceVillage.getTile(ev.q, ev.r);
+          if (tile) {
+            tile.type = TileType.GRASS;
+            this.noviceVillage.placeContent(ev.q, ev.r, makeDungeon(ev.name, ev.level, ev.difficulty), 0);
+          }
+        }
+        // ── 放置新手村宝箱 ──────────────────────────────────────
+        for (const ev of NOVICE_TREASURE_LIST) {
+          const tile = this.noviceVillage.getTile(ev.q, ev.r);
+          if (tile) {
+            tile.type = TileType.GRASS;
+            this.noviceVillage.placeContent(ev.q, ev.r, makeTreasure(ev.lootTier), 0);
+          }
+        }
+        // ── 放置新手村祭坛 ──────────────────────────────────────
+        for (const ev of NOVICE_ALTAR_LIST) {
+          const tile = this.noviceVillage.getTile(ev.q, ev.r);
+          if (tile) {
+            tile.type = TileType.GRASS;
+            this.noviceVillage.placeContent(ev.q, ev.r, makeAltar(), 0);
+          }
+        }
+        // ── 启动教程系统 ────────────────────────────────────────
+        this.tutorial = new TutorialManager(this);
+
         this.fsm.transition(GameState.MAP_EXPLORATION);
       }),
       exit: () => this.ui.hideMapGeneration(),
