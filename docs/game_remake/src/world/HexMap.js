@@ -9,7 +9,8 @@ import { hexToPixel } from './Tile.js';
 export function createMapByPreset(presetName) {
   const preset = MapPresets[presetName];
   if (!preset) throw new Error('Map preset not found: ' + presetName);
-  return new HexMap(preset.radius, preset.tileSize, SeededRandom.randomSeed());
+  const seed = presetName === 'novice' ? 42 : SeededRandom.randomSeed();
+  return new HexMap(preset.radius, preset.tileSize, seed);
 }
 
 /**

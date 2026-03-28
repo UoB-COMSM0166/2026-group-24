@@ -77,7 +77,7 @@ export class TutorialManager {
       fought_enemy:     { done: false, label: '⚔️  击败一只怪物' },
       opened_chest:     { done: false, label: '🎁  打开宝箱' },
       visited_altar:    { done: false, label: '🔮  使用祭坛' },
-      visited_merchant: { done: false, label: '🛒  拜访商人' },
+     // visited_merchant: { done: false, label: '🛒  拜访商人' },
       opened_inventory: { done: false, label: '🎒  查看背包' },
     };
 
@@ -144,7 +144,7 @@ export class TutorialManager {
 
     ui.showEvent = function (title, desc, buttons = [], ...rest) {
       buttons = [...(buttons ?? [])];
-      if (self.gc.currentMapName !== '新手村' || self.allDone) {
+      if (self.gc.currentMapName !== 'Novice Village' || self.allDone) {
         return original(title, desc, buttons, ...rest);
       }
 
@@ -219,7 +219,7 @@ export class TutorialManager {
       // 第一次进入战斗时介绍战斗系统
       if (
           newState === 'COMBAT' &&
-          self.gc.currentMapName === '新手村' &&
+          self.gc.currentMapName === 'Novice Village' &&
           !self._introducedEvents.has('combat')
       ) {
         self._introducedEvents.add('combat');
@@ -241,7 +241,7 @@ export class TutorialManager {
       if (
           prevState === 'COMBAT' &&
           newState === 'MAP_EXPLORATION' &&
-          self.gc.currentMapName === '新手村' &&
+          self.gc.currentMapName === 'Novice Village' &&
           wasWin
       ) {
         self.complete('fought_enemy');

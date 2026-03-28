@@ -137,10 +137,8 @@ export class DialogueBox {
       cursor: pointer;
     `;
     this._btnEl.textContent = '继续 ▶';
-    this._btnEl.addEventListener('click', () => this._next());
-
     // 点击整个对话框也可以推进
-    box.addEventListener('click', () => this._next());
+    this._btnEl.addEventListener('click', (e) => { e.stopPropagation(); this._next(); });
 
     footer.appendChild(this._pageEl);
     footer.appendChild(this._btnEl);
