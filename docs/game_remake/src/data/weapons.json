@@ -5,7 +5,7 @@
       "name": "Iron Sword",
       "owner": "knight",
       "type": "blade",
-      "rarity": "common",
+      "rarity": "rare",
       "statBonus": {
         "strength": 6
       },
@@ -37,7 +37,7 @@
       "name": "Knight Longsword",
       "owner": "knight",
       "type": "blade",
-      "rarity": "common",
+      "rarity": "rare",
       "statBonus": {
         "strength": 10,
         "vitality": 4
@@ -80,7 +80,7 @@
       "name": "Lava Sword",
       "owner": "knight",
       "type": "blade",
-      "rarity": "uncommon",
+      "rarity": "rare",
       "statBonus": {
         "strength": 16
       },
@@ -134,7 +134,7 @@
       "name": "Flame Dragon Sword",
       "owner": "knight",
       "type": "blade",
-      "rarity": "rare",
+      "rarity": "epic",
       "statBonus": {
         "strength": 24
       },
@@ -194,7 +194,7 @@
       "name": "Old Staff",
       "owner": "wizard",
       "type": "staff",
-      "rarity": "common",
+      "rarity": "rare",
       "statBonus": {
         "intellect": 8
       },
@@ -232,7 +232,7 @@
       "name": "Element Staff",
       "owner": "wizard",
       "type": "staff",
-      "rarity": "common",
+      "rarity": "rare",
       "statBonus": {
         "intellect": 14,
         "awareness": 4
@@ -287,7 +287,7 @@
       "name": "Thunder Staff",
       "owner": "wizard",
       "type": "staff",
-      "rarity": "uncommon",
+      "rarity": "rare",
       "statBonus": {
         "intellect": 20
       },
@@ -347,7 +347,7 @@
       "name": "Abyss Tome",
       "owner": "wizard",
       "type": "tome",
-      "rarity": "rare",
+      "rarity": "epic",
       "statBonus": {
         "intellect": 28,
         "talent": 8
@@ -402,7 +402,7 @@
       "name": "Bare Fist",
       "owner": "priest",
       "type": "fist",
-      "rarity": "common",
+      "rarity": "rare",
       "statBonus": {
         "talent": 4
       },
@@ -434,7 +434,7 @@
       "name": "Iron Gauntlet",
       "owner": "priest",
       "type": "fist",
-      "rarity": "common",
+      "rarity": "rare",
       "statBonus": {
         "talent": 10,
         "vitality": 6
@@ -477,7 +477,7 @@
       "name": "Earth Gauntlet",
       "owner": "priest",
       "type": "fist",
-      "rarity": "uncommon",
+      "rarity": "rare",
       "statBonus": {
         "talent": 16,
         "vitality": 10
@@ -520,7 +520,7 @@
       "name": "Mountain Sacred Fist",
       "owner": "priest",
       "type": "fist",
-      "rarity": "rare",
+      "rarity": "epic",
       "statBonus": {
         "talent": 24,
         "vitality": 16
@@ -563,7 +563,7 @@
       "name": "Hunter Bow",
       "owner": "ranger",
       "type": "bow",
-      "rarity": "common",
+      "rarity": "rare",
       "statBonus": {
         "awareness": 6
       },
@@ -595,7 +595,7 @@
       "name": "Elf Longbow",
       "owner": "ranger",
       "type": "bow",
-      "rarity": "common",
+      "rarity": "rare",
       "statBonus": {
         "awareness": 12,
         "agility": 6
@@ -638,7 +638,7 @@
       "name": "Vine Bow",
       "owner": "ranger",
       "type": "bow",
-      "rarity": "uncommon",
+      "rarity": "rare",
       "statBonus": {
         "awareness": 18,
         "talent": 6
@@ -693,7 +693,7 @@
       "name": "World Tree Bow",
       "owner": "ranger",
       "type": "bow",
-      "rarity": "rare",
+      "rarity": "epic",
       "statBonus": {
         "awareness": 26,
         "talent": 10

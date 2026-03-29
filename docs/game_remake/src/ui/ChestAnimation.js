@@ -25,7 +25,7 @@ export class ChestAnimation {
       const H = Math.min(window.innerHeight, 600);
       const cx = W / 2, cy = H / 2;
 
-      let phase = 'enter'; 
+      let phase = 'enter';
       let timer = 0;
       let particles = [];
       let lightRays = [];
@@ -34,7 +34,7 @@ export class ChestAnimation {
       let chestY = H + 100;
       let chestTargetY = cy + 40;
       let chestAngle = 0;
-      let lidAngle = 0; 
+      let lidAngle = 0;
       let shakeOffset = 0;
 
       let itemY = cy;
@@ -43,6 +43,15 @@ export class ChestAnimation {
       let glowPulse = 0;
 
       const rarityColor = RARITY_COLORS[item.rarity] || RARITY_COLORS.rare;
+
+      // ★ 新增变量 ★
+      const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
+      let lidOffY = 0;
+      let lidVelY = 0;
+      let fireworks = [];
+      let trinketSparkles = [];
+      let forgeSparkles = [];
+      // ★ 新增结束 ★
 
       sketch.setup = function () {
         const canvas = sketch.createCanvas(W, H);
@@ -64,21 +73,31 @@ export class ChestAnimation {
             if (Math.abs(chestY - chestTargetY) < 2) { phase = 'shake'; timer = 0; }
             break;
           case 'shake':
-            shakeOffset = Math.sin(timer * 25) * (4 + timer * 6);
-            chestAngle = Math.sin(timer * 20) * 0.04;
+            // ★ 修改：更剧烈的抖动 ★
+            shakeOffset = Math.sin(timer * 35) * (10 + timer * 16);
+            chestAngle = Math.sin(timer * 28) * 0.09;
             if (timer > 1.2) { phase = 'open'; timer = 0; spawnBurstParticles(); }
             break;
           case 'open':
-            lidAngle += (Math.PI * 0.45 - lidAngle) * 0.1;
-            shakeOffset *= 0.9;
-            itemY += (cy - 60 - itemY) * 0.06;
+            // ★ 修改：盖子飞出屏幕 ★
+            if (lidAngle < Math.PI * 0.75) {
+              lidAngle += 0.09;
+            } else {
+              lidVelY -= 3.5;
+              lidOffY += lidVelY;
+            }
+            shakeOffset *= 0.85;
+            itemY += (cy - 160 - itemY) * 0.06;
             itemAlpha = Math.min(255, itemAlpha + 8);
             if (timer > 0.3) spawnLightRays();
-            if (timer > 1.5) { phase = 'reveal'; timer = 0; }
+            if (timer > 1.5 && itemAlpha > 200) {
+              phase = 'reveal'; timer = 0;
+              if (isWeapon) spawnFireworks(); // ★ 新增：武器触发烟花 ★
+            }
             break;
           case 'reveal':
             textAlpha = Math.min(255, textAlpha + 6);
-            itemY += (cy - 80 - itemY) * 0.05;
+            itemY += (cy - 160 - itemY) * 0.05; // ★ 修改：和 open 阶段目标一致 ★
             if (timer > 0.8) { phase = 'idle'; canClose = true; }
             break;
           case 'idle': break;
@@ -90,48 +109,56 @@ export class ChestAnimation {
 
         updateAndDrawParticles(sketch, particles);
         updateAndDrawRays(sketch, lightRays);
+        updateAndDrawFireworks(sketch, fireworks);
+        updateAndDrawTrinketSparkles(sketch, trinketSparkles);
+        updateAndDrawForgeSparkles(sketch, forgeSparkles);
 
         sketch.push();
         sketch.translate(cx + shakeOffset, chestY);
         sketch.rotate(chestAngle);
-        drawChest(sketch, lidAngle, rarityColor.main);
+        drawChest(sketch, lidAngle, rarityColor.main, lidOffY); // ★ 修改：传入 lidOffY ★
         sketch.pop();
 
         if (itemAlpha > 0) {
           sketch.push();
           sketch.translate(cx, itemY);
-          const glowSize = 60 + Math.sin(glowPulse) * 8;
+          // ★ 修改：发光范围更大，武器额外放大 ★
+          const glowSize = (isWeapon ? 90 : 70) + Math.sin(glowPulse) * 12;
           const c = sketch.color(rarityColor.glow);
-          c.setAlpha(itemAlpha * 0.3);
+          c.setAlpha(itemAlpha * 0.35);
           sketch.noStroke();
           sketch.fill(c);
           sketch.ellipse(0, 0, glowSize * 2, glowSize * 2);
-          drawItemIcon(sketch, item.icon, itemAlpha, rarityColor.main);
+          if (isWeapon) sketch.scale(2.0); // ★ 新增：武器图标放大2倍 ★
+          drawItemIcon(sketch, item.icon || item.type, itemAlpha, rarityColor.main);
           sketch.pop();
         }
 
         if (textAlpha > 0) {
+          // ★ 修改：文字固定在屏幕底部，不跟随 itemY，避免被箱子遮挡 ★
           sketch.push();
+          const textBase = H - 175;
+
           sketch.textSize(13);
           sketch.noStroke();
           const tagC = sketch.color(rarityColor.main);
           tagC.setAlpha(textAlpha);
           sketch.fill(tagC);
-          sketch.text(`— ${rarityColor.label} —`, cx, itemY + 55);
+          sketch.text(`— ${rarityColor.label} —`, cx, textBase);
 
           sketch.textSize(26);
           sketch.textStyle(sketch.BOLD);
           const nameC = sketch.color(255);
           nameC.setAlpha(textAlpha);
           sketch.fill(nameC);
-          sketch.text(item.name, cx, itemY + 85);
+          sketch.text(item.name, cx, textBase + 38);
 
-          sketch.textSize(14);
+          sketch.textSize(13);
           sketch.textStyle(sketch.NORMAL);
           const descC = sketch.color(200);
           descC.setAlpha(textAlpha * 0.8);
           sketch.fill(descC);
-          sketch.text(item.desc, cx, itemY + 115);
+          sketch.text(item.desc, cx, textBase + 72);
 
           if (canClose) {
             const hintA = Math.floor(128 + Math.sin(glowPulse * 2) * 80);
@@ -139,13 +166,22 @@ export class ChestAnimation {
             hintC.setAlpha(hintA);
             sketch.fill(hintC);
             sketch.textSize(12);
-            sketch.text('[ Click anywhere to continue ]', cx, H - 40);
+            sketch.text('[ Click anywhere to continue ]', cx, H - 28);
           }
           sketch.pop();
         }
 
         if ((phase === 'open' || phase === 'reveal' || phase === 'idle') && sketch.frameCount % 3 === 0) {
           particles.push(makeSparkle(cx, chestY - 30, rarityColor.glow));
+        }
+        if (!isWeapon && (phase === 'reveal' || phase === 'idle') && sketch.frameCount % 4 === 0) {
+          spawnTrinketSparkle(cx, itemY);
+        }
+        if (isWeapon && (phase === 'reveal' || phase === 'idle')) {
+          const count = sketch.frameCount % 2 === 0 ? 10 : 8;
+          for (let i = 0; i < count; i++) {
+            spawnForgeSpark(cx, itemY);
+          }
         }
       };
 
@@ -172,18 +208,31 @@ export class ChestAnimation {
         }
       }
 
+      // ★ 修改：改为闪电效果，范围更大 ★
       function spawnLightRays() {
-        if (lightRays.length < 8 && Math.random() < 0.15) {
+        if (lightRays.length < 20 && Math.random() < 0.7) {
+          const endX = cx + (Math.random() - 0.5) * W * 0.95;
+          const endY = Math.random() * cy * 0.7;
+          const segments = 6 + Math.floor(Math.random() * 5);
+          const points = [{ x: cx, y: chestTargetY - 25 }];
+          for (let i = 1; i < segments; i++) {
+            const t = i / segments;
+            points.push({
+              x: cx + (endX - cx) * t + (Math.random() - 0.5) * 90,
+              y: (chestTargetY - 25) + (endY - (chestTargetY - 25)) * t + (Math.random() - 0.5) * 65,
+            });
+          }
+          points.push({ x: endX, y: endY });
           lightRays.push({
-            x: cx, y: chestTargetY - 25,
-            angle: -Math.PI / 2 + (Math.random() - 0.5) * 1.2,
-            length: 80 + Math.random() * 120,
-            width: 2 + Math.random() * 3,
-            life: 1, decay: 0.02,
+            points,
+            life: 1,
+            decay: 0.07 + Math.random() * 0.05,
             color: rarityColor.glow,
+            width: 2.5 + Math.random() * 4.5,
           });
         }
       }
+      // ★ 修改结束 ★
 
       function makeSparkle(bx, by, color) {
         return {
@@ -197,6 +246,199 @@ export class ChestAnimation {
           color,
         };
       }
+
+      function spawnFireworks() {
+        const fx = cx, fy = itemY;
+
+        // 第一轮：大范围扩散，品质颜色，数量大幅增加
+        for (let i = 0; i < 180; i++) {
+          const angle = (Math.PI * 2 * i) / 180 + Math.random() * 0.2;
+          const speed = 5 + Math.random() * 14;
+          fireworks.push({
+            x: fx, y: fy,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 4,
+            life: 1,
+            decay: 0.008 + Math.random() * 0.01,
+            size: 5 + Math.random() * 9,
+            color: rarityColor.glow,
+          });
+        }
+
+        // 第二轮：内圈主色，慢速拖尾
+        for (let i = 0; i < 100; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 2 + Math.random() * 7;
+          fireworks.push({
+            x: fx, y: fy,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 0.9,
+            decay: 0.012 + Math.random() * 0.012,
+            size: 4 + Math.random() * 6,
+            color: rarityColor.main,
+          });
+        }
+
+        // ★ 新增第三轮：白色闪光核心，极快扩散后迅速消失
+        for (let i = 0; i < 60; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 8 + Math.random() * 18;
+          fireworks.push({
+            x: fx, y: fy,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 2,
+            life: 0.7,
+            decay: 0.035 + Math.random() * 0.025,
+            size: 3 + Math.random() * 5,
+            color: '#ffffff',
+          });
+        }
+      }
+// ★ 新增：生成单颗菱形星星 ★
+      function spawnTrinketSparkle(originX, originY) {
+        // 随机散落在物品图标周围
+        const spread = 90;
+        const x = originX + (Math.random() - 0.5) * spread * 2;
+        const y = originY + (Math.random() - 0.5) * spread;
+        const size = 6 + Math.random() * 14;
+        const duration = 40 + Math.random() * 40; // 帧数
+        trinketSparkles.push({
+          x, y, size,
+          frame: 0,
+          totalFrames: duration,
+          color: rarityColor.main,
+          glowColor: rarityColor.glow,
+          angle: Math.random() * Math.PI, // 旋转角度
+        });
+      }
+
+// ★ 新增：更新并绘制所有菱形星星 ★
+      function updateAndDrawTrinketSparkles(s, sparkles) {
+        for (let i = sparkles.length - 1; i >= 0; i--) {
+          const sp = sparkles[i];
+          sp.frame++;
+          if (sp.frame >= sp.totalFrames) { sparkles.splice(i, 1); continue; }
+
+          // 生命周期：0→0.5 渐入，0.5→1 渐出，中间最亮
+          const t = sp.frame / sp.totalFrames;
+          const lifeAlpha = t < 0.5 ? t * 2 : (1 - t) * 2;
+          // 尺寸也随生命周期缩放：先大后小
+          const scale = 0.3 + Math.sin(t * Math.PI) * 0.7;
+
+          s.push();
+          s.translate(sp.x, sp.y);
+          s.rotate(sp.angle + t * 0.5); // 缓慢旋转
+
+          const sz = sp.size * scale;
+          const alpha = Math.floor(lifeAlpha * 255);
+
+          // 外层发光晕
+          const glowC = s.color(sp.glowColor);
+          glowC.setAlpha(alpha * 0.35);
+          s.noStroke(); s.fill(glowC);
+          drawDiamond(s, sz * 2.2);
+
+          // 主体菱形，品质颜色
+          const mainC = s.color(sp.color);
+          mainC.setAlpha(alpha * 0.85);
+          s.fill(mainC);
+          drawDiamond(s, sz);
+
+          // 内芯白色高光
+          const whiteC = s.color(255, 255, 255);
+          whiteC.setAlpha(alpha);
+          s.fill(whiteC);
+          drawDiamond(s, sz * 0.35);
+
+          // 四个方向的细长光芒
+          s.stroke(255, 255, 255, alpha * 0.8);
+          s.strokeWeight(1.2);
+          const rayLen = sz * 1.8;
+          s.line(0, -rayLen, 0, rayLen);   // 竖
+          s.line(-rayLen, 0, rayLen, 0);   // 横
+          // 斜向细光芒（更短）
+          const dRay = rayLen * 0.5;
+          s.strokeWeight(0.7);
+          s.line(-dRay, -dRay, dRay, dRay);
+          s.line(dRay, -dRay, -dRay, dRay);
+
+          s.pop();
+        }
+      }
+
+// ★ 新增：绘制菱形（以原点为中心）★
+      function drawDiamond(s, size) {
+        s.beginShape();
+        s.vertex(0, -size);
+        s.vertex(size * 0.4, 0);
+        s.vertex(0, size);
+        s.vertex(-size * 0.4, 0);
+        s.endShape(s.CLOSE);
+      }
+
+// ★ 新增：生成单颗锻造火花 ★
+      function spawnForgeSpark(originX, originY) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 5 + Math.random() * 16;
+        // 颜色在金黄、橙红之间随机
+        const colors = ['#fbbf24', '#f59e0b', '#fb923c', '#fde68a', '#ff6b00'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        forgeSparkles.push({
+          x: originX + (Math.random() - 0.5) * 80,
+          y: originY + (Math.random() - 0.5) * 80,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 5,
+          life: 0.9 + Math.random() * 0.5,
+          decay: 0.015 + Math.random() * 0.015,
+          size: 4 + Math.random() * 9,
+          color,
+          trail: [], // 拖尾记录
+        });
+      }
+
+// ★ 新增：更新并绘制锻造火花 ★
+      function updateAndDrawForgeSparkles(s, sparks) {
+        for (let i = sparks.length - 1; i >= 0; i--) {
+          const sp = sparks[i];
+
+          // 记录拖尾位置（最多保留5个）
+          sp.trail.push({ x: sp.x, y: sp.y });
+          if (sp.trail.length > 5) sp.trail.shift();
+
+          sp.x += sp.vx;
+          sp.y += sp.vy;
+          sp.vy += 0.18; // 重力，让火花抛物线下落
+          sp.vx *= 0.96; // 空气阻力
+          sp.life -= sp.decay;
+
+          if (sp.life <= 0) { sparks.splice(i, 1); continue; }
+
+          // 绘制拖尾
+          for (let j = 0; j < sp.trail.length; j++) {
+            const trailAlpha = (j / sp.trail.length) * sp.life * 160;
+            const trailSize = sp.size * (j / sp.trail.length) * 0.6;
+            const tc = s.color(sp.color);
+            tc.setAlpha(trailAlpha);
+            s.noStroke(); s.fill(tc);
+            s.ellipse(sp.trail[j].x, sp.trail[j].y, trailSize, trailSize);
+          }
+
+          // 绘制主体火花
+          const alpha = sp.life * 255;
+          const c = s.color(sp.color);
+          c.setAlpha(alpha);
+          s.noStroke(); s.fill(c);
+          s.ellipse(sp.x, sp.y, sp.size, sp.size);
+
+          // 白色核心高光
+          const wc = s.color(255, 255, 255);
+          wc.setAlpha(alpha * 0.7);
+          s.fill(wc);
+          s.ellipse(sp.x, sp.y, sp.size * 0.4, sp.size * 0.4);
+        }
+      }
+// ★ 新增结束 ★
     }, overlay);
   }
 
@@ -212,7 +454,8 @@ export class ChestAnimation {
   }
 }
 
-function drawChest(s, lidAngle, accentColor) {
+// ★ 修改：加 lidOffY 参数，让盖子飞出屏幕 ★
+function drawChest(s, lidAngle, accentColor, lidOffY = 0) {
   const bw = 90, bh = 55;
   const lh = 25;
 
@@ -238,7 +481,7 @@ function drawChest(s, lidAngle, accentColor) {
   s.ellipse(0, 0, 8, 8);
 
   s.push();
-  s.translate(0, -bh / 2);
+  s.translate(0, -bh / 2 + lidOffY); // ★ 修改：加上飞出偏移 ★
   s.rotate(-lidAngle);
 
   s.fill(110, 70, 30);
@@ -290,6 +533,25 @@ function drawItemIcon(s, iconType, alpha, accentColor) {
       }
       break;
     }
+      // ★ 修改：各武器类型用独立 key 读图，以后换图只改 DataLoader 路径即可 ★
+    case 'blade':
+    case 'staff':
+    case 'tome':
+    case 'bow':
+    case 'fist': {
+      const imgKey = `weapon_${iconType}`;
+      const img = window.DataLoader?.getImage(imgKey);
+      if (img) {
+        s.drawingContext.save();
+        s.drawingContext.globalAlpha = a;
+        s.drawingContext.drawImage(img, -28, -28, 56, 56);
+        s.drawingContext.restore();
+      } else {
+        drawSwordIcon(s, a, accentColor); // PNG 未加载时降级
+      }
+      break;
+    }
+// ★ 修改结束 ★
     default:
       s.fill(200, 200, 200, alpha);
       s.noStroke();
@@ -387,16 +649,35 @@ function updateAndDrawParticles(s, particles) {
   }
 }
 
+// ★ 修改：支持闪电折线绘制 ★
 function updateAndDrawRays(s, rays) {
   for (let i = rays.length - 1; i >= 0; i--) {
     const r = rays[i]; r.life -= r.decay;
     if (r.life <= 0) { rays.splice(i, 1); continue; }
-    s.push(); s.translate(r.x, r.y); s.rotate(r.angle);
-    const c = s.color(r.color); c.setAlpha(r.life * 100); s.stroke(c); s.strokeWeight(r.width * r.life);
-    s.line(0, 0, 0, -r.length);
-    s.pop();
+    if (r.points) {
+      s.push();
+      const gc = s.color(r.color); gc.setAlpha(r.life * 160);
+      s.stroke(gc); s.strokeWeight(r.width * r.life * 3); s.noFill();
+      s.beginShape();
+      for (const pt of r.points) s.vertex(pt.x, pt.y);
+      s.endShape();
+      const wc = s.color(255, 255, 255); wc.setAlpha(r.life * 220);
+      s.stroke(wc); s.strokeWeight(r.width * r.life * 0.8);
+      s.beginShape();
+      for (const pt of r.points) s.vertex(pt.x, pt.y);
+      s.endShape();
+      s.pop();
+    } else {
+      s.push(); s.translate(r.x, r.y); s.rotate(r.angle);
+      const c = s.color(r.color); c.setAlpha(r.life * 100);
+      s.stroke(c); s.strokeWeight(r.width * r.life);
+      s.line(0, 0, 0, -r.length);
+      s.pop();
+    }
   }
 }
+// ★ 修改结束 ★
+
 function drawFallbackRingIcon(s, a, accentColor) {
   s.push();
   s.noFill();
@@ -408,3 +689,51 @@ function drawFallbackRingIcon(s, a, accentColor) {
   s.arc(0, 0, 28, 28, -s.PI * 0.9, -s.PI * 0.2);
   s.pop();
 }
+
+// ★ 新增：烟花粒子更新与绘制 ★
+function updateAndDrawFireworks(s, fireworks) {
+  for (let i = fireworks.length - 1; i >= 0; i--) {
+    const f = fireworks[i];
+    f.x += f.vx; f.y += f.vy;
+    f.vy += 0.04;
+    f.vx *= 0.97;
+    f.life -= f.decay;
+    if (f.life <= 0) { fireworks.splice(i, 1); continue; }
+    const c = s.color(f.color); c.setAlpha(f.life * 255);
+    s.noStroke(); s.fill(c);
+    s.ellipse(f.x, f.y, f.size * f.life, f.size * f.life);
+  }
+}
+
+// ★ 新增：法杖/魔法书降级图标 ★
+function drawStaffFallback(s, a, color) {
+  s.push(); s.scale(1.8);
+  s.stroke(180, 140, 255, a * 255); s.strokeWeight(4);
+  s.line(0, -28, 0, 18);
+  s.noStroke(); s.fill(160, 100, 255, a * 255);
+  s.ellipse(0, -28, 18, 18);
+  s.fill(255, 220, 100, a * 200);
+  s.ellipse(0, -28, 8, 8);
+  s.pop();
+}
+
+// ★ 新增：弓箭降级图标 ★
+function drawBowFallback(s, a, color) {
+  s.push(); s.scale(1.8);
+  s.noFill(); s.stroke(100, 200, 100, a * 255); s.strokeWeight(3);
+  s.arc(0, 0, 36, 50, -s.PI * 0.6, s.PI * 0.6);
+  s.stroke(220, 200, 150, a * 255); s.strokeWeight(2);
+  s.line(0, -22, 0, 22);
+  s.pop();
+}
+
+// ★ 新增：拳套降级图标 ★
+function drawFistFallback(s, a, color) {
+  s.push(); s.scale(1.8);
+  s.fill(200, 100, 50, a * 255); s.stroke(150, 70, 30, a * 255); s.strokeWeight(2);
+  s.rect(-12, -8, 24, 20, 4);
+  s.rect(-10, -18, 8, 12, 3);
+  s.rect(2, -16, 8, 10, 3);
+  s.pop();
+}
+// ★ 新增结束 ★

@@ -75,6 +75,11 @@ export class DataLoader {
       'bracelet':       './resource/img/items/daifu.png',
       'ring_strength':  './resource/img/items/daifu.png',
       'ring_intellect': './resource/img/items/daifu.png',
+      'weapon_blade':  './resource/img/items/daifu.png',
+      'weapon_staff':  './resource/img/items/daifu.png',
+      'weapon_tome':   './resource/img/items/daifu.png',
+      'weapon_bow':    './resource/img/items/daifu.png',
+      'weapon_fist':   './resource/img/items/daifu.png',
     };
 
     // --- 动画加载任务 (英雄序列帧) ---

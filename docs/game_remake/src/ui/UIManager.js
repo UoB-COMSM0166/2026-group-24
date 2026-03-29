@@ -287,6 +287,14 @@ export class UIManager {
     overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:220; display:flex; align-items:center; justify-content:center; font-family:sans-serif;";
     const card = document.createElement("div");
     card.style.cssText = "width:460px; max-width:92vw; background:rgba(10,10,25,0.95); border:1px solid rgba(255,255,255,0.18); border-radius:14px; padding:14px; color:white;";
+    const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
+    const lootTitle = isWeapon ? '⚔️ 获得武器！' : '💍 获得饰品！';
+    const lootTypeLabel = isWeapon
+        ? `类型：${item?.type ?? '武器'} | 适用：${item?.owner ?? '未知'} | 品质：${item?.rarity ?? ''}`
+        : `品质：${item?.rarity ?? ''} | 类型：饰品`;
+    const lootHint = isWeapon
+        ? '"立即装备" 会放入武器槽并刷新属性，"存入背包" 放入武器存放区。'
+        : '"立即装备" 会放入道具槽并刷新属性，"存入背包" 放入道具存放区。';
     const heroBtns = (heroes ?? []).map((h, i) => {
       return `
       <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
@@ -296,9 +304,17 @@ export class UIManager {
       </div>`;
     }).join("");
     card.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div style="font-weight:700;">Assign to Hero</div><button id="loot-close" style="background:transparent;border:none;color:#aaa;cursor:pointer;">✕</button></div>
-    <div style="padding:10px;border:1px solid rgba(255,255,255,0.10);border-radius:12px;"><div style="font-weight:700;">${item?.name ?? "Item"}</div><div style="opacity:.75;font-size:12px;margin-top:4px;">${item?.desc ?? ""}</div><div style="opacity:.7;font-size:12px;margin-top:6px;">Rarity: ${item?.rarity ?? "common"} | Slot: ${item?.slot ?? 0}</div><div style="opacity:.65;font-size:12px;margin-top:6px;">"Equip Now" will assign the item to its slot (0/1) and refresh stats.</div></div>
-    <div style="margin-top:10px;">${heroBtns || `<div style="opacity:.75;">No heroes available</div>`}</div>`;
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+  <div style="font-weight:700;">${lootTitle}</div>
+  <button id="loot-close" style="background:transparent;border:none;color:#aaa;cursor:pointer;">✕</button>
+</div>
+<div style="padding:10px;border:1px solid rgba(255,255,255,0.10);border-radius:12px;">
+  <div style="font-weight:700;">${item?.name ?? "Item"}</div>
+  <div style="opacity:.75;font-size:12px;margin-top:4px;">${item?.desc ?? ""}</div>
+  <div style="opacity:.7;font-size:12px;margin-top:6px;">${lootTypeLabel}</div>
+  <div style="opacity:.65;font-size:12px;margin-top:6px;">${lootHint}</div>
+</div>
+<div style="margin-top:10px;">${heroBtns || `<div style="opacity:.75;">No heroes available</div>`}</div>`;
     overlay.appendChild(card); document.body.appendChild(overlay);
     card.querySelector("#loot-close")?.addEventListener("click", () => { onPick?.({ heroIndex: 0, action: "put" }); overlay.remove(); });
     card.querySelectorAll(".loot-put").forEach(btn => btn.addEventListener("click", () => { onPick?.({ heroIndex: Number(btn.dataset.i), action: "put" }); overlay.remove(); }));
