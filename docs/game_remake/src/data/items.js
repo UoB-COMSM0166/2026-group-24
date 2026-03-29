@@ -74,7 +74,7 @@ export function rollRandomWeapon() {
 }
 
 export function rollRandomLoot() {
-  if (Math.random() < 0.2) {
+  if (Math.random() < 0.6) {
     return rollRandomItem();
   }
   return rollRandomWeapon() ?? rollRandomItem();
