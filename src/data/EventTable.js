@@ -10,7 +10,7 @@ import {
 } from '../world/Tile.js';
 import { GameState } from '../core/Constants.js';
 import { rollSpeed } from '../core/Dice.js';
-import { rollRandomItem } from './items.js';
+import { rollRandomItem, rollRandomLoot } from './items.js'; // ★ 新增 rollRandomLoot ★
 
 // ── 静态配置列表 ────────────────────────────────────────────────────
 
@@ -300,13 +300,14 @@ export class EventTable {
         text: '🎁 Open',
         onClick: () => {
           tile.content = null;
-          let loot = rollRandomItem();
 
-          // 根据品质等级调整战利品
+          let loot = rollRandomLoot();
           if (content.lootTier === 3) {
-            while (loot.rarity !== 'epic') loot = rollRandomItem();
+            let attempts = 0;
+            while (loot.rarity !== 'epic' && attempts < 30) { loot = rollRandomLoot(); attempts++; }
           } else if (content.lootTier === 2) {
-            while (loot.rarity === 'common') loot = rollRandomItem();
+            let attempts = 0;
+            while (loot.rarity === 'common' && attempts < 30) { loot = rollRandomLoot(); attempts++; }
           }
 
           gameController.ui.showChestReward(loot, () => {

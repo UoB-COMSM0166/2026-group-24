@@ -10,6 +10,7 @@ export const ItemDB = [
     statBonus: { agility: 10 },
     slot: 1,
     type: 'trinket',
+
   },
   {
     id: 'ring_of_strength',
@@ -54,3 +55,27 @@ export const RARITY_COLORS = {
   epic:      { main: '#a855f7', glow: '#c084fc', label: 'Epic' },
   legendary: { main: '#ef4444', glow: '#f87171', label: 'Legendary' },
 };
+
+export function rollRandomWeapon() {
+  const weapons = window.DataLoader?.getAllWeapons() ?? [];
+  if (weapons.length === 0) return null;
+  const weights = weapons.map(w => {
+    if (w.rarity === 'epic')  return 2;
+    if (w.rarity === 'rare')  return 5;
+    return 3;
+  });
+  const total = weights.reduce((a, b) => a + b, 0);
+  let roll = Math.random() * total;
+  for (let i = 0; i < weapons.length; i++) {
+    roll -= weights[i];
+    if (roll <= 0) return { ...weapons[i] };
+  }
+  return { ...weapons[0] };
+}
+
+export function rollRandomLoot() {
+  if (Math.random() < 0.6) {
+    return rollRandomItem();
+  }
+  return rollRandomWeapon() ?? rollRandomItem();
+}
