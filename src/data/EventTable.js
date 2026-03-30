@@ -10,7 +10,7 @@ import {
 } from '../world/Tile.js';
 import { GameState } from '../core/Constants.js';
 import { rollSpeed } from '../core/Dice.js';
-import { rollRandomItem, rollRandomLoot } from './items.js'; // ★ 新增 rollRandomLoot ★
+import { rollRandomItem, rollRandomLoot, rollGoldDrop, rollShopInventory } from './items.js'; // ★ 新增 rollRandomLoot ★
 
 // ── 静态配置列表 ────────────────────────────────────────────────────
 
@@ -109,7 +109,14 @@ export const NOVICE_TREASURE_LIST = [
 export const NOVICE_ALTAR_LIST = [
   { q: 2, r: 1 },
 ];
+export const NOVICE_SHOP_LIST = [
+  { q: 0, r: 2 },
+];
 
+export const MAIN_SHOP_LIST = [
+  { map: 'main', q: -3, r: 3 },
+  { map: 'main', q: 5,  r: -3 },
+];
 // ── EventTable 类 ───────────────────────────────────────────────────
 
 export class EventTable {
@@ -310,21 +317,38 @@ export class EventTable {
             while (loot.rarity === 'common' && attempts < 30) { loot = rollRandomLoot(); attempts++; }
           }
 
+          const goldGained = rollGoldDrop(loot?.rarity ?? 'common');
+          gameController.gold = (gameController.gold ?? 0) + goldGained;
+          gameController.ui.updateGold?.(gameController.gold);
+
           gameController.ui.showChestReward(loot, () => {
             gameController.ui.showLootAssign(loot, gameController.selectedHeroes, ({ heroIndex, action }) => {
               const hero = gameController.selectedHeroes?.[heroIndex];
               if (hero) {
                 if (action === 'put') {
                   gameController.ui.inventoryUI.addToStorage(loot);
-                } else {
-                  gameController.ui.inventoryUI.addToStorage(loot);
+                } else if (action === 'equip') {
+                  const isWeapon = Array.isArray(loot.skills) && loot.skills.length > 0;
+                  if (isWeapon) {
+                    const emptySlot = (hero.weaponSlots ?? [null, null]).findIndex(w => w === null);
+                    if (emptySlot !== -1) {
+                      hero.weaponSlots[emptySlot] = loot;
+                    } else {
+                      const kicked = hero.weaponSlots[0];
+                      hero.weaponSlots[0] = loot;
+                      gameController.ui.inventoryUI.addToStorage(kicked);
+                    }
+                  } else {
+                    hero.equip?.(loot, 0);
+                  }
+                  hero.refreshDerivedStats?.();
                 }
                 gameController.ui.updatePartyStatus(gameController.selectedHeroes);
               }
             });
           });
         }
-      }]
+        }]
     );
   }
 
@@ -585,6 +609,23 @@ export class EventTable {
 
     step1();
   }
+
+static async handleShop(gameController, tile, content) {
+  const { ShopUI } = await import('../ui/ShopUI.js');
+  const { rollShopInventory } = await import('./items.js');
+  const inventory = rollShopInventory(3);
+  ShopUI.show(
+    inventory,
+    gameController.gold ?? 0,
+    (item) => {
+      gameController.gold = (gameController.gold ?? 0) - item._shopPrice;
+      gameController.ui.updateGold?.(gameController.gold);
+      gameController.ui.inventoryUI.addToStorage(item);
+      gameController.ui.updatePartyStatus(gameController.selectedHeroes);
+    },
+    () => {}
+  );
+}
 
   // ── 事件处理：遗迹 ───────────────────────────────────────────────
 
