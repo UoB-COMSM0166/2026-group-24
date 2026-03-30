@@ -29,6 +29,10 @@ export class UIManager {
     this.onCombatEnd = callbacks.onCombatEnd ?? (() => { });
     this.inventoryUI = new InventoryUI();
     this.animFrameReq = null;
+    this._goldEl = document.createElement('div');
+    this._goldEl.style.cssText = 'position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(10,8,6,0.85);border:1px solid rgba(251,191,36,0.4);border-radius:10px;padding:6px 16px;color:#fbbf24;font-family:sans-serif;font-weight:700;font-size:14px;z-index:200;display:none;pointer-events:none;';
+    this._goldEl.textContent = '💰 0';
+    document.body.appendChild(this._goldEl);
   }
 
   _drawHeroPreview(ctx, heroId, width, height, time) {
@@ -37,7 +41,7 @@ export class UIManager {
 
     ctx.clearRect(0, 0, width, height);
 
-    // --- 在这里定义每个英雄的微调参数 ---
+   // --- Fine-tuning parameters for each hero ---
     const configs = {
         'wizard': { size: 220, offsetX: 20, offsetY: -10, frameCount: 6 },
         'knight': { size: 280, offsetX: 12, offsetY: -95 },
@@ -48,7 +52,7 @@ export class UIManager {
 
     const cfg = configs[heroId] || configs['default'];
     const drawSize = cfg.size;
-    // 居中计算公式：(画布宽度 - 绘制宽度) / 2 + 偏移量
+// Center formula: (canvas width - draw size) / 2 + offset
     const dx = (width - drawSize) / 2 + cfg.offsetX;
     const dy = (height - drawSize) / 2 + cfg.offsetY;
 
@@ -60,10 +64,10 @@ export class UIManager {
         const frameIdx = Math.floor(time / 100) % frameCount;
 
         ctx.drawImage(
-            img,
-            frameIdx * frameWidth, 0, frameWidth, frameHeight, // 切片源
-            dx, dy, drawSize, drawSize                        // 绘制目标
-        );
+                        img,
+                        frameIdx * frameWidth, 0, frameWidth, frameHeight, // source slice
+                        dx, dy, drawSize, drawSize                          // draw target
+                    );
     } else {
         const frames = anim.idle;
         if (frames.length === 0) return;
@@ -288,21 +292,27 @@ export class UIManager {
     const card = document.createElement("div");
     card.style.cssText = "width:460px; max-width:92vw; background:rgba(10,10,25,0.95); border:1px solid rgba(255,255,255,0.18); border-radius:14px; padding:14px; color:white;";
     const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
-    const lootTitle = isWeapon ? '⚔️ 获得武器！' : '💍 获得饰品！';
-    const lootTypeLabel = isWeapon
-        ? `类型：${item?.type ?? '武器'} | 适用：${item?.owner ?? '未知'} | 品质：${item?.rarity ?? ''}`
-        : `品质：${item?.rarity ?? ''} | 类型：饰品`;
-    const lootHint = isWeapon
-        ? '"立即装备" 会放入武器槽并刷新属性，"存入背包" 放入武器存放区。'
-        : '"立即装备" 会放入道具槽并刷新属性，"存入背包" 放入道具存放区。';
-    const heroBtns = (heroes ?? []).map((h, i) => {
-      return `
-      <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
-        <div style="flex:1;opacity:.9;">${h.name ?? `Hero${i + 1}`}</div>
-        <button class="loot-put" data-i="${i}" style="padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.06); color:white; cursor:pointer;">Store in Bag</button>
-        <button class="loot-equip" data-i="${i}" style="padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.18); background:rgba(46,204,113,0.18); color:white; cursor:pointer;">Equip Now</button>
-      </div>`;
-    }).join("");
+    const lootTitle = isWeapon ? '⚔️ Weapon Obtained!' : '💍 Accessory Obtained!';
+        const lootTypeLabel = isWeapon
+            ? `Type: ${item?.type ?? 'Weapon'} | For: ${item?.owner ?? 'Unknown'} | Rarity: ${item?.rarity ?? ''}`
+            : `Rarity: ${item?.rarity ?? ''} | Type: Accessory`;
+        const lootHint = isWeapon
+            ? '"Equip Now" places it in a weapon slot and refreshes stats. "Store in Bag" sends it to the weapon storage.'
+            : '"Equip Now" places it in an item slot and refreshes stats. "Store in Bag" sends it to item storage.';
+        // Shared inventory: one "Store in Bag" button, equip buttons listed per hero
+        const heroBtns = `
+          <div style="margin-top:12px;">
+            <button class="loot-put" data-i="0" style="width:100%;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.06);color:white;cursor:pointer;font-size:13px;">
+              📦 Store in Bag
+            </button>
+          </div>
+          <div style="margin-top:10px;opacity:.6;font-size:11px;padding:0 2px;">— or equip directly to —</div>
+          ${(heroes ?? []).map((h, i) => `
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+            <div style="flex:1;opacity:.9;font-size:13px;">${h.name ?? `Hero${i + 1}`}</div>
+            <button class="loot-equip" data-i="${i}" style="padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:rgba(46,204,113,0.18);color:white;cursor:pointer;">⚔️ Equip Now</button>
+          </div>`).join('')}
+        `;
     card.innerHTML = `
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
   <div style="font-weight:700;">${lootTitle}</div>
@@ -333,6 +343,10 @@ export class UIManager {
 
   hideStoryScreen() {
     this.els.storyScreen.style.display = 'none';
+  }
+  updateGold(amount) {
+    this._goldEl.textContent = `💰 ${amount}`;
+    this._goldEl.style.display = 'block';
   }
   showChestReward(item, onClose) { ChestAnimation.play(item, onClose ?? (() => {})); }
   // src/ui/UIManager.js  — PATCH: updated updateCombatUI method
