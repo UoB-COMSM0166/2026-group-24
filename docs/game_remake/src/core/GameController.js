@@ -631,11 +631,13 @@ export class GameController {
     hero._baseAwareness = hero.awareness;
     hero._baseTalent = hero.talent;
 
+    // 【修复】：兼容完整对象或ID的读取方式
     if (data.weaponSlots && Array.isArray(data.weaponSlots)) {
       hero.weaponSlots = [null, null];
-      data.weaponSlots.forEach((weaponId, i) => {
-        if (weaponId) {
-          const weapon = DataLoader.getWeapon?.(weaponId);
+      data.weaponSlots.forEach((w, i) => {
+        if (w) {
+          // 如果存档里存的是完整对象则直接使用，如果是字符串则尝试通过DataLoader获取
+          const weapon = typeof w === 'object' ? w : DataLoader.getWeapon?.(w);
           if (weapon) hero.weaponSlots[i] = weapon;
         }
       });
@@ -688,7 +690,7 @@ export class GameController {
                     awareness: h._baseAwareness,
                     talent: h._baseTalent
                 },
-                weaponSlots: h.weaponSlots.map(w => w ? w.id : null),
+                weaponSlots: h.weaponSlots,
                 equippedWeaponIndex: h.equippedWeaponIndex,
                 equipSlots: h.equipSlots,
                 inventory: h.inventory
