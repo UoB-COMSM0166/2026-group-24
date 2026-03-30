@@ -40,6 +40,7 @@ export class GameController {
     this.merchantEncountered = false;
     this._isMoving = false;
     this.rangeHighlight = null;
+    this.gold = 0;
     // ── 两步移动新增状态 ──────────────────────────────────────────
     this.pendingPath = null;      // A* 算出的待确认路径
     this.pendingTarget = null;    // 待确认目标格 {q, r}
@@ -182,7 +183,24 @@ export class GameController {
             tile.type = TileType.GRASS;
             this.noviceVillage.placeContent(ev.q, ev.r, makeAltar(), 0);
           }
+
         }
+        // ── 放置新手村商店 ──────────────────────────────────────
+                for (const ev of NOVICE_SHOP_LIST) {
+                  const tile = this.noviceVillage.getTile(ev.q, ev.r);
+                  if (tile) {
+                    tile.type = TileType.GRASS;
+                    this.noviceVillage.placeContent(ev.q, ev.r, makeShop(), 0);
+                  }
+                }
+                // ── 放置主地图商店 ──────────────────────────────────────
+                for (const ev of MAIN_SHOP_LIST) {
+                  const tile = this.map.getTile(ev.q, ev.r);
+                  if (tile) {
+                    tile.type = TileType.GRASS;
+                    this.map.placeContent(ev.q, ev.r, makeShop(), 0);
+                  }
+                }
         // ── 启动教程系统 ────────────────────────────────────────
         this.tutorial = new TutorialManager(this);
 
@@ -203,6 +221,9 @@ export class GameController {
         this.ui.updatePartyStatus(this.selectedHeroes);
         if (won) {
           const loot = rollRandomLoot();
+          const goldGained = rollGoldDrop(loot?.rarity ?? 'common');
+          this.gold = (this.gold ?? 0) + goldGained;
+          this.ui.updateGold?.(this.gold);
 
           // 先显示战斗后的故事对话（如果存在）
           if (this.currentBossContent?.postCombatMessage) {
@@ -525,6 +546,8 @@ export class GameController {
       EventTable.handleCorruptedDeer(this, tile, c);
     } else if (c.type === TileContentType.NPC) {
       EventTable.handleNPC(this, tile, c);
+    } else if (c.type === TileContentType.SHOP) {
+           EventTable.handleShop(this, tile, c);
     }
   }
 
