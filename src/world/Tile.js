@@ -23,7 +23,6 @@ export const TileContentType = {
   MERCHANT: 'merchant',
   RUIN: 'ruin',
   CORRUPTED_DEER: 'corruptedDeer',
-  SHOP: 'shop',
 };
 
 // ── 共享坐标工具 ──────────────────────────────────────────────────
@@ -77,9 +76,6 @@ export function makeRuin(name = 'Ancient Ruin Entrance', enemyName = 'Corrupted 
 }
 export function makeCorruptedDeer(name = 'Corrupted Deer') {
   return { type: TileContentType.CORRUPTED_DEER, name, iconType: 'blackCircle' };
-}
-export function makeShop(name = 'mystery shop') {
-   return { type: TileContentType.SHOP, name, iconType: 'purpleCircle' };
 }
 export function makeInjuredVillager(name = 'INJURED VILLAGER', dialogue = '') {
   return { type: TileContentType.NPC, name, dialogue, iconType: 'redCircle' };
