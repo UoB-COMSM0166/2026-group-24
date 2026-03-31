@@ -264,10 +264,15 @@
 
 <div id="react-combat-root" style="display: none; position: fixed; inset: 0; z-index: 100;"></div>
 
-<div id="event-ui" style="position: fixed; inset: 0; display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.6); z-index: 200;">
-  <div style="background: #2c2c54; padding: 30px; border-radius: 12px; text-align: center; min-width: 300px;">
-    <h3 id="event-title"></h3><p id="event-desc"></p>
-    <div id="event-buttons" style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center;"></div>
+<div id="event-ui" style="position: fixed; inset: 0; display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 200;">
+  <div style="background: linear-gradient(145deg, rgba(30,30,45,0.95), rgba(15,15,25,0.98)); padding: 40px; border-radius: 16px; text-align: center; min-width: 400px; max-width: 80vw; border: 2px solid rgba(243, 156, 18, 0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(243, 156, 18, 0.1);">
+    
+    <h3 id="event-title" style="color: #f39c12; font-size: 1.5rem; margin-bottom: 15px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); letter-spacing: 1px;"></h3>
+    
+    <p id="event-desc" style="color: #e0e0e0; font-size: 1rem; line-height: 1.6; margin-bottom: 25px; white-space: pre-wrap;"></p>
+    
+    <div id="event-buttons" style="margin-top:20px; display:flex; gap:15px; flex-wrap:wrap; justify-content:center;"></div>
+    
   </div>
 </div>
 
