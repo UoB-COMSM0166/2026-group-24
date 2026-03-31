@@ -60,6 +60,8 @@ export class DataLoader {
       'forest_2': './resource/img/map/chapter1/barrier_3.png',
       'forest_3': './resource/img/map/chapter1/barrier_4.png',
       'forest_4': './resource/img/map/chapter1/barrier_4.png',
+      'corruptedDeer': './resource/img/map/chapter1/forest.png',
+      'injuredVillager': './resource/img/map/chapter1/villager.png',
       'mountain_1': './resource/img/map/chapter1/barrier_1.png',
       'mountain_2': './resource/img/map/chapter1/barrier_1.png',
       'mountain_3': './resource/img/map/chapter1/barrier_2.png',
