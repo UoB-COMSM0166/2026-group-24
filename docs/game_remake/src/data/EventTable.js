@@ -109,14 +109,16 @@ export const NOVICE_TREASURE_LIST = [
 export const NOVICE_ALTAR_LIST = [
   { q: 2, r: 1 },
 ];
+
 export const NOVICE_SHOP_LIST = [
-  { q: 0, r: 2 },
+  { q: 0, r: 2, name: 'shop' },
 ];
 
 export const MAIN_SHOP_LIST = [
-  { map: 'main', q: -3, r: 3 },
-  { map: 'main', q: 5,  r: -3 },
+  { q: -3, r: -3, name: 'Forest Shop' },
+  { q: 5,  r: -3, name: 'Wilderness Shop' },
 ];
+
 // ── EventTable 类 ───────────────────────────────────────────────────
 
 export class EventTable {

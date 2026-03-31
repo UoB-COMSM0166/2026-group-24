@@ -16,9 +16,8 @@ import { EventTable } from '../data/EventTable.js';
 import { findPath, getReachableTiles } from '../utils/Pathfinder.js';
 import { rollEncounter, ENEMY_TYPES } from '../data/EncounterTable.js';
 import { TutorialManager } from './TutorialManager.js';
-import { NOVICE_DUNGEON_LIST, NOVICE_TREASURE_LIST, NOVICE_ALTAR_LIST } from '../data/EventTable.js';
-import { makeDungeon, makeTreasure, makeAltar } from '../world/Tile.js';
-
+import { NOVICE_DUNGEON_LIST, NOVICE_TREASURE_LIST, NOVICE_ALTAR_LIST, NOVICE_SHOP_LIST, MAIN_SHOP_LIST } from '../data/EventTable.js';
+import { makeDungeon, makeTreasure, makeAltar, makeShop } from '../world/Tile.js';
 export class GameController {
   constructor(map, player, ui, camera) {
     this.map = map;
