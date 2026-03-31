@@ -52,6 +52,14 @@ export class Character {
     this.y += (this.targetY - this.y) * lerpSpeed;
   }
 
+updateGold(amount) {
+  this.gold = amount;
+  // 如果背包已打开，直接更新金币显示，不用整体重渲染
+  const goldEl = this.panel.querySelector('#inv-gold-display');
+  if (goldEl) goldEl.textContent = `💰 Gold: ${amount}`;
+}
+
+
   setGridPos(q, r, map) {
     this.q = q; this.r = r;
     const pos = map.getTile(q, r).getCanvasPos(map.tileSize);

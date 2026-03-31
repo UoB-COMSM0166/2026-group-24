@@ -10,7 +10,7 @@ import { Player } from '../entities/Player.js';
 import { DataLoader } from '../data/DataLoader.js';
 import { rollSpeed } from './Dice.js';
 import { Renderer } from '../rendering/Renderer.js';
-import { rollRandomItem, rollRandomLoot } from '../data/items.js';
+import { rollRandomItem, rollRandomLoot, rollGoldDrop } from '../data/items.js';
 import { GameStory } from './GameStory.js';
 import { EventTable } from '../data/EventTable.js';
 import { findPath, getReachableTiles } from '../utils/Pathfinder.js';

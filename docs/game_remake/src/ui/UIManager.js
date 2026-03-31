@@ -29,10 +29,8 @@ export class UIManager {
     this.onCombatEnd = callbacks.onCombatEnd ?? (() => { });
     this.inventoryUI = new InventoryUI();
     this.animFrameReq = null;
-    this._goldEl = document.createElement('div');
-    this._goldEl.style.cssText = 'position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(10,8,6,0.85);border:1px solid rgba(251,191,36,0.4);border-radius:10px;padding:6px 16px;color:#fbbf24;font-family:sans-serif;font-weight:700;font-size:14px;z-index:200;display:none;pointer-events:none;';
-    this._goldEl.textContent = '💰 0';
-    document.body.appendChild(this._goldEl);
+
+
   }
 
   _drawHeroPreview(ctx, heroId, width, height, time) {
@@ -345,8 +343,7 @@ export class UIManager {
     this.els.storyScreen.style.display = 'none';
   }
   updateGold(amount) {
-    this._goldEl.textContent = `💰 ${amount}`;
-    this._goldEl.style.display = 'block';
+      this.inventoryUI?.updateGold(amount);
   }
   showChestReward(item, onClose) { ChestAnimation.play(item, onClose ?? (() => {})); }
   // src/ui/UIManager.js  — PATCH: updated updateCombatUI method
