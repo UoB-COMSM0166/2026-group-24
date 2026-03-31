@@ -65,13 +65,9 @@ export class InventoryUI {
     }
 
     close() {
-            this.isOpen = false;
-            this.panel.style.display = "none";
-            if (this._heroAnimReq) {
-                cancelAnimationFrame(this._heroAnimReq);
-                this._heroAnimReq = null;
-            }
-        }
+        this.isOpen = false;
+        this.panel.style.display = "none";
+    }
 
     update(heroes) {
         this.heroes = Array.isArray(heroes) ? heroes : [];
@@ -203,23 +199,18 @@ export class InventoryUI {
             </div>
         </div>
 
-     <!-- 右侧角色区 -->
-             <div style="flex:1;">
-                 <div style="margin-bottom:10px;">${tabs}</div>
+        <!-- 右侧角色区 -->
+        <div style="flex:1;">
+            <div style="margin-bottom:10px;">${tabs}</div>
 
-                 <div style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid rgba(255,255,255,0.10);border-radius:12px;margin-bottom:10px;">
-                    <canvas id="inv-hero-canvas" width="120" height="140"
-                        style="border-radius:10px;background:rgba(255,255,255,0.04);flex-shrink:0;">
-                    </canvas>
-                     <div style="flex:1;">
-                         <div style="font-weight:700;font-size:15px;margin-bottom:4px;">${hero.name}</div>
-                         <div style="opacity:.9;font-size:13px;">HP ${hp} / ${maxHp}</div>
-                         <div style="opacity:.9;font-size:13px;">ATK ${hero.attack ?? 0} | DEF ${hero.defense ?? 0} | SPD ${hero.speed ?? 0}</div>
-                         <div style="opacity:.65;font-size:11px;margin-top:3px;">STR ${hero.strength ?? 0} | VIT ${hero.vitality ?? 0} | AGI ${hero.agility ?? 0} | INT ${hero.intellect ?? 0} | AWR ${hero.awareness ?? 0} | TAL ${hero.talent ?? 0}</div>
-                     </div>
-                 </div>
-
-
+            <div style="padding:10px;border:1px solid rgba(255,255,255,0.10);border-radius:12px;margin-bottom:10px;">
+    <div style="font-weight:700;margin-bottom:6px;">Character Stats</div>
+    <div style="opacity:.9;">HP ${hp} / ${maxHp}</div>
+    <div style="opacity:.9;">ATK ${hero.attack ?? 0} | DEF ${hero.defense ?? 0} | SPD ${hero.speed ?? 0}</div>
+    <div style="opacity:.75;font-size:12px;margin-top:4px;">
+        STR ${hero.strength ?? 0} | TOU ${hero.toughness ?? 0} | AGI ${hero.agility ?? 0} | INT ${hero.intellect ?? 0}
+    </div>
+</div>
 
 
 ${weaponSlotsHTML}
@@ -465,22 +456,6 @@ ${itemSlotsHTML}
                 }
             });
         }
-        // ── 角色预览动画 ──────────────────────────────────────────────
-                const invCanvas = this.panel.querySelector('#inv-hero-canvas');
-                        if (invCanvas) {
-                            const ctx2d = invCanvas.getContext('2d');
-                            if (this._heroAnimReq) cancelAnimationFrame(this._heroAnimReq);
-                            const heroId = hero.id;
-                            const uiManager = window._gameController?.ui;
-                            const animate = (now) => {
-                                if (!this.isOpen) return;
-                                if (uiManager?._drawHeroPreview) {
-                                    uiManager._drawHeroPreview(ctx2d, heroId, 120, 140, now);
-                                }
-                                this._heroAnimReq = requestAnimationFrame(animate);
-                            };
-                            this._heroAnimReq = requestAnimationFrame(animate);
-                        }
     }
 
 
