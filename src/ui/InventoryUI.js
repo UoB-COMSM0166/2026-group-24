@@ -29,19 +29,21 @@ export class InventoryUI {
         this.panel = document.createElement("div");
         this.panel.style.cssText = [
             "position:fixed",
-            "right:18px",
+            "right:20px",
             "top:80px",
             "width:780px",
             "max-width:calc(100vw - 40px)",
+            "max-height:70vh",
             "overflow:auto",
-            "padding:14px",
-            "border-radius:14px",
-            "border:1px solid rgba(255,255,255,0.18)",
-            "background:rgba(10,10,25,0.92)",
+            "padding:18px",
+            "border-radius:16px",
+            "border:1px solid rgba(243,156,18,0.4)",
+            "background:linear-gradient(145deg, rgba(15,15,30,0.95), rgba(5,5,15,0.98))",
+            "backdrop-filter:blur(12px)",
             "color:white",
             "z-index:150",
             "display:none",
-            "box-shadow:0 12px 30px rgba(0,0,0,0.45)",
+            "box-shadow:0 16px 40px rgba(0,0,0,0.6), inset 0 1px 10px rgba(255,255,255,0.05)",
             "font-family:sans-serif",
         ].join(";");
         document.body.appendChild(this.panel);
