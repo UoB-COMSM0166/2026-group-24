@@ -467,6 +467,8 @@ export class EventTable {
                 {
                   text: 'Accept',
                   onClick: () => {
+                    // 切换到救援车队任务集
+                    gameController.tutorial.taskList.switchToMission('Rescue the Caravan');
                     gameController._startMission('Rescue the Caravan', 5);
                     gameController.ui.showEvent(
                       '✓ Quest Accepted',
