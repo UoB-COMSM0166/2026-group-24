@@ -1,4 +1,4 @@
-// src/core/InputHandler.js
+// src/core/Inputhandler.js
 export class InputHandler {
   constructor(canvas, camera, getMap, gameController) {
     this.canvas = canvas;
@@ -15,6 +15,9 @@ export class InputHandler {
     this._onMouseUp = this._onMouseUp.bind(this);
     this._onWheel = this._onWheel.bind(this);
     this._onEndTurn = this._onEndTurn.bind(this);
+    
+    // 【新增】绑定键盘事件处理函数的上下文，确保 this 指向正确
+    this._onKeyDown = this._onKeyDown.bind(this); 
   }
 
   bind(endTurnBtn) {
@@ -23,6 +26,9 @@ export class InputHandler {
     this.canvas.addEventListener('mouseup', this._onMouseUp);
     // passive: false 让我们能调用 preventDefault() 阻止页面滚动
     this.canvas.addEventListener('wheel', this._onWheel, { passive: false });
+    
+    // 【新增】注册全局键盘按下事件
+    window.addEventListener('keydown', this._onKeyDown);
 
     if (endTurnBtn) {
       this.endTurnBtn = endTurnBtn;
@@ -35,9 +41,24 @@ export class InputHandler {
     this.canvas.removeEventListener('mousemove', this._onMouseMove);
     this.canvas.removeEventListener('mouseup', this._onMouseUp);
     this.canvas.removeEventListener('wheel', this._onWheel);
+    
+    // 【新增】卸载全局键盘事件，防止内存泄漏和重复触发
+    window.removeEventListener('keydown', this._onKeyDown);
 
     if (this.endTurnBtn) {
       this.endTurnBtn.removeEventListener('click', this._onEndTurn);
+    }
+  }
+
+  // 【新增】键盘输入的具体处理逻辑
+  _onKeyDown(e) {
+    // 安全检查：如果玩家正在输入框里打字 (比如起名字、聊天)，则不触发结束回合
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    
+    // 监听空格键
+    if (e.code === 'Space') {
+      e.preventDefault(); // 阻止浏览器按下空格时默认向下滚动网页的行为
+      this._onEndTurn();  // 直接调用现成的结束回合方法
     }
   }
 
