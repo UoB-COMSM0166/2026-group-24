@@ -12,8 +12,8 @@ export class InventoryUI {
         this.btn.title = "Inventory (B)";
         this.btn.style.cssText = [
             "position:fixed",
-            "right:18px",
-            "top:18px",
+            "right:20px",
+            "top:20px",
             "width:46px",
             "height:46px",
             "border-radius:12px",
@@ -30,9 +30,9 @@ export class InventoryUI {
         this.panel.style.cssText = [
             "position:fixed",
             "right:18px",
-            "top:72px",
+            "top:80px",
             "width:780px",
-            "max-height:70vh",
+            "max-width:calc(100vw - 40px)",
             "overflow:auto",
             "padding:14px",
             "border-radius:14px",

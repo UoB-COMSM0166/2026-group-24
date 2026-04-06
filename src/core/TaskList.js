@@ -212,17 +212,17 @@ export class TaskList {
     el.id = 'tutorial-hud';
     el.style.cssText = `
       position: fixed;
-      top: 80px;
-      right: 16px;
+      top: 80px;      /* 位于右上角背包的下方 */
+      right: 20px;    /* 靠右对齐 */
       background: rgba(10,8,6,0.88);
       border: 1px solid rgba(251,191,36,0.4);
       border-radius: 12px;
       padding: 14px 16px;
       color: white;
       font-family: sans-serif;
-      font-size: 11px;
-      min-width: 160px;
-      z-index: 500;
+      font-size: 12px; /* 字体稍微调大一点点更清晰 */
+      min-width: 180px;
+      z-index: 50;
       backdrop-filter: blur(8px);
       box-shadow: 0 4px 24px rgba(0,0,0,0.6);
     `;
@@ -233,7 +233,7 @@ export class TaskList {
       debugBtn.textContent = '🔧 完成所有任务';
       debugBtn.style.cssText = `
         position: fixed;
-        bottom: 20px;
+        bottom: 70px;
         left: 20px;
         background: rgba(239,68,68,0.85);
         border: none;
