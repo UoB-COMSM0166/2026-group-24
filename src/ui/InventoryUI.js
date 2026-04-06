@@ -274,6 +274,14 @@ ${itemSlotsHTML}
                 const slotIndex = Number(el.dataset.slot);
                 const weapon = hero.weaponSlots?.[slotIndex];
                 if (!weapon) return;
+
+                // 【修复核心】：使用 filter(Boolean) 严格过滤
+                const equippedWeapons = (hero.weaponSlots || []).filter(Boolean);
+                if (equippedWeapons.length <= 1) {
+                    this._showSlotError("Must equip at least one weapon!");
+                    return; 
+                }
+
                 hero.weaponSlots[slotIndex] = null;
                 this.sharedStorage.weapons.push(weapon);
                 if (typeof hero.refreshDerivedStats === "function") hero.refreshDerivedStats();
@@ -442,10 +450,17 @@ ${itemSlotsHTML}
                 if (dragFrom === "equipped-weapon") {
                     const weapon = hero.weaponSlots?.[slotIndex];
                     if (!weapon) return;
+                    const equippedWeapons = (hero.weaponSlots || []).filter(Boolean);
+                    if (equippedWeapons.length <= 1) {
+                        this._showSlotError("Must equip at least one weapon!");
+                        return; // 拒绝拖入仓库
+                    }
+
                     hero.weaponSlots[slotIndex] = null;
                     this.sharedStorage.weapons.push(weapon);
                     if (typeof hero.refreshDerivedStats === "function") hero.refreshDerivedStats();
                     this.render();
+                    
                 } else if (dragFrom === "equipped-item") {
                     const item = hero.equipSlots?.[slotIndex];
                     if (!item) return;
