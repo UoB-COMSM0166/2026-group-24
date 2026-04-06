@@ -15,6 +15,7 @@ import {
 } from '../world/Tile.js';
 import { MapPresets } from './Constants.js';
 import { DialogueBox } from '../ui/DialogueBox.js';
+import { TaskList } from './TaskList.js';
 
 // ── 出口传送阵位置（新手村中心）────────────────────────────────────
 const EXIT_Q = 0;
@@ -72,14 +73,8 @@ export class TutorialManager {
     this.gc = gc;
     this.allDone = false;
 
-    // ── 任务清单 ──────────────────────────────────────────────────────
-    this.tasks = {
-      fought_enemy:     { done: false, label: '⚔️  击败一只怪物' },
-      opened_chest:     { done: false, label: '🎁  打开宝箱' },
-      visited_altar:    { done: false, label: '🔮  使用祭坛' },
-     // visited_merchant: { done: false, label: '🛒  拜访商人' },
-      opened_inventory: { done: false, label: '🎒  查看背包' },
-    };
+    // ── 任务清单管理 ───────────────────────────────────────────────
+    this.taskList = new TaskList(() => this._onAllTasksComplete());
 
     // 记录哪些事件类型已经介绍过（每类只介绍一次）
     this._introducedEvents = new Set();
@@ -113,11 +108,12 @@ export class TutorialManager {
           this._locked = false;
           this._patchShowEvent();
           this._patchFsmTransition();
+          this._patchPlayerMovement();
           setTimeout(() => {
             this.gc.ui.showEvent(
                 '📋 新手训练任务',
                 '完成以下所有训练，出口传送阵便会开启：\n\n⚔️  击败一只怪物\n🎁  打开一个宝箱\n🔮  在祭坛祈祷\n🛒  拜访村庄商人\n🎒  查看你的背包（按 B 键）\n\n全部完成后，地图中央会出现传送阵！',
-                [{ text: '明白！', onClick: () => this._initHUD() }]
+                [{ text: '明白！', onClick: () => this.taskList.initHUD() }]
             );
           }, 100);
         }
@@ -128,10 +124,24 @@ export class TutorialManager {
   // 公开：标记任务完成（InventoryUI 直接调用）
   // ══════════════════════════════════════════════════════════════════
   complete(key) {
-    if (!this.tasks[key] || this.tasks[key].done) return;
-    this.tasks[key].done = true;
-    this._updateHUD();
-    this._checkAllDone();
+    this.taskList.complete(key);
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  // 包装玩家移动：通知 TaskList 检查坐标相关任务
+  // ══════════════════════════════════════════════════════════════════
+  _patchPlayerMovement() {
+    const origMovePlayer = this.gc.movePlayer.bind(this.gc);
+    const self = this;
+
+    this.gc.movePlayer = function (q, r, ...args) {
+      const result = origMovePlayer(q, r, ...args);
+      
+      // 通知 TaskList 检查玩家是否到达了任何任务的目标坐标
+      self.taskList.checkPlayerPosition(self.gc.player.q, self.gc.player.r);
+      
+      return result;
+    };
   }
 
   // ══════════════════════════════════════════════════════════════════
@@ -167,6 +177,7 @@ export class TutorialManager {
 
       if (t.includes('训练营商人'))  self.complete('visited_merchant');
       if (t.includes('🎁') || t.includes('Treasure')) self.complete('opened_chest');
+      
       // 第一次获得战利品分配界面后，提示玩家去背包查看
       if ((t.includes('🎁') || t.includes('获得物品')) && !self._lootIntroduced) {
         self._lootIntroduced = true;
@@ -203,9 +214,6 @@ export class TutorialManager {
     };
   }
 
-  // ══════════════════════════════════════════════════════════════════
-  // 包装 fsm.transition：检测战斗胜利
-  // ══════════════════════════════════════════════════════════════════
   _patchFsmTransition() {
     const fsm = this.gc.fsm;
     const original = fsm.transition.bind(fsm);
@@ -215,6 +223,17 @@ export class TutorialManager {
       const prevState = fsm.currentState;
       const wasWin = self.gc.combatManager?.phase === 'WIN';
       const result = original(newState, ...args);
+
+      // ── 检测进入主地图时的任务切换 ────────────────────────────────────
+      if (
+          newState === 'MAP_EXPLORATION' &&
+          self.gc.currentMapName !== 'Novice Village' &&
+          self.taskList.getCurrentMission() === 'Novice Village'
+      ) {
+        setTimeout(() => {
+          self.taskList.switchToMission('Main Map - Rescue Villagers');
+        }, 100);
+      }
 
       // 第一次进入战斗时介绍战斗系统
       if (
@@ -251,18 +270,21 @@ export class TutorialManager {
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 全部完成检查
+  // 全部任务完成时的回调
   // ══════════════════════════════════════════════════════════════════
-  _checkAllDone() {
+  _onAllTasksComplete() {
     if (this.allDone) return;
-    if (!Object.values(this.tasks).every(t => t.done)) return;
 
     this.allDone = true;
-    this._unlockExitPortal();
-    // 延迟一秒再弹，确保事件弹窗已经关闭
-    setTimeout(() => {
-      this._showCompletionMessage();
-    }, 1000);
+    
+    // 检查是否在新手村
+    if (this.gc.currentMapName === 'Novice Village') {
+      this._unlockExitPortal();
+      // 延迟一秒再弹，确保事件弹窗已经关闭
+      setTimeout(() => {
+        this._showCompletionMessage();
+      }, 1000);
+    }
   }
 
   _unlockExitPortal() {
@@ -309,95 +331,12 @@ export class TutorialManager {
               '走上传送阵即可进入主世界，真正的冒险从现在开始，祝你好运！',
             ]},
           () => {
-            if (this._hudEl) {
-              this._hudEl.style.transition = 'opacity 0.8s ease';
-              this._hudEl.style.opacity = '0';
-              setTimeout(() => this._hudEl?.remove(), 900);
-            }
-            if (this._debugBtn) this._debugBtn.remove();
+            // TaskList 会自动根据 autoCleanupOnComplete 标志处理清理逻辑
+            // TutorialManager 不再需要管理这个
           }
       );
     }, 1000);
   }
 
-  // ══════════════════════════════════════════════════════════════════
-  // HUD 任务进度面板
-  // ══════════════════════════════════════════════════════════════════
-  _initHUD() {
-    const el = document.createElement('div');
-    el.id = 'tutorial-hud';
-    el.style.cssText = `
-      position: fixed;
-      top: 80px;
-      right: 16px;
-      background: rgba(10,8,6,0.88);
-      border: 1px solid rgba(251,191,36,0.4);
-      border-radius: 12px;
-      padding: 14px 16px;
-      color: white;
-      font-family: sans-serif;
-      font-size: 11px;
-      min-width: 160px;
-      z-index: 500;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.6);
-    `;
-    // 调试按钮：一键完成所有任务
-    const debugBtn = document.createElement('button');
-    debugBtn.textContent = '🔧 完成所有任务';
-    debugBtn.style.cssText = `
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background: rgba(239,68,68,0.85);
-      border: none;
-      border-radius: 8px;
-      padding: 8px 16px;
-      color: white;
-      font-family: sans-serif;
-      font-size: 13px;
-      cursor: pointer;
-      z-index: 999;
-    `;
-    debugBtn.addEventListener('click', () => {
-      Object.keys(this.tasks).forEach(key => this.complete(key));
-    });
-    document.body.appendChild(debugBtn);
-    this._debugBtn = debugBtn;
-    document.body.appendChild(el);
-    this._hudEl = el;
-    this._updateHUD();
-  }
-
-  _updateHUD() {
-    if (!this._hudEl) return;
-    const entries = Object.values(this.tasks);
-    const done = entries.filter(t => t.done).length;
-    const total = entries.length;
-    const pct = Math.round((done / total) * 100);
-
-    const rows = entries.map(t => `
-      <div style="
-        display:flex;align-items:center;gap:8px;margin-bottom:5px;
-        opacity:${t.done ? '0.45' : '1'};
-        text-decoration:${t.done ? 'line-through' : 'none'};
-        color:${t.done ? '#9ca3af' : '#f3f4f6'};
-        transition:all 0.3s;
-      ">
-        <span>${t.done ? '✅' : '⭕'}</span>
-        <span>${t.label}</span>
-      </div>
-    `).join('');
-
-    this._hudEl.innerHTML = `
-      <div style="font-weight:700;font-size:13px;margin-bottom:10px;color:#fbbf24;letter-spacing:0.04em;">
-        📋 新手教程
-      </div>
-      ${rows}
-      <div style="margin-top:10px;background:rgba(255,255,255,0.08);border-radius:6px;height:5px;overflow:hidden;">
-        <div style="width:${pct}%;height:100%;background:linear-gradient(to right,#f59e0b,#fbbf24);border-radius:6px;transition:width 0.5s;"></div>
-      </div>
-      <div style="font-size:11px;color:#6b7280;text-align:right;margin-top:4px;">${done} / ${total}</div>
-    `;
-  }
 }
+
