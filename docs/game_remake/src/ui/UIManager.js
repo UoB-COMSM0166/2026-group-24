@@ -267,17 +267,32 @@ export class UIManager {
     window.renderCombatUI('react-combat-root', stateSnapshot, callbacks);
   }
   onCombatResult(result) { this.hideCombatOverlay(); this.onCombatEnd(result); }
-  showEvent(title, desc, buttons = []) {
+  showEvent(title, desc, buttons = [], config = {}) {
     const { eventUI, eventTitle, eventDesc, eventButtons } = this.els;
     if (!eventUI) return;
+    
+    const titleEl = document.getElementById('event-title');
+    const descEl = document.getElementById('event-desc');
+    const nameEl = document.getElementById('event-name');
+    const avatarEl = document.getElementById('event-avatar');
+    const pageEl = document.getElementById('event-page');
+    
+    // 设置头像和名字（可选配置）
+    if (nameEl) nameEl.textContent = config.name || '事件';
+    if (avatarEl) avatarEl.textContent = config.avatar || '📋';
+    
     eventUI.style.display = 'flex';
-    eventTitle.innerText = title;
-    eventDesc.innerText = desc;
+    if (titleEl) titleEl.textContent = title;
+    if (descEl) descEl.textContent = desc;
+    if (pageEl) pageEl.textContent = ''; // 单页事件不显示页码
+    
     eventButtons.innerHTML = '';
     buttons.forEach(btn => {
       const button = document.createElement('button');
-      button.innerText = btn.text;
-      button.style.cssText = "background: #e67e22; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;";
+      button.textContent = btn.text;
+      button.style.cssText = "background: transparent; border: 1px solid rgba(251,191,36,0.5); border-radius: 6px; padding: 5px 18px; color: #fbbf24; font-family: sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s ease;";
+      button.onmouseover = () => { button.style.background = 'rgba(251,191,36,0.1)'; };
+      button.onmouseout = () => { button.style.background = 'transparent'; };
       button.onclick = () => { eventUI.style.display = 'none'; if (btn.onClick) btn.onClick(); };
       eventButtons.appendChild(button);
     });
