@@ -96,9 +96,9 @@ export class GameController {
         ensureGrass(this.map, RUIN_LIST);
         ensureGrass(this.map, CORRUPTED_DEER_LIST);
 
-        // 双向传送阵
+        // 主地图传送阵指向新手村
         this.map.placeContent(mainQ, mainR, makePortal('Novice Village', noviceQ, noviceR), 0);
-        this.noviceVillage.placeContent(noviceQ, noviceR, makePortal('Main Map', mainQ, mainR), 0);
+        // 新手村开局传送阵已删除，任务完成后会动态创建
 
         // 批量放置 NPC
         for (const npc of NPC_LIST) {
