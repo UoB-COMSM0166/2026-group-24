@@ -11,7 +11,7 @@
 .save-btn {
       position: fixed; 
       bottom: 20px;    /* 保持在屏幕底部 */
-      right: 30px;     /* ⬅️ 修改这里：改为 right，留一点边距防遮挡 */
+      right: 20px;     /* ⬅️ 修改这里：改为 right，留一点边距防遮挡 */
       z-index: 50; 
       background: linear-gradient(135deg, rgba(39, 174, 96, 0.85), rgba(30, 130, 76, 0.95)); 
       backdrop-filter: blur(4px); 
@@ -167,7 +167,7 @@
 
     #party-status-overlay {
       position: fixed;
-      top: 60px;
+      top: 80px;
       left: 20px;
       z-index: 30;
       display: none;
@@ -277,8 +277,7 @@
   <button id="end-turn-btn" style="background:#e67e22; border:none; color:white; padding:6px 16px; border-radius:4px; cursor:pointer;">End Turn</button>
 </div>
 
-<button id="debug-toggle-btn" style="position: fixed; top: 60px; right: 10px; z-index: 15; background: #e67e22; border: 2px solid #fff; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px;">🐛 Debug: OFF</button>
-
+<button id="debug-toggle-btn" style="position: fixed; bottom: 20px; left: 20px; z-index: 15; background: #e67e22; border: 2px solid #fff; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px;">🐛 Debug: OFF</button>
 <div id="react-combat-root" style="display: none; position: fixed; inset: 0; z-index: 100;"></div>
 
 <div id="event-ui" style="position: fixed; inset: 0; display: none; align-items: flex-end; justify-content: center; padding-bottom: 36px; z-index: 200; pointer-events: none; background: rgba(0, 0, 0, 0.5);">
