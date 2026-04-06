@@ -210,10 +210,13 @@ export class TaskList {
   initHUD() {
     const el = document.createElement('div');
     el.id = 'tutorial-hud';
+    
+    // 【修改点】：将定位改为靠左侧垂直居中
     el.style.cssText = `
       position: fixed;
-      top: 80px;
-      right: 16px;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
       background: rgba(10,8,6,0.88);
       border: 1px solid rgba(251,191,36,0.4);
       border-radius: 12px;
