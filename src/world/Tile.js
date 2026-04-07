@@ -79,7 +79,7 @@ export function makeCorruptedDeer(name = 'Corrupted Deer') {
   return { type: TileContentType.CORRUPTED_DEER, name};
 }
 export function makeInjuredVillager(name = 'INJURED VILLAGER', dialogue = '') {
-  return { type: TileContentType.NPC, name, dialogue,iconType: 'redCircle'};
+  return { type: TileContentType.INJURED_VILLAGER, name, dialogue };
 }
 
 // ── Tile 类 ──────────────────────────────────────────────────────
