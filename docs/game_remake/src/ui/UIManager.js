@@ -293,10 +293,22 @@ export class UIManager {
       button.style.cssText = "background: transparent; border: 1px solid rgba(251,191,36,0.5); border-radius: 6px; padding: 5px 18px; color: #fbbf24; font-family: sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s ease;";
       button.onmouseover = () => { button.style.background = 'rgba(251,191,36,0.1)'; };
       button.onmouseout = () => { button.style.background = 'transparent'; };
-      button.onclick = () => { eventUI.style.display = 'none'; if (btn.onClick) btn.onClick(); };
+      button.onclick = () => { 
+        eventUI.style.display = 'none'; 
+        // 在事件对话框关闭后，调用恢复进度条标题的回调
+        if (config.onClose) {
+          setTimeout(() => config.onClose(), 50);
+        }
+        if (btn.onClick) btn.onClick(); 
+      };
       eventButtons.appendChild(button);
     });
   }
+
+  showChestReward(item, onClose) {
+    ChestAnimation.play(item, onClose);
+  }
+
   showLootAssign(item, heroes, onPick) {
     const overlay = document.createElement("div");
     overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:220; display:flex; align-items:center; justify-content:center; font-family:sans-serif;";
