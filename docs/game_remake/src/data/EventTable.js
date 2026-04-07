@@ -205,6 +205,8 @@ export class EventTable {
    * @param {Object} gameController
    */
   static handleTrap(gameController) {
+    // 触发陷阱时改变标题
+    gameController.ui.updateProgressBarTitle('💀 Find Village');
     gameController.ui.showEvent(
       this.EVENTS.TRAP.title,
       this.EVENTS.TRAP.description,
@@ -336,6 +338,8 @@ export class EventTable {
    * @param {Object} tile
    */
   static handleAltar(gameController, tile) {
+    // 触发祭坦时改变标题
+    gameController.ui.updateProgressBarTitle('💀 Find Village');
     gameController.ui.showEvent(
       this.EVENTS.ALTAR.title,
       this.EVENTS.ALTAR.description,
@@ -378,6 +382,8 @@ export class EventTable {
    * @param {Object} tile
    */
   static handleLighthouse(gameController, tile) {
+    // 触发灰塔时改变标题
+    gameController.ui.updateProgressBarTitle('💀 Find Village');
     gameController.ui.showEvent(
       this.EVENTS.LIGHTHOUSE.title,
       this.EVENTS.LIGHTHOUSE.description,
@@ -426,8 +432,8 @@ export class EventTable {
    * @param {Object} tile
    * @param {Object} content
    */
-  static handleNPC(gameController, tile, content) {
-    gameController.ui.showEvent(
+  static handleNPC(gameController, tile, content) {    // 触发遗迹时改变标题
+    gameController.ui.updateProgressBarTitle('💀 Find Village');    gameController.ui.showEvent(
       `👤 ${content.name}`,
       content.dialogue || 'Hello traveler!',
       [{ text: 'Continue', onClick: () => { } }]

@@ -39,6 +39,7 @@ export class GameController {
     this.currentMissionName = null;
     this.merchantEncountered = false;
     this._isMoving = false;
+    this._progressBarTitle = null;  // 保存进度条标题以便恢复
     this.rangeHighlight = null;
     // ── 两步移动新增状态 ──────────────────────────────────────────
     this.pendingPath = null;      // A* 算出的待确认路径
@@ -105,6 +106,7 @@ export class GameController {
           const targetMap = npc.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(npc.q, npc.r);
           if (tile && tile.type === TileType.GRASS) {
+            tile.isFixedEvent = true;  // 先标记为固定事件，这样 placeContent 中的 revealAround 不会揭示它
             let content;
             if (npc.name === 'INJURED VILLAGER') {
               content = makeInjuredVillager(npc.name, npc.dialogue);
@@ -120,6 +122,7 @@ export class GameController {
           const targetMap = village.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(village.q, village.r);
           if (tile && tile.type === TileType.GRASS) {
+            tile.isFixedEvent = true;  // 先标记为固定事件
             targetMap.placeContent(village.q, village.r, makeVillage(village.name), 0);
           }
         }
@@ -129,6 +132,7 @@ export class GameController {
           const targetMap = merchant.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(merchant.q, merchant.r);
           if (tile && tile.type === TileType.GRASS) {
+            tile.isFixedEvent = true;  // 先标记为固定事件
             targetMap.placeContent(merchant.q, merchant.r, makeMerchant(merchant.name), 0);
           }
         }
@@ -138,6 +142,7 @@ export class GameController {
           const targetMap = ruin.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(ruin.q, ruin.r);
           if (tile && tile.type === TileType.GRASS) {
+            tile.isFixedEvent = true;  // 先标记为固定事件
             const content = makeRuin(ruin.name, ruin.enemyName);
             content.description = ruin.description;
             content.postCombatMessage = ruin.postCombatMessage;
@@ -150,6 +155,7 @@ export class GameController {
           const targetMap = deer.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(deer.q, deer.r);
           if (tile && tile.type === TileType.GRASS) {
+            tile.isFixedEvent = true;  // 先标记为固定事件
             targetMap.placeContent(deer.q, deer.r, makeCorruptedDeer(deer.name), 0);
           }
         }
@@ -192,7 +198,17 @@ export class GameController {
     });
 
     this.fsm.addState(GameState.MAP_EXPLORATION, {
-      enter: () => { this.turnCount = 0; this.ui.showMapUI(); this._startTurn(); },
+      enter: () => { 
+        this.turnCount = 0; 
+        this.ui.showMapUI();
+        // 根据当前地图设置进度条标题
+        if (this.currentMapName === 'Novice Village') {
+          this.ui.updateProgressBarTitle('🏘️ Novice Village');
+        } else {
+          this.ui.updateProgressBarTitle('🌍 Main World');
+        }
+        this._startTurn(); 
+      },
     });
 
     this.fsm.addState(GameState.COMBAT, {
@@ -523,7 +539,7 @@ export class GameController {
       EventTable.handleRuin(this, tile, c);
     } else if (c.type === TileContentType.CORRUPTED_DEER) {
       EventTable.handleCorruptedDeer(this, tile, c);
-    } else if (c.type === TileContentType.NPC) {
+    } else if (c.type === TileContentType.NPC || c.type === TileContentType.INJURED_VILLAGER) {
       EventTable.handleNPC(this, tile, c);
     }
   }
@@ -558,6 +574,20 @@ export class GameController {
     this.ui.setProgressBarNormal();
     this.ui.updateProgressBar(0, maxTurns);
     this.ui.updateProgressBarTitle(`🎯 ${missionName}`);
+  }
+
+  // ── 更新进度条标题（根据当前任务或地图） ──────────────────────
+  _updateProgressBarTitle() {
+    let title;
+    if (this.currentMissionName) {
+      title = `🎯 ${this.currentMissionName}`;
+    } else if (this.currentMapName === 'Novice Village') {
+      title = '🏘️ Novice Village';
+    } else {
+      title = '🌍 Main World';
+    }
+    this._progressBarTitle = title;
+    this.ui.updateProgressBarTitle(title);
   }
 
   _executeTrapRoll() {
@@ -747,6 +777,14 @@ export class GameController {
         this.ui.updateMovementUI(this.player.movementPoints);
         this.ui.updatePartyStatus(this.selectedHeroes);
         this.ui.updateProgressBar(this.turnCount, this.currentMaxTurns);
+        // 设置进度条标题
+        if (this.currentMissionName) {
+          this.ui.updateProgressBarTitle(`🎯 ${this.currentMissionName}`);
+        } else if (this.currentMapName === 'Novice Village') {
+          this.ui.updateProgressBarTitle('🏘️ Novice Village');
+        } else {
+          this.ui.updateProgressBarTitle('🌍 Main World');
+        }
         if (this.bossMode) this.ui.updateBossMode();
 
         return true;
