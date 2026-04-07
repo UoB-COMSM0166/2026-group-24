@@ -5,8 +5,19 @@ export class GameStory {
   // 故事内容定义
   static STORIES = {
     INTRO: {
-      title: 'Adventure Begins',
-      text: 'In a distant forest, an ancient dark tree is corrupting the land. Warriors, you must explore this realm within 20 turns, then journey to the dark tree in the bottom-right corner of the map and defeat it to obtain the Jade Key and save this land.'
+      title: '老向导',
+      type: 'segmented',
+      avatar: 'elder',
+      segments: [
+        {
+          text: 'In the farthest reaches of the western frontier lies a forgotten woodland known as the Lost\n Forest. Once, it was the busiest trade route in the region, where merchant caravans traveled\n safely along sunlit paths. Villages flourished along its borders, thriving on trade and\n prosperity.',
+          backgroundImage: 'outset1'
+        },
+        {
+          text: 'But everything changed several months ago. Villagers were the first to notice the signs—deep\n within the forest, a massive tree appeared where none had ever stood before. Twisted, black,\n and ancient, it seemed to rise from the very depths of the earth itself. Soon, it came to be\n known as the Dark Tree...',
+          backgroundImage: 'outset2'
+        }
+      ]
     }
   };
 
@@ -29,7 +40,13 @@ export class GameStory {
     }
 
     this.currentStory = storyKey;
-    this.ui.showStoryScreen(story.title, story.text, onNext);
+    
+    // 支持分段故事
+    if (story.type === 'segmented' && story.segments) {
+      this.ui.showSegmentedStory(story.title, story.segments, onNext, story.avatar);
+    } else {
+      this.ui.showStoryScreen(story.title, story.text, onNext);
+    }
   }
 
   /**

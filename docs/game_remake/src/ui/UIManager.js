@@ -349,7 +349,250 @@ export class UIManager {
   hideStoryScreen() {
     this.els.storyScreen.style.display = 'none';
   }
-  showChestReward(item, onClose) { ChestAnimation.play(item, onClose ?? (() => {})); }
+
+  /**
+   * 显示分段故事（带背景图和对话框UI风格）
+   * @param {string} title - 故事标题
+   * @param {Array} segments - 分段数组，每个包含 { text, backgroundImage }
+   * @param {Function} onComplete - 故事完成后的回调
+   * @param {string} avatar - 头像键名（可选）
+   */
+  showSegmentedStory(title, segments, onComplete = null, avatar = null) {
+    const { DataLoader } = window;
+    if (!DataLoader || !segments || segments.length === 0) {
+      console.warn('Invalid segmented story');
+      onComplete?.();
+      return;
+    }
+
+    let currentSegment = 0;
+    let textAnimationId = null;
+
+    const showSegment = () => {
+      if (currentSegment >= segments.length) {
+        segmentedStoryOverlay.remove();
+        onComplete?.();
+        return;
+      }
+
+      const segment = segments[currentSegment];
+      const bgImg = DataLoader.getImage(segment.backgroundImage);
+
+      // 更新背景
+      bgImageEl.style.backgroundImage = bgImg ? `url('${bgImg.src}')` : 'none';
+
+      // 清空之前的动画
+      if (textAnimationId) clearTimeout(textAnimationId);
+      textEl.textContent = '';
+
+      // 一行行显示文本
+      const lines = segment.text.split('\n');
+      let lineIndex = 0;
+
+      const showNextLine = () => {
+        if (lineIndex < lines.length) {
+          if (lineIndex > 0) {
+            textEl.textContent += '\n';
+          }
+          textEl.textContent += lines[lineIndex];
+          lineIndex++;
+          textAnimationId = setTimeout(showNextLine, 500); // 每行间隔 500ms
+        }
+      };
+
+      showNextLine();
+
+      // 更新按钮文字
+      const isLast = currentSegment === segments.length - 1;
+      btnEl.textContent = isLast ? '开始游戏 ▶' : '继续 ▶';
+
+      // 更新页码
+      pageEl.textContent = `${currentSegment + 1} / ${segments.length}`;
+
+      currentSegment++;
+    };
+
+    // 创建分段故事UI
+    const segmentedStoryOverlay = document.createElement('div');
+    segmentedStoryOverlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 36px;
+      pointer-events: none;
+    `;
+
+    // 背景图层
+    const bgImageEl = document.createElement('div');
+    bgImageEl.style.cssText = `
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      filter: blur(3px);
+      z-index: 0;
+      pointer-events: none;
+    `;
+
+    // 半透明遮罩
+    const maskEl = document.createElement('div');
+    maskEl.style.cssText = `
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1;
+    `;
+
+    // 对话框容器
+    const containerEl = document.createElement('div');
+    containerEl.style.cssText = `
+      position: relative;
+      width: 90%;
+      max-width: 860px;
+      pointer-events: all;
+      z-index: 2;
+    `;
+
+    // 头像区域
+    const avatarWrapEl = document.createElement('div');
+    avatarWrapEl.style.cssText = `
+      position: absolute;
+      top: -95px;
+      left: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      z-index: 10;
+    `;
+
+    const avatarEl = document.createElement('div');
+    avatarEl.style.cssText = `
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #2d3748;
+      border: 3px solid rgba(251,191,36,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      overflow: hidden;
+    `;
+    
+    // 显示头像：如果提供了avatar键名，则从DataLoader获取图片
+    if (avatar) {
+      const avatarImg = DataLoader.getImage(avatar);
+      if (avatarImg) {
+        avatarEl.innerHTML = `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      } else {
+        avatarEl.textContent = '🧙';
+      }
+    } else {
+      avatarEl.textContent = '📖';
+    }
+
+    const nameEl = document.createElement('div');
+    nameEl.style.cssText = `
+      background: rgba(10,8,6,0.9);
+      border: 1px solid rgba(251,191,36,0.5);
+      border-radius: 6px;
+      padding: 2px 12px;
+      font-family: sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fbbf24;
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+    `;
+    nameEl.textContent = title;
+
+    avatarWrapEl.appendChild(avatarEl);
+    avatarWrapEl.appendChild(nameEl);
+
+    // 对话框
+    const boxEl = document.createElement('div');
+    boxEl.style.cssText = `
+      background: rgba(10,8,6,0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(251,191,36,0.3);
+      border-radius: 12px;
+      padding: 26px 36px 20px 168px;
+      height: 210px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    `;
+
+    const textEl = document.createElement('p');
+    textEl.style.cssText = `
+      font-family: sans-serif;
+      font-size: 15px;
+      color: #f3f4f6;
+      line-height: 1.85;
+      margin: 0 0 14px 0;
+      flex: 1;
+      overflow: hidden;
+      white-space: pre-wrap;
+    `;
+
+    // 底部：页码 + 按钮
+    const footerEl = document.createElement('div');
+    footerEl.style.cssText = `
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    `;
+
+    const pageEl = document.createElement('span');
+    pageEl.style.cssText = `
+      font-family: sans-serif;
+      font-size: 12px;
+      color: #6b7280;
+    `;
+
+    const btnEl = document.createElement('button');
+    btnEl.style.cssText = `
+      background: transparent;
+      border: 1px solid rgba(251,191,36,0.5);
+      border-radius: 6px;
+      padding: 5px 18px;
+      color: #fbbf24;
+      font-family: sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    `;
+    btnEl.onmouseover = () => {
+      btnEl.style.background = 'rgba(251,191,36,0.1)';
+      btnEl.style.borderColor = 'rgba(251,191,36,0.8)';
+    };
+    btnEl.onmouseout = () => {
+      btnEl.style.background = 'transparent';
+      btnEl.style.borderColor = 'rgba(251,191,36,0.5)';
+    };
+    btnEl.onclick = showSegment;
+
+    footerEl.appendChild(pageEl);
+    footerEl.appendChild(btnEl);
+    boxEl.appendChild(textEl);
+    boxEl.appendChild(footerEl);
+
+    containerEl.appendChild(avatarWrapEl);
+    containerEl.appendChild(boxEl);
+    segmentedStoryOverlay.appendChild(bgImageEl);
+    segmentedStoryOverlay.appendChild(maskEl);
+    segmentedStoryOverlay.appendChild(containerEl);
+
+    document.body.appendChild(segmentedStoryOverlay);
+
+    // 显示第一个分段
+    showSegment();
+  }
   // src/ui/UIManager.js  — PATCH: updated updateCombatUI method
   // Replace the existing updateCombatUI method in your UIManager with this version.
   // Everything else in UIManager stays the same.
