@@ -1,6 +1,11 @@
 // src/world/Tile.js
 import { DataLoader } from '../data/DataLoader.js';
 
+// ── Debug配置：全局调试标记 ────────────────────────────────────
+export const DebugConfig = {
+  showHiddenFixedEvents: false  // 是否显示隐藏的固定特殊事件
+};
+
 // ── 地形类型 ──────────────────────────────────────────────────────
 export const TileType = {
   GRASS: { id: 0, color: '#7cfc00', name: 'Plains', moveCost: 1 },
@@ -135,6 +140,7 @@ export class Tile {
     this.type = type;
     this.content = null;
     this.isRevealed = false;
+    this.isFixedEvent = false;  // 标记：是否为固定特殊事件（如NPC、村庄、商人等）
     this.variant = rng
       ? Math.floor(rng.next() * 4) + 1
       : Math.floor(Math.random() * 4) + 1;
@@ -199,8 +205,10 @@ export class Tile {
       ctx.drawImage(terrainImg, x - size - bleed / 2, y - imgH / 2, imgW, imgH);
     }
 
-    // 4. 内容图标（仅 visible 状态）
-    if (this.content && visState === 'visible') {
+    // 4. 内容图标（仅 visible 状态，或 debug 模式下显示隐藏的固定事件）
+    const shouldShowContent = visState === 'visible' || 
+                              (this.isFixedEvent && DebugConfig.showHiddenFixedEvents);
+    if (this.content && shouldShowContent) {
       const { iconType } = this.content;
       if (iconType) {
         const color = Tile.CIRCLE_COLOR_MAP[iconType];

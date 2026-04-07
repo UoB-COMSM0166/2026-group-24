@@ -85,7 +85,10 @@ export class HexMap {
     const tile = this.getTile(q, r);
     if (!tile) return;
     tile.content = content;
-    this.revealAround(q, r, revealRadius);
+    // 固定特殊事件（如NPC、村庄等）不会自动被揭示，保持被黑雾遮掩
+    if (!tile.isFixedEvent) {
+      this.revealAround(q, r, revealRadius);
+    }
     this._ensureAccessibilityAroundTile(q, r);
   }
 
