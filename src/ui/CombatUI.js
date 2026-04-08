@@ -32,7 +32,7 @@ if (!document.getElementById('combat-ui-style')) {
     }
     /* 容器大小与怪物 SVG (140x196) 保持一致，确保位置对齐 */
     .sprite-container {
-      width: 140px;
+      width: 160px;
       height: 196px;
       display: flex;
       align-items: flex-end;
@@ -245,38 +245,39 @@ const AnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX = fals
   }, [heroId, action]);
 
 // Wizard: sprite sheet rendering
-  if (heroId === 'wizard') {
-    const sheet = DataLoader.getAnim('wizard', action);
-    if (!sheet) return null;
+if (heroId === 'wizard') {
+  const sheet = DataLoader.getAnim('wizard', action);
+  if (!sheet) return null;
 
-    const frameConfigs = {
-          idle:    { totalFrames: 6, scale: 2.2, ty: 47, tx: -40 },
-          hit:     { totalFrames: 1, scale: 2.2, ty: 47, tx: -40 },
-          death:   { totalFrames: 1, scale: 2.2, ty: 47, tx: -40 },
-          attack1: { totalFrames: 8, scale: 2.2, ty: 47, tx: -40 },
-          attack2: { totalFrames: 8, scale: 2.2, ty: 47, tx: -40 },
-        };
-    const fc = frameConfigs[action] || frameConfigs.idle;
-    const frameW = sheet.width / fc.totalFrames;
+  const frameConfigs = {
+    idle:    { totalFrames: 6, scale: 2.2, ty: 47, ml: -40 },
+    hit:     { totalFrames: 1, scale: 2.2, ty: 47, ml: -40 },
+    death:   { totalFrames: 1, scale: 2.2, ty: 47, ml: -40 },
+    attack1: { totalFrames: 8, scale: 2.2, ty: 47, ml: -40 },
+    attack2: { totalFrames: 8, scale: 2.2, ty: 47, ml: -40 },
+  };
+  const fc = frameConfigs[action] || frameConfigs.idle;
+  const frameW = sheet.width / fc.totalFrames;
 
-    return (
-      <div className="sprite-container">
-        <div className="unit-shadow" />
-        <div style={{
-          width: `${frameW}px`,
-          height: `${sheet.height}px`,
-          backgroundImage: `url(${sheet.src})`,
-          backgroundPosition: `-${frame * frameW}px 0px`,
-          backgroundSize: `${sheet.width}px ${sheet.height}px`,
-          backgroundRepeat: 'no-repeat',
-          transform: `scale(${fc.scale}) translateY(${fc.ty}px) translateX(${fc.tx}px)${flipX ? ' scaleX(-1)' : ''}`,
-          transformOrigin: 'bottom center',
-          imageRendering: 'pixelated',
-          marginBottom: '-5px'
-        }} className="pixel-art" />
-      </div>
-    );
-  }
+  return (
+    <div className="sprite-container">
+      <div className="unit-shadow" />
+      <div style={{
+        width: `${frameW}px`,
+        height: `${sheet.height}px`,
+        backgroundImage: `url(${sheet.src})`,
+        backgroundPosition: `-${frame * frameW}px 0px`,
+        backgroundSize: `${sheet.width}px ${sheet.height}px`,
+        backgroundRepeat: 'no-repeat',
+        transform: `scale(${fc.scale}) translateY(${fc.ty}px)${flipX ? ' scaleX(-1)' : ''}`,
+        transformOrigin: 'bottom center',
+        imageRendering: 'pixelated',
+        marginBottom: '-5px',
+        marginLeft: `${fc.ml}px`,
+      }} className="pixel-art" />
+    </div>
+  );
+}
 
   // Other heroes: sequence frame rendering
   const animFrames = DataLoader.getAnim(heroId, action);
@@ -761,7 +762,7 @@ const CombatApp = ({ state, callbacks }) => {
               isCaster(a) && !isCaster(b) ? -1 : !isCaster(a) && isCaster(b) ? 1 : 0
             );
             return (
-              <div style={{ display:'flex', gap:'80px', alignItems:'flex-end',
+              <div style={{ display:'flex', gap:'180px', alignItems:'flex-end',
                 pointerEvents: phase === 'AWAIT_TARGET' ? 'none' : 'auto',
                 position: 'relative' }}>
                 {sorted.map(h => {
