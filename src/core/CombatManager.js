@@ -177,21 +177,23 @@ export class CombatManager {
   // ── Try to trigger a status effect based on dice roll ─────────────
   _tryTriggerStatus(skill, target, rollVal) {
     if (!skill.statusEffect || !skill.statusChance) return;
-    const key = String(rollVal);
-    const chance = skill.statusChance[key] || 0;
+    const chance = typeof skill.statusChance === 'number'
+      ? skill.statusChance
+      : (skill.statusChance[String(rollVal)] || 0);
     if (Math.random() < chance) {
       this._applyStatus(target === 'aoe' ? null : target, skill.statusEffect);
     }
   }
 
   // ── AOE status trigger ────────────────────────────────────────────
-  _tryTriggerStatusAOE(skill, rollVal) {
+  _tryTriggerStatusAOE(skill, rollVal, targets = this.enemies) {
     if (!skill.statusEffect || !skill.statusChance) return;
-    const key = String(rollVal);
-    const chance = skill.statusChance[key] || 0;
-    this.enemies.forEach(e => {
-      if (this._isAlive(e) && Math.random() < chance) {
-        this._applyStatus(e, skill.statusEffect);
+    const chance = typeof skill.statusChance === 'number'
+      ? skill.statusChance
+      : (skill.statusChance[String(rollVal)] || 0);
+    targets.forEach(unit => {
+      if (this._isAlive(unit) && Math.random() < chance) {
+        this._applyStatus(unit, skill.statusEffect);
       }
     });
   }
@@ -320,6 +322,7 @@ export class CombatManager {
     const { skill, target, attacker, multiplier, rollVal, textType, isHeal } = this.currentAction;
     const statKey = skill.statKey || 'strength';
     const statValue = this._getEffectiveAtk(attacker, statKey);
+    const isEnemyAction = attacker?.type === 'enemy';
 
     // Miss
     if (multiplier === 0) {
@@ -358,20 +361,21 @@ export class CombatManager {
       let baseDamage = Math.floor(statValue * (skill.power / 100) * multiplier);
 
       if (target === 'aoe') {
-        // AOE hit all enemies
-        this.enemies.forEach(e => {
-          if (this._isAlive(e)) {
-            const finalDmg = this._getIncomingDamage(e, Math.max(1, baseDamage - (e.defense || 0)));
-            e.hp = Math.max(0, e.hp - finalDmg);
+        const aoeTargets = attacker.type === 'enemy' ? this.heroes : this.enemies;
+        // AOE hit all opponents
+        aoeTargets.forEach(unit => {
+          if (this._isAlive(unit)) {
+            const finalDmg = this._getIncomingDamage(unit, Math.max(1, baseDamage - (unit.defense || 0)));
+            unit.hp = Math.max(0, unit.hp - finalDmg);
           }
         });
         // AOE status trigger
-        this._tryTriggerStatusAOE(skill, rollVal);
+        this._tryTriggerStatusAOE(skill, rollVal, aoeTargets);
         this.diceInfo = {
           isHeal: false,
           damage: baseDamage,
           type: textType,
-          targetId: this.enemies.find(e => this._isAlive(e))?.id
+          targetId: aoeTargets.find(unit => this._isAlive(unit))?.id
         };
         this.addLog(`Rolled [${rollVal}] → AOE [${skill.name}] hit all! ${this._rollLabel(textType)}`);
       } else {
@@ -489,6 +493,41 @@ export class CombatManager {
     let rollVal = Math.max(1, Math.min(6, Math.round(result.sampleRoll)));
     const multiplier = rollVal <= 1 ? 0 : rollVal <= 2 ? 0.5 : rollVal <= 4 ? 1.0 : rollVal === 5 ? 1.5 : 2.0;
     const textType   = rollVal <= 1 ? 'miss' : rollVal <= 2 ? 'weak' : rollVal <= 4 ? 'normal' : rollVal === 5 ? 'crit' : 'perfect';
+
+    const resolvedSkill = skill || {
+      id: 'enemy_attack',
+      name: skillName,
+      type: 'attack',
+      target: 'single',
+      power,
+      statKey,
+    };
+    const resolvedTarget = resolvedSkill.target === 'aoe' ? 'aoe' : target;
+
+    this.currentAction = {
+      skill: resolvedSkill,
+      attacker: this.activeUnit,
+      target: resolvedTarget,
+      multiplier,
+      rollVal,
+      textType,
+      isHeal: false,
+    };
+
+    this.diceInfo = {
+      finalRoll: rollVal,
+      desc: 'Rolling',
+      attackerId: this.activeUnit.id,
+      targetId: resolvedTarget === 'aoe' ? target?.id : resolvedTarget?.id,
+      isHeal: false,
+      skillType: resolvedSkill.type || 'attack',
+      skillPower: resolvedSkill.power || power || 0,
+      skipDice: true,
+    };
+
+    this.phase = 'ROLLING';
+    this.notifyUI();
+    return;
 
     if (multiplier === 0) {
       this.addLog(`${this.activeUnit.name} used [${skillName}] but missed!`);
