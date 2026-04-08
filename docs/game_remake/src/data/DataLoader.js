@@ -85,6 +85,9 @@ export class DataLoader {
       'weapon_tome':   './resource/img/items/daifu.png',
       'weapon_bow':    './resource/img/items/daifu.png',
       'weapon_fist':   './resource/img/items/daifu.png',
+      'traveler_set':      './resource/img/items/daifu.png',
+      'star_cloak':        './resource/img/items/daifu.png',
+      'bloodthirst_mask':  './resource/img/items/daifu.png',
     };
 
     // --- 动画加载任务 (英雄序列帧) ---

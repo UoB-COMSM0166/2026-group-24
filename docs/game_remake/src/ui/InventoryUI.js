@@ -575,6 +575,12 @@ function _getItemEmoji(iconType) {
             return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('💪')">`;
         case 'ring_intellect':
             return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🔵')">`;
+        case 'traveler_set':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🧭')">`;
+        case 'star_cloak':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🌟')">`;
+        case 'bloodthirst_mask':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🩸')">`;
         default:        return '📦';
     }
 }
@@ -617,6 +623,21 @@ function drawItemIconMini(canvas, iconType) {
                 ctx.drawImage(img, -16, -16, 32, 32);
             } else {
                 ctx.strokeStyle = iconType === 'ring_intellect' ? '#c084fc' : '#60a5fa';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, 11, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            break;
+        }
+        case 'traveler_set':
+        case 'star_cloak':
+        case 'bloodthirst_mask': {
+            const img = window.DataLoader?.getImage(iconType);
+            if (img) {
+                ctx.drawImage(img, -16, -16, 32, 32);
+            } else {
+                ctx.strokeStyle = '#60a5fa';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
                 ctx.arc(0, 0, 11, 0, Math.PI * 2);
