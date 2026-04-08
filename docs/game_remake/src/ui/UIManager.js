@@ -29,8 +29,10 @@ export class UIManager {
     this.onCombatEnd = callbacks.onCombatEnd ?? (() => { });
     this.inventoryUI = new InventoryUI();
     this.animFrameReq = null;
-
-
+    this._goldEl = document.createElement('div');
+    this._goldEl.style.cssText = 'position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(10,8,6,0.85);border:1px solid rgba(251,191,36,0.4);border-radius:10px;padding:6px 16px;color:#fbbf24;font-family:sans-serif;font-weight:700;font-size:14px;z-index:200;display:none;pointer-events:none;';
+    this._goldEl.textContent = '💰 0';
+    document.body.appendChild(this._goldEl);
   }
 
   _drawHeroPreview(ctx, heroId, width, height, time) {
@@ -39,7 +41,7 @@ export class UIManager {
 
     ctx.clearRect(0, 0, width, height);
 
-   // --- Fine-tuning parameters for each hero ---
+    // --- 在这里定义每个英雄的微调参数 ---
     const configs = {
         'wizard': { size: 220, offsetX: 20, offsetY: -10, frameCount: 6 },
         'knight': { size: 280, offsetX: 12, offsetY: -95 },
@@ -50,7 +52,7 @@ export class UIManager {
 
     const cfg = configs[heroId] || configs['default'];
     const drawSize = cfg.size;
-// Center formula: (canvas width - draw size) / 2 + offset
+    // 居中计算公式：(画布宽度 - 绘制宽度) / 2 + 偏移量
     const dx = (width - drawSize) / 2 + cfg.offsetX;
     const dy = (height - drawSize) / 2 + cfg.offsetY;
 
@@ -62,10 +64,10 @@ export class UIManager {
         const frameIdx = Math.floor(time / 100) % frameCount;
 
         ctx.drawImage(
-                        img,
-                        frameIdx * frameWidth, 0, frameWidth, frameHeight, // source slice
-                        dx, dy, drawSize, drawSize                          // draw target
-                    );
+            img,
+            frameIdx * frameWidth, 0, frameWidth, frameHeight, // 切片源
+            dx, dy, drawSize, drawSize                        // 绘制目标
+        );
     } else {
         const frames = anim.idle;
         if (frames.length === 0) return;
@@ -269,48 +271,69 @@ export class UIManager {
     window.renderCombatUI('react-combat-root', stateSnapshot, callbacks);
   }
   onCombatResult(result) { this.hideCombatOverlay(); this.onCombatEnd(result); }
-  showEvent(title, desc, buttons = []) {
+  showEvent(title, desc, buttons = [], config = {}) {
     const { eventUI, eventTitle, eventDesc, eventButtons } = this.els;
     if (!eventUI) return;
+
+    const titleEl = document.getElementById('event-title');
+    const descEl = document.getElementById('event-desc');
+    const nameEl = document.getElementById('event-name');
+    const avatarEl = document.getElementById('event-avatar');
+    const pageEl = document.getElementById('event-page');
+
+    // 设置头像和名字（可选配置）
+    if (nameEl) nameEl.textContent = config.name || '事件';
+    if (avatarEl) avatarEl.textContent = config.avatar || '📋';
+
     eventUI.style.display = 'flex';
-    eventTitle.innerText = title;
-    eventDesc.innerText = desc;
+    if (titleEl) titleEl.textContent = title;
+    if (descEl) descEl.textContent = desc;
+    if (pageEl) pageEl.textContent = ''; // 单页事件不显示页码
+
     eventButtons.innerHTML = '';
     buttons.forEach(btn => {
       const button = document.createElement('button');
-      button.innerText = btn.text;
-      button.style.cssText = "background: #e67e22; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;";
-      button.onclick = () => { eventUI.style.display = 'none'; if (btn.onClick) btn.onClick(); };
+      button.textContent = btn.text;
+      button.style.cssText = "background: transparent; border: 1px solid rgba(251,191,36,0.5); border-radius: 6px; padding: 5px 18px; color: #fbbf24; font-family: sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s ease;";
+      button.onmouseover = () => { button.style.background = 'rgba(251,191,36,0.1)'; };
+      button.onmouseout = () => { button.style.background = 'transparent'; };
+      button.onclick = () => {
+        eventUI.style.display = 'none';
+        // 在事件对话框关闭后，调用恢复进度条标题的回调
+        if (config.onClose) {
+          setTimeout(() => config.onClose(), 50);
+        }
+        if (btn.onClick) btn.onClick();
+      };
       eventButtons.appendChild(button);
     });
   }
+
+  showChestReward(item, onClose) {
+    ChestAnimation.play(item, onClose);
+  }
+
   showLootAssign(item, heroes, onPick) {
     const overlay = document.createElement("div");
     overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:220; display:flex; align-items:center; justify-content:center; font-family:sans-serif;";
     const card = document.createElement("div");
     card.style.cssText = "width:460px; max-width:92vw; background:rgba(10,10,25,0.95); border:1px solid rgba(255,255,255,0.18); border-radius:14px; padding:14px; color:white;";
     const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
-    const lootTitle = isWeapon ? '⚔️ Weapon Obtained!' : '💍 Accessory Obtained!';
-        const lootTypeLabel = isWeapon
-            ? `Type: ${item?.type ?? 'Weapon'} | For: ${item?.owner ?? 'Unknown'} | Rarity: ${item?.rarity ?? ''}`
-            : `Rarity: ${item?.rarity ?? ''} | Type: Accessory`;
-        const lootHint = isWeapon
-            ? '"Equip Now" places it in a weapon slot and refreshes stats. "Store in Bag" sends it to the weapon storage.'
-            : '"Equip Now" places it in an item slot and refreshes stats. "Store in Bag" sends it to item storage.';
-        // Shared inventory: one "Store in Bag" button, equip buttons listed per hero
-        const heroBtns = `
-          <div style="margin-top:12px;">
-            <button class="loot-put" data-i="0" style="width:100%;padding:9px;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.06);color:white;cursor:pointer;font-size:13px;">
-              📦 Store in Bag
-            </button>
-          </div>
-          <div style="margin-top:10px;opacity:.6;font-size:11px;padding:0 2px;">— or equip directly to —</div>
-          ${(heroes ?? []).map((h, i) => `
-          <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
-            <div style="flex:1;opacity:.9;font-size:13px;">${h.name ?? `Hero${i + 1}`}</div>
-            <button class="loot-equip" data-i="${i}" style="padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:rgba(46,204,113,0.18);color:white;cursor:pointer;">⚔️ Equip Now</button>
-          </div>`).join('')}
-        `;
+    const lootTitle = isWeapon ? '⚔️ 获得武器！' : '💍 获得饰品！';
+    const lootTypeLabel = isWeapon
+        ? `类型：${item?.type ?? '武器'} | 适用：${item?.owner ?? '未知'} | 品质：${item?.rarity ?? ''}`
+        : `品质：${item?.rarity ?? ''} | 类型：饰品`;
+    const lootHint = isWeapon
+        ? '"立即装备" 会放入武器槽并刷新属性，"存入背包" 放入武器存放区。'
+        : '"立即装备" 会放入道具槽并刷新属性，"存入背包" 放入道具存放区。';
+    const heroBtns = (heroes ?? []).map((h, i) => {
+      return `
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
+        <div style="flex:1;opacity:.9;">${h.name ?? `Hero${i + 1}`}</div>
+        <button class="loot-put" data-i="${i}" style="padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.18); background:rgba(255,255,255,0.06); color:white; cursor:pointer;">Store in Bag</button>
+        <button class="loot-equip" data-i="${i}" style="padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.18); background:rgba(46,204,113,0.18); color:white; cursor:pointer;">Equip Now</button>
+      </div>`;
+    }).join("");
     card.innerHTML = `
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
   <div style="font-weight:700;">${lootTitle}</div>
@@ -344,6 +367,250 @@ export class UIManager {
   }
   updateGold(amount) {
       this.inventoryUI?.updateGold(amount);
+  }
+
+  /**
+   * 显示分段故事（带背景图和对话框UI风格）
+   * @param {string} title - 故事标题
+   * @param {Array} segments - 分段数组，每个包含 { text, backgroundImage }
+   * @param {Function} onComplete - 故事完成后的回调
+   * @param {string} avatar - 头像键名（可选）
+   */
+  showSegmentedStory(title, segments, onComplete = null, avatar = null) {
+    const { DataLoader } = window;
+    if (!DataLoader || !segments || segments.length === 0) {
+      console.warn('Invalid segmented story');
+      onComplete?.();
+      return;
+    }
+
+    let currentSegment = 0;
+    let textAnimationId = null;
+
+    const showSegment = () => {
+      if (currentSegment >= segments.length) {
+        segmentedStoryOverlay.remove();
+        onComplete?.();
+        return;
+      }
+
+      const segment = segments[currentSegment];
+      const bgImg = DataLoader.getImage(segment.backgroundImage);
+
+      // 更新背景
+      bgImageEl.style.backgroundImage = bgImg ? `url('${bgImg.src}')` : 'none';
+
+      // 清空之前的动画
+      if (textAnimationId) clearTimeout(textAnimationId);
+      textEl.textContent = '';
+
+      // 一行行显示文本
+      const lines = segment.text.split('\n');
+      let lineIndex = 0;
+
+      const showNextLine = () => {
+        if (lineIndex < lines.length) {
+          if (lineIndex > 0) {
+            textEl.textContent += '\n';
+          }
+          textEl.textContent += lines[lineIndex];
+          lineIndex++;
+          textAnimationId = setTimeout(showNextLine, 500); // 每行间隔 500ms
+        }
+      };
+
+      showNextLine();
+
+      // 更新按钮文字
+      const isLast = currentSegment === segments.length - 1;
+      btnEl.textContent = isLast ? '开始游戏 ▶' : '继续 ▶';
+
+      // 更新页码
+      pageEl.textContent = `${currentSegment + 1} / ${segments.length}`;
+
+      currentSegment++;
+    };
+
+    // 创建分段故事UI
+    const segmentedStoryOverlay = document.createElement('div');
+    segmentedStoryOverlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 36px;
+      pointer-events: none;
+    `;
+
+    // 背景图层
+    const bgImageEl = document.createElement('div');
+    bgImageEl.style.cssText = `
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      filter: blur(3px);
+      z-index: 0;
+      pointer-events: none;
+    `;
+
+    // 半透明遮罩
+    const maskEl = document.createElement('div');
+    maskEl.style.cssText = `
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1;
+    `;
+
+    // 对话框容器
+    const containerEl = document.createElement('div');
+    containerEl.style.cssText = `
+      position: relative;
+      width: 90%;
+      max-width: 860px;
+      pointer-events: all;
+      z-index: 2;
+    `;
+
+    // 头像区域
+    const avatarWrapEl = document.createElement('div');
+    avatarWrapEl.style.cssText = `
+      position: absolute;
+      top: -95px;
+      left: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      z-index: 10;
+    `;
+
+    const avatarEl = document.createElement('div');
+    avatarEl.style.cssText = `
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #2d3748;
+      border: 3px solid rgba(251,191,36,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      overflow: hidden;
+    `;
+
+    // 显示头像：如果提供了avatar键名，则从DataLoader获取图片
+    if (avatar) {
+      const avatarImg = DataLoader.getImage(avatar);
+      if (avatarImg) {
+        avatarEl.innerHTML = `<img src="${avatarImg.src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      } else {
+        avatarEl.textContent = '🧙';
+      }
+    } else {
+      avatarEl.textContent = '📖';
+    }
+
+    const nameEl = document.createElement('div');
+    nameEl.style.cssText = `
+      background: rgba(10,8,6,0.9);
+      border: 1px solid rgba(251,191,36,0.5);
+      border-radius: 6px;
+      padding: 2px 12px;
+      font-family: sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fbbf24;
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+    `;
+    nameEl.textContent = title;
+
+    avatarWrapEl.appendChild(avatarEl);
+    avatarWrapEl.appendChild(nameEl);
+
+    // 对话框
+    const boxEl = document.createElement('div');
+    boxEl.style.cssText = `
+      background: rgba(10,8,6,0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(251,191,36,0.3);
+      border-radius: 12px;
+      padding: 26px 36px 20px 168px;
+      height: 210px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    `;
+
+    const textEl = document.createElement('p');
+    textEl.style.cssText = `
+      font-family: sans-serif;
+      font-size: 15px;
+      color: #f3f4f6;
+      line-height: 1.85;
+      margin: 0 0 14px 0;
+      flex: 1;
+      overflow: hidden;
+      white-space: pre-wrap;
+    `;
+
+    // 底部：页码 + 按钮
+    const footerEl = document.createElement('div');
+    footerEl.style.cssText = `
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    `;
+
+    const pageEl = document.createElement('span');
+    pageEl.style.cssText = `
+      font-family: sans-serif;
+      font-size: 12px;
+      color: #6b7280;
+    `;
+
+    const btnEl = document.createElement('button');
+    btnEl.style.cssText = `
+      background: transparent;
+      border: 1px solid rgba(251,191,36,0.5);
+      border-radius: 6px;
+      padding: 5px 18px;
+      color: #fbbf24;
+      font-family: sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    `;
+    btnEl.onmouseover = () => {
+      btnEl.style.background = 'rgba(251,191,36,0.1)';
+      btnEl.style.borderColor = 'rgba(251,191,36,0.8)';
+    };
+    btnEl.onmouseout = () => {
+      btnEl.style.background = 'transparent';
+      btnEl.style.borderColor = 'rgba(251,191,36,0.5)';
+    };
+    btnEl.onclick = showSegment;
+
+    footerEl.appendChild(pageEl);
+    footerEl.appendChild(btnEl);
+    boxEl.appendChild(textEl);
+    boxEl.appendChild(footerEl);
+
+    containerEl.appendChild(avatarWrapEl);
+    containerEl.appendChild(boxEl);
+    segmentedStoryOverlay.appendChild(bgImageEl);
+    segmentedStoryOverlay.appendChild(maskEl);
+    segmentedStoryOverlay.appendChild(containerEl);
+
+    document.body.appendChild(segmentedStoryOverlay);
+
+    // 显示第一个分段
+    showSegment();
   }
   showChestReward(item, onClose) { ChestAnimation.play(item, onClose ?? (() => {})); }
   // src/ui/UIManager.js  — PATCH: updated updateCombatUI method

@@ -551,7 +551,20 @@ function drawItemIcon(s, iconType, alpha, accentColor) {
       }
       break;
     }
-// ★ 修改结束 ★
+    case 'traveler_set':
+    case 'star_cloak':
+    case 'bloodthirst_mask': {
+      const img = window.DataLoader?.getImage(iconType);
+      if (img) {
+        s.drawingContext.save();
+        s.drawingContext.globalAlpha = a;
+        s.drawingContext.drawImage(img, -28, -28, 56, 56);
+        s.drawingContext.restore();
+      } else {
+        drawFallbackRingIcon(s, a, accentColor);
+      }
+      break;
+    }
     default:
       s.fill(200, 200, 200, alpha);
       s.noStroke();

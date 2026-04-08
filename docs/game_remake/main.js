@@ -3,7 +3,7 @@ import { GameController } from './src/core/GameController.js';
 import { GameState, MapConfig } from './src/core/Constants.js';
 import { GameLoop } from './src/core/GameLoop.js';
 import { HexMap, createMapByPreset } from './src/world/HexMap.js';
-import { makePortal, hexToPixel } from './src/world/Tile.js';  // ← hexToPixel 从 Tile.js 统一导入
+import { makePortal, hexToPixel, DebugConfig } from './src/world/Tile.js';  // ← hexToPixel 从 Tile.js 统一导入
 import { Camera } from './src/world/Camera.js';
 import { Player } from './src/entities/Player.js';
 import { DataLoader } from './src/data/DataLoader.js';
@@ -61,12 +61,13 @@ async function init() {
     // 3. 显示标题页面，点击 START 后进入游戏
     const titleScreen = new TitleScreen(
       () => startGame(false), // 新游戏
-      () => startGame(true)   // 读取存档
+      () => startGame(true) ,  // 读取存档
+      () => startGame(false, true)  // 开发者模式
     );
     titleScreen.show();
 }
 
-function startGame(isLoad = false) {
+function startGame(isLoad = false, isDevMode = false) {
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
 
@@ -116,6 +117,7 @@ function startGame(isLoad = false) {
     // 初始化控制器
     const gameController = new GameController(map, player, ui, camera);
     window._gameController = gameController;
+    if (isDevMode) gameController.isDevMode = true;
     // 监听状态切换，切换音乐
     const origTransition = gameController.fsm.transition.bind(gameController.fsm);
     gameController.fsm.transition = function (state, ...args) {
@@ -148,6 +150,7 @@ function startGame(isLoad = false) {
     const debugBtn = document.getElementById('debug-toggle-btn');
     debugBtn.addEventListener('click', () => {
         Renderer.debugMode = !Renderer.debugMode;
+        DebugConfig.showHiddenFixedEvents = Renderer.debugMode;  // 在debug模式下显示隐藏的特殊事件
         debugBtn.textContent = Renderer.debugMode ? '🐛 Debug: ON' : '🐛 Debug: OFF';
         debugBtn.style.background = Renderer.debugMode ? '#27ae60' : '#e67e22';
     });
@@ -161,6 +164,8 @@ function startGame(isLoad = false) {
              alert("读取存档文件失败/损坏！");
              gameController.fsm.transition(GameState.CHARACTER_SELECT);
         }
+    } else if (isDevMode) {
+        gameController.startDevMode();
     } else {
         gameController.fsm.transition(GameState.CHARACTER_SELECT);
     }

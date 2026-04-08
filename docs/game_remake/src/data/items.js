@@ -32,6 +32,39 @@ export const ItemDB = [
     slot: 1,
     type: 'trinket',
   },
+  {
+    id: 'traveler_set',
+    name: "Traveler's Set",
+    desc: 'Gear worn by seasoned explorers. Always grants +2 movement points at the start of each turn.',
+    rarity: 'rare',
+    icon: 'traveler_set',
+    statBonus: {},
+    slot: 1,
+    type: 'trinket',
+    effect: 'movement_plus_2',
+  },
+  {
+    id: 'star_cloak',
+    name: 'Star Cloak',
+    desc: 'A cloak woven with the power of the stars. Grants immunity to the first two hits received in combat.',
+    rarity: 'epic',
+    icon: 'star_cloak',
+    statBonus: {},
+    slot: 1,
+    type: 'trinket',
+    effect: 'damage_immune_2',
+  },
+  {
+    id: 'bloodthirst_mask',
+    name: 'Bloodthirst Mask',
+    desc: 'An ancient mask soaked in blood. Restores HP equal to 10% of damage dealt after each attack.',
+    rarity: 'legendary',
+    icon: 'bloodthirst_mask',
+    statBonus: {},
+    slot: 1,
+    type: 'trinket',
+    effect: 'lifesteal_10',
+  },
 ];
 
 export function rollRandomItem() {
@@ -78,40 +111,4 @@ export function rollRandomLoot() {
     return rollRandomItem();
   }
   return rollRandomWeapon() ?? rollRandomItem();
-}
-// ── 金币掉落 ──────────────────────────────────────────────────────
-const GOLD_DROP = {
-  legendary: [80, 150],
-  epic:      [40, 80],
-  rare:      [15, 35],
-  common:    [5, 15],
-};
-export function rollGoldDrop(rarity = 'common') {
-  const [min, max] = GOLD_DROP[rarity] ?? GOLD_DROP.common;
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-// ── 商店定价 ──────────────────────────────────────────────────────
-const SHOP_PRICE = {
-  legendary: 400,
-  epic:      200,
-  rare:      100,
-  common:    40,
-};
-export function getShopPrice(item) {
-  return SHOP_PRICE[item?.rarity] ?? 40;
-}
-
-// ── 随机生成商店货架 ──────────────────────────────────────────────
-export function rollShopInventory(count = 3) {
-  const items = [];
-  for (let i = 0; i < count; i++) {
-    const isWeapon = Math.random() < 0.5;
-    const item = isWeapon ? (rollRandomWeapon() ?? rollRandomItem()) : rollRandomItem();
-    if (item) {
-      item._shopPrice = getShopPrice(item);
-      items.push(item);
-    }
-  }
-  return items;
 }

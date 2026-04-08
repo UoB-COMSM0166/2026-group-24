@@ -12,8 +12,8 @@ export class InventoryUI {
         this.btn.title = "Inventory (B)";
         this.btn.style.cssText = [
             "position:fixed",
-            "right:18px",
-            "top:18px",
+            "right:20px",
+            "top:20px",
             "width:46px",
             "height:46px",
             "border-radius:12px",
@@ -51,19 +51,21 @@ document.body.appendChild(this.goldTag);
         this.panel = document.createElement("div");
         this.panel.style.cssText = [
             "position:fixed",
-            "right:18px",
-            "top:72px",
+            "right:20px",
+            "top:80px",
             "width:780px",
+            "max-width:calc(100vw - 40px)",
             "max-height:70vh",
             "overflow:auto",
-            "padding:14px",
-            "border-radius:14px",
-            "border:1px solid rgba(255,255,255,0.18)",
-            "background:rgba(10,10,25,0.92)",
+            "padding:18px",
+            "border-radius:16px",
+            "border:1px solid rgba(243,156,18,0.4)",
+            "background:linear-gradient(145deg, rgba(15,15,30,0.95), rgba(5,5,15,0.98))",
+            "backdrop-filter:blur(12px)",
             "color:white",
             "z-index:150",
             "display:none",
-            "box-shadow:0 12px 30px rgba(0,0,0,0.45)",
+            "box-shadow:0 16px 40px rgba(0,0,0,0.6), inset 0 1px 10px rgba(255,255,255,0.05)",
             "font-family:sans-serif",
         ].join(";");
         document.body.appendChild(this.panel);
@@ -87,13 +89,9 @@ document.body.appendChild(this.goldTag);
     }
 
     close() {
-            this.isOpen = false;
-            this.panel.style.display = "none";
-            if (this._heroAnimReq) {
-                cancelAnimationFrame(this._heroAnimReq);
-                this._heroAnimReq = null;
-            }
-        }
+        this.isOpen = false;
+        this.panel.style.display = "none";
+    }
 
     update(heroes) {
         this.heroes = Array.isArray(heroes) ? heroes : [];
@@ -233,23 +231,18 @@ document.body.appendChild(this.goldTag);
             </div>
         </div>
 
-     <!-- 右侧角色区 -->
-             <div style="flex:1;">
-                 <div style="margin-bottom:10px;">${tabs}</div>
+        <!-- 右侧角色区 -->
+        <div style="flex:1;">
+            <div style="margin-bottom:10px;">${tabs}</div>
 
-                 <div style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid rgba(255,255,255,0.10);border-radius:12px;margin-bottom:10px;">
-                    <canvas id="inv-hero-canvas" width="120" height="140"
-                        style="border-radius:10px;background:rgba(255,255,255,0.04);flex-shrink:0;">
-                    </canvas>
-                     <div style="flex:1;">
-                         <div style="font-weight:700;font-size:15px;margin-bottom:4px;">${hero.name}</div>
-                         <div style="opacity:.9;font-size:13px;">HP ${hp} / ${maxHp}</div>
-                         <div style="opacity:.9;font-size:13px;">ATK ${hero.attack ?? 0} | DEF ${hero.defense ?? 0} | SPD ${hero.speed ?? 0}</div>
-                         <div style="opacity:.65;font-size:11px;margin-top:3px;">STR ${hero.strength ?? 0} | VIT ${hero.vitality ?? 0} | AGI ${hero.agility ?? 0} | INT ${hero.intellect ?? 0} | AWR ${hero.awareness ?? 0} | TAL ${hero.talent ?? 0}</div>
-                     </div>
-                 </div>
-
-
+            <div style="padding:10px;border:1px solid rgba(255,255,255,0.10);border-radius:12px;margin-bottom:10px;">
+    <div style="font-weight:700;margin-bottom:6px;">Character Stats</div>
+    <div style="opacity:.9;">HP ${hp} / ${maxHp}</div>
+    <div style="opacity:.9;">ATK ${hero.attack ?? 0} | DEF ${hero.defense ?? 0} | SPD ${hero.speed ?? 0}</div>
+    <div style="opacity:.75;font-size:12px;margin-top:4px;">
+        STR ${hero.strength ?? 0} | TOU ${hero.toughness ?? 0} | AGI ${hero.agility ?? 0} | INT ${hero.intellect ?? 0}
+    </div>
+</div>
 
 
 ${weaponSlotsHTML}
@@ -313,6 +306,14 @@ ${itemSlotsHTML}
                 const slotIndex = Number(el.dataset.slot);
                 const weapon = hero.weaponSlots?.[slotIndex];
                 if (!weapon) return;
+
+                // 【修复核心】：使用 filter(Boolean) 严格过滤
+                const equippedWeapons = (hero.weaponSlots || []).filter(Boolean);
+                if (equippedWeapons.length <= 1) {
+                    this._showSlotError("Must equip at least one weapon!");
+                    return; 
+                }
+
                 hero.weaponSlots[slotIndex] = null;
                 this.sharedStorage.weapons.push(weapon);
                 if (typeof hero.refreshDerivedStats === "function") hero.refreshDerivedStats();
@@ -481,10 +482,17 @@ ${itemSlotsHTML}
                 if (dragFrom === "equipped-weapon") {
                     const weapon = hero.weaponSlots?.[slotIndex];
                     if (!weapon) return;
+                    const equippedWeapons = (hero.weaponSlots || []).filter(Boolean);
+                    if (equippedWeapons.length <= 1) {
+                        this._showSlotError("Must equip at least one weapon!");
+                        return; // 拒绝拖入仓库
+                    }
+
                     hero.weaponSlots[slotIndex] = null;
                     this.sharedStorage.weapons.push(weapon);
                     if (typeof hero.refreshDerivedStats === "function") hero.refreshDerivedStats();
                     this.render();
+                    
                 } else if (dragFrom === "equipped-item") {
                     const item = hero.equipSlots?.[slotIndex];
                     if (!item) return;
@@ -495,22 +503,6 @@ ${itemSlotsHTML}
                 }
             });
         }
-        // ── 角色预览动画 ──────────────────────────────────────────────
-                const invCanvas = this.panel.querySelector('#inv-hero-canvas');
-                        if (invCanvas) {
-                            const ctx2d = invCanvas.getContext('2d');
-                            if (this._heroAnimReq) cancelAnimationFrame(this._heroAnimReq);
-                            const heroId = hero.id;
-                            const uiManager = window._gameController?.ui;
-                            const animate = (now) => {
-                                if (!this.isOpen) return;
-                                if (uiManager?._drawHeroPreview) {
-                                    uiManager._drawHeroPreview(ctx2d, heroId, 120, 140, now);
-                                }
-                                this._heroAnimReq = requestAnimationFrame(animate);
-                            };
-                            this._heroAnimReq = requestAnimationFrame(animate);
-                        }
     }
 
 
@@ -621,6 +613,12 @@ function _getItemEmoji(iconType) {
             return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('💪')">`;
         case 'ring_intellect':
             return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🔵')">`;
+        case 'traveler_set':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🧭')">`;
+        case 'star_cloak':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🌟')">`;
+        case 'bloodthirst_mask':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🩸')">`;
         default:        return '📦';
     }
 }
@@ -663,6 +661,21 @@ function drawItemIconMini(canvas, iconType) {
                 ctx.drawImage(img, -16, -16, 32, 32);
             } else {
                 ctx.strokeStyle = iconType === 'ring_intellect' ? '#c084fc' : '#60a5fa';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(0, 0, 11, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            break;
+        }
+        case 'traveler_set':
+        case 'star_cloak':
+        case 'bloodthirst_mask': {
+            const img = window.DataLoader?.getImage(iconType);
+            if (img) {
+                ctx.drawImage(img, -16, -16, 32, 32);
+            } else {
+                ctx.strokeStyle = '#60a5fa';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
                 ctx.arc(0, 0, 11, 0, Math.PI * 2);

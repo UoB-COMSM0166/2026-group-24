@@ -2,14 +2,15 @@
 import { rollAttack } from './Dice.js';
 
 // ── Status effect definitions ─────────────────────────────────────────────────
-// burn      : lose 5% maxHp per turn for 3 turns (fire)
-// frozen    : skip next turn (ice)
-// shock     : next damage received +30% for 2 turns (thunder)
-// poison    : lose 10 flat HP per turn for 3 turns (nature/toxic)
-// entangle  : cannot evade, damage received +20% for 2 turns (wood)
+// burn       : lose 5% maxHp per turn for 3 turns (fire)
+// frozen     : skip next turn (ice)
+// shock      : next damage received +30% for 2 turns (thunder)
+// poison     : lose 10 flat HP per turn for 3 turns (nature/toxic)
+// entangle   : cannot evade, damage received +20% for 2 turns (wood)
 // rock_shield: reduce next incoming damage by 50% (earth/block)
-// warcry    : own ATK +25% for 2 turns (knight buff)
-// heal_aura : regen 8% maxHp per turn for 3 turns (priest buff)
+// warcry     : own ATK +25% for 2 turns (knight buff)
+// heal_aura  : regen 8% maxHp per turn for 3 turns (priest buff)
+// anti_heal  : cannot recover HP for 2 turns (assassin debuff)  ← hub新增
 
 export class CombatManager {
   constructor(heroes, enemies, ui) {
@@ -35,7 +36,14 @@ export class CombatManager {
 
   init() {
     this.turnOrder = [...this.heroes, ...this.enemies]
-      .sort((a, b) => (b.speed || 0) - (a.speed || 0));
+        .sort((a, b) => (b.speed || 0) - (a.speed || 0));
+    for (const hero of this.heroes) {
+      const hasStarCloak = (hero.equipSlots ?? []).some(item => item?.effect === 'damage_immune_2');
+      if (hasStarCloak) {
+        hero.starCloakCharges = 2;
+        this.addLog(`✨ ${hero.name}'s Star Cloak activates! First 2 hits will be blocked.`);
+      }
+    }
     this.nextTurn();
   }
 
@@ -81,6 +89,11 @@ export class CombatManager {
         unit.statusEffects.heal_aura = 3;
         this.addLog(`💚 ${unit.name} channels Heal Aura! Regen 8% HP/turn (3 turns)`);
         break;
+        // ── hub新增：禁疗 ────────────────────────────────────────────
+      case 'anti_heal':
+        unit.statusEffects.anti_heal = 2;
+        this.addLog(`🚫 ${unit.name} is Wounded! Cannot recover HP! (2 turns)`);
+        break;
     }
   }
 
@@ -116,8 +129,8 @@ export class CombatManager {
       if (fx.heal_aura <= 0) delete fx.heal_aura;
     }
 
-    // Decrement turn-based buffs/debuffs
-    ['shock', 'entangle', 'warcry'].forEach(key => {
+    // Decrement turn-based buffs/debuffs（hub新增 anti_heal）
+    ['shock', 'entangle', 'warcry', 'anti_heal'].forEach(key => {
       if (fx[key] > 0) {
         fx[key]--;
         if (fx[key] <= 0) {
@@ -138,6 +151,11 @@ export class CombatManager {
   // ── Get effective damage received considering debuffs ────────────
   _getIncomingDamage(target, rawDamage) {
     let dmg = rawDamage;
+    if (target.starCloakCharges > 0) {
+      target.starCloakCharges--;
+      this.addLog(`✨ ${target.name}'s Star Cloak blocks the hit! (${target.starCloakCharges} charge${target.starCloakCharges !== 1 ? 's' : ''} remaining)`);
+      return 0;
+    }
     const fx = target.statusEffects || {};
 
     // Shock: +30% damage taken
@@ -264,9 +282,9 @@ export class CombatManager {
   executePlayerAction(targetId) {
     const { skill, attacker } = this.currentAction;
     this.currentAction.target =
-      targetId === 'aoe_target'
-        ? 'aoe'
-        : (this.enemies.find(e => e.id === targetId) || this.heroes.find(h => h.id === targetId));
+        targetId === 'aoe_target'
+            ? 'aoe'
+            : (this.enemies.find(e => e.id === targetId) || this.heroes.find(h => h.id === targetId));
 
     let result = rollAttack(attacker, 0.5, 6);
     let rollVal = Math.max(1, Math.min(6, Math.round(result.sampleRoll)));
@@ -282,7 +300,17 @@ export class CombatManager {
 
     const isHeal = skill.type === 'heal' || skill.type === 'buff';
     this.currentAction = { ...this.currentAction, multiplier, rollVal, textType, isHeal };
-    this.diceInfo = { finalRoll: rollVal, desc: 'Rolling' };
+
+    // ── 保留你的攻击动画扩展字段（attackerId / targetId / isHeal / skillType）──
+    this.diceInfo = {
+      finalRoll: rollVal,
+      desc: 'Rolling',
+      attackerId: attacker.id,
+      targetId: this.currentAction.target?.id || null,
+      isHeal: isHeal,
+      skillType: skill.type,
+      skillPower: skill.power || 0,    // ★ NEW: for attack anim selection
+    };
     this.phase = 'ROLLING';
     this.notifyUI();
   }
@@ -311,9 +339,15 @@ export class CombatManager {
       const healAmount = Math.max(1, Math.floor(statValue * (skill.power / 100) * multiplier));
       if (skill.power > 0) {
         const healTarget = (target && target !== 'aoe') ? target : attacker;
-        healTarget.hp = Math.min(healTarget.maxHp || 100, healTarget.hp + healAmount);
-        this.diceInfo = { isHeal: true, damage: healAmount, targetId: healTarget.id };
-        this.addLog(`Rolled [${rollVal}] → Restored ${healAmount} HP`);
+        // ── hub新增：禁疗状态检查 ──────────────────────────────────
+        if (healTarget.statusEffects?.anti_heal > 0) {
+          this.addLog(`🚫 ${healTarget.name} is under anti-heal! Cannot recover HP!`);
+          this.diceInfo = { isHeal: false, damage: 0, type: 'normal', targetId: healTarget.id };
+        } else {
+          healTarget.hp = Math.min(healTarget.maxHp || 100, healTarget.hp + healAmount);
+          this.diceInfo = { isHeal: true, damage: healAmount, targetId: healTarget.id };
+          this.addLog(`Rolled [${rollVal}] → Restored ${healAmount} HP`);
+        }
       } else {
         const healTarget = (target && target !== 'aoe') ? target : attacker;
         this.diceInfo = { isHeal: true, damage: 0, targetId: healTarget.id };
@@ -351,6 +385,16 @@ export class CombatManager {
 
         this.diceInfo = { isHeal: false, damage: finalDamage, type: textType, targetId: target.id };
         this.addLog(`Rolled [${rollVal}] → [${skill.name}] dealt ${finalDamage} to ${target.name} ${this._rollLabel(textType)}`);
+
+        const hasLifesteal = (attacker.equipSlots ?? []).some(item => item?.effect === 'lifesteal_10');
+        if (hasLifesteal && finalDamage > 0 && attacker.hp > 0) {
+          const healAmt = Math.max(1, Math.floor(finalDamage * 0.1));
+          if (!(attacker.statusEffects?.anti_heal > 0)) {
+            attacker.hp = Math.min(attacker.maxHp, attacker.hp + healAmt);
+            this.addLog(`🩸 ${attacker.name}'s Bloodthirst Mask restores ${healAmt} HP!`);
+          }
+        }
+
       }
     }
     this.phase = 'EXECUTING';
@@ -359,34 +403,127 @@ export class CombatManager {
 
   _rollLabel(textType) {
     return textType === 'perfect' ? '⚡ PERFECT! ×2.0'
-         : textType === 'crit'    ? '💥 CRIT! ×1.5'
-         : textType === 'weak'    ? '(Weak ×0.5)'
-         : textType === 'miss'    ? '💨 MISS'
-         : '';
+        : textType === 'crit'    ? '💥 CRIT! ×1.5'
+            : textType === 'weak'    ? '(Weak ×0.5)'
+                : textType === 'miss'    ? '💨 MISS'
+                    : '';
   }
 
-  // ── Enemy AI ──────────────────────────────────────────────────────
+  // ── Enemy AI（采用 hub 完整版，支持 buff/heal/aoe 等多种技能类型）────
   handleAI() {
-    const aliveHeroes = this.heroes.filter(h => this._isAlive(h));
+    const aliveHeroes  = this.heroes.filter(h => this._isAlive(h));
     if (aliveHeroes.length === 0) return;
 
-    const target = aliveHeroes.sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
-    const usedSkillName = this.activeUnit.skillSlots?.[0]?.name || 'Attack';
+    const aliveEnemies = this.enemies.filter(e => this._isAlive(e));
+    const skills = this.activeUnit.skills || [];
+    const skill  = skills.length > 0
+        ? skills[Math.floor(Math.random() * skills.length)]
+        : null;
 
-    let result = rollAttack(this.activeUnit, 0.5, 6);
+    // ── buff/self：给自己上盾（Goblin Warrior）───────────────────────
+    if (skill?.type === 'buff' && skill.target === 'self') {
+      this._applyStatus(this.activeUnit, skill.statusEffect);
+      this.diceInfo = { isHeal: false, damage: 0, type: 'buff', targetId: this.activeUnit.id };
+      this.phase = 'EXECUTING';
+      this.notifyUI();
+      return;
+    }
+
+    // ── ally_heal：治疗随机队友（Goblin Shaman）─────────────────────
+    if (skill?.type === 'ally_heal') {
+      const candidates  = aliveEnemies.filter(e => e.id !== this.activeUnit.id);
+      const healTarget  = candidates.length > 0
+          ? candidates[Math.floor(Math.random() * candidates.length)]
+          : this.activeUnit;
+      const amount = skill.healAmount || 15;
+      // 检查禁疗
+      if (healTarget.statusEffects?.anti_heal > 0) {
+        this.addLog(`🚫 ${healTarget.name} cannot be healed!`);
+        this.diceInfo = { isHeal: false, damage: 0, targetId: healTarget.id };
+      } else {
+        healTarget.hp = Math.min(healTarget.maxHp || healTarget.hp, healTarget.hp + amount);
+        this.addLog(`💚 ${this.activeUnit.name} used [${skill.name}]! ${healTarget.name} recovered ${amount} HP!`);
+        this.diceInfo = { isHeal: true, damage: amount, targetId: healTarget.id };
+      }
+      this.phase = 'EXECUTING';
+      this.notifyUI();
+      return;
+    }
+
+    // ── ally_buff：给随机队友上 warcry（Goblin Shaman）──────────────
+    if (skill?.type === 'ally_buff') {
+      const buffTarget = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+      this._applyStatus(buffTarget, skill.statusEffect);
+      this.diceInfo = { isHeal: false, damage: 0, type: 'buff', targetId: buffTarget.id };
+      this.phase = 'EXECUTING';
+      this.notifyUI();
+      return;
+    }
+
+    // ── self_restore：精英怪回血+护盾 ───────────────────────────────
+    if (skill?.type === 'self_restore') {
+      const healAmt = Math.floor(this.activeUnit.maxHp * (skill.healPct || 0.1));
+      if (this.activeUnit.statusEffects?.anti_heal > 0) {
+        // 被禁疗时只上盾，不回血
+        this._applyStatus(this.activeUnit, skill.statusEffect);
+        this.addLog(`🚫 ${this.activeUnit.name} is anti-healed! Shield only.`);
+        this.diceInfo = { isHeal: false, damage: 0, type: 'buff', targetId: this.activeUnit.id };
+      } else {
+        this.activeUnit.hp = Math.min(this.activeUnit.maxHp, this.activeUnit.hp + healAmt);
+        this._applyStatus(this.activeUnit, skill.statusEffect);
+        this.addLog(`💚 ${this.activeUnit.name} used [${skill.name}]! Restored ${healAmt} HP and raised shield!`);
+        this.diceInfo = { isHeal: true, damage: healAmt, targetId: this.activeUnit.id };
+      }
+      this.phase = 'EXECUTING';
+      this.notifyUI();
+      return;
+    }
+
+    // ── 攻击（single / aoe）或兜底普攻 ──────────────────────────────
+    const target    = aliveHeroes.sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+    const skillName = skill?.name    || 'Attack';
+    const statKey   = skill?.statKey || 'strength';
+    const power     = skill?.power   ?? 100;
+
+    let result  = rollAttack(this.activeUnit, 0.5, 6);
     let rollVal = Math.max(1, Math.min(6, Math.round(result.sampleRoll)));
     const multiplier = rollVal <= 1 ? 0 : rollVal <= 2 ? 0.5 : rollVal <= 4 ? 1.0 : rollVal === 5 ? 1.5 : 2.0;
+    const textType   = rollVal <= 1 ? 'miss' : rollVal <= 2 ? 'weak' : rollVal <= 4 ? 'normal' : rollVal === 5 ? 'crit' : 'perfect';
 
     if (multiplier === 0) {
-      this.addLog(`${this.activeUnit.name} missed!`);
+      this.addLog(`${this.activeUnit.name} used [${skillName}] but missed!`);
       this.diceInfo = { isHeal: false, damage: 0, type: 'miss', targetId: target.id };
+
+    } else if (skill?.target === 'aoe') {
+      // 群体攻击（Dark Mage Hellfire / Blizzard）
+      const statVal = this._getEffectiveAtk(this.activeUnit, statKey);
+      const baseDmg = Math.floor(statVal * (power / 100) * multiplier);
+      let sampleDmg = 0;
+      aliveHeroes.forEach(hero => {
+        const finalDmg = this._getIncomingDamage(hero, Math.max(1, baseDmg - (hero.defense || 0)));
+        hero.hp  = Math.max(0, hero.hp - finalDmg);
+        sampleDmg = finalDmg;
+        if (skill.statusEffect && Math.random() < (skill.statusChance || 0)) {
+          this._applyStatus(hero, skill.statusEffect);
+        }
+      });
+      this.addLog(`${this.activeUnit.name} used [${skillName}]! Hit all heroes! ${this._rollLabel(textType)}`);
+      this.diceInfo = { isHeal: false, damage: sampleDmg, type: textType, targetId: aliveHeroes[0]?.id };
+
     } else {
-      const rawDmg = Math.max(1, Math.floor((this.activeUnit.attack || 12) * multiplier) - (target.defense || 0));
+      // 单体攻击
+      const statVal   = this._getEffectiveAtk(this.activeUnit, statKey);
+      const baseDmg   = Math.floor(statVal * (power / 100) * multiplier);
+      const rawDmg    = Math.max(1, baseDmg - (target.defense || 0));
       const actualDmg = this._getIncomingDamage(target, rawDmg);
       target.hp = Math.max(0, target.hp - actualDmg);
-      this.addLog(`${this.activeUnit.name} used [${usedSkillName}]! Dealt ${actualDmg} damage ${this._rollLabel(rollVal >= 6 ? 'perfect' : rollVal >= 5 ? 'crit' : '')}`);
-      this.diceInfo = { isHeal: false, damage: actualDmg, type: rollVal >= 5 ? 'crit' : 'damage', targetId: target.id };
+      if (skill?.statusEffect && Math.random() < (skill.statusChance || 0)) {
+        this._applyStatus(target, skill.statusEffect);
+      }
+      this.addLog(`${this.activeUnit.name} used [${skillName}]! Dealt ${actualDmg} to ${target.name} ${this._rollLabel(textType)}`);
+      this.diceInfo = { isHeal: false, damage: actualDmg, type: textType, targetId: target.id };
     }
+
     this.phase = 'EXECUTING';
     this.notifyUI();
   }

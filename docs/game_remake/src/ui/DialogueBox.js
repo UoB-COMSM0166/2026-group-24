@@ -1,4 +1,12 @@
 // src/ui/DialogueBox.js
+// ══════════════════════════════════════════════════════════════════════
+// NPC 对话框组件
+// 独立组件，不依赖任何现有代码
+// 用法：
+//   const box = new DialogueBox();
+//   box.show({ name: '老向导', lines: ['第一句', '第二句'] }, onDone);
+// ══════════════════════════════════════════════════════════════════════
+
 export class DialogueBox {
   constructor() {
     this._el = null;
@@ -8,7 +16,9 @@ export class DialogueBox {
     this._build();
   }
 
+  // ── 构建 DOM ────────────────────────────────────────────────────────
   _build() {
+    // 整体容器（全屏遮罩底部）
     const wrap = document.createElement('div');
     wrap.id = 'dialogue-wrap';
     wrap.style.cssText = `
@@ -22,6 +32,7 @@ export class DialogueBox {
       pointer-events: none;
     `;
 
+    // 对话区域（头像 + 对话框）
     const container = document.createElement('div');
     container.style.cssText = `
       position: relative;
@@ -30,6 +41,7 @@ export class DialogueBox {
       pointer-events: all;
     `;
 
+    // ── 头像区 ────────────────────────────────────────────────────────
     const avatarWrap = document.createElement('div');
     avatarWrap.style.cssText = `
       position: absolute;
@@ -41,6 +53,7 @@ export class DialogueBox {
       gap: 5px;
     `;
 
+    // 头像圆框（占位用emoji，后续换图片只需替换这里）
     this._avatarEl = document.createElement('div');
     this._avatarEl.style.cssText = `
       width: 80px;
@@ -57,6 +70,7 @@ export class DialogueBox {
     `;
     this._avatarEl.textContent = '🧙';
 
+    // NPC 名字
     this._nameEl = document.createElement('div');
     this._nameEl.style.cssText = `
       background: rgba(10,8,6,0.9);
@@ -74,6 +88,7 @@ export class DialogueBox {
     avatarWrap.appendChild(this._avatarEl);
     avatarWrap.appendChild(this._nameEl);
 
+    // ── 对话框 ────────────────────────────────────────────────────────
     const box = document.createElement('div');
     box.style.cssText = `
       background: rgba(10,8,6,0.93);
@@ -84,6 +99,7 @@ export class DialogueBox {
       cursor: pointer;
     `;
 
+    // 对话文字
     this._textEl = document.createElement('p');
     this._textEl.style.cssText = `
       font-family: sans-serif;
@@ -94,6 +110,7 @@ export class DialogueBox {
       min-height: 56px;
     `;
 
+    // 底部：页码 + 继续按钮
     const footer = document.createElement('div');
     footer.style.cssText = `
       display: flex;
@@ -120,6 +137,7 @@ export class DialogueBox {
       cursor: pointer;
     `;
     this._btnEl.textContent = '继续 ▶';
+    // 点击整个对话框也可以推进
     this._btnEl.addEventListener('click', (e) => { e.stopPropagation(); this._next(); });
 
     footer.appendChild(this._pageEl);
@@ -135,24 +153,38 @@ export class DialogueBox {
     this._el = wrap;
   }
 
+  // ── 公开：显示对话 ──────────────────────────────────────────────────
+  /**
+   * @param {object} config
+   * @param {string} config.name      NPC 名字
+   * @param {string[]} config.lines   对话内容数组
+   * @param {string} [config.avatar]  头像 emoji 或图片 URL（可选）
+   * @param {Function} onDone         全部读完后的回调
+   */
   show(config, onDone) {
     this._lines = config.lines ?? [];
     this._current = 0;
     this._onDone = onDone ?? null;
+
     this._nameEl.textContent = config.name ?? 'NPC';
+
+    // 头像：支持 emoji 字符串或图片 URL
     if (config.avatar && config.avatar.startsWith('http')) {
       this._avatarEl.innerHTML = `<img src="${config.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
     } else {
       this._avatarEl.textContent = config.avatar ?? '🧙';
     }
+
     this._el.style.display = 'flex';
     this._render();
   }
 
+  // ── 公开：隐藏 ─────────────────────────────────────────────────────
   hide() {
     this._el.style.display = 'none';
   }
 
+  // ── 内部：渲染当前句子 ──────────────────────────────────────────────
   _render() {
     const total = this._lines.length;
     const idx = this._current;
@@ -161,6 +193,7 @@ export class DialogueBox {
     this._btnEl.textContent = idx === total - 1 ? '开始 ▶' : '继续 ▶';
   }
 
+  // ── 内部：推进到下一句 ──────────────────────────────────────────────
   _next() {
     this._current++;
     if (this._current >= this._lines.length) {

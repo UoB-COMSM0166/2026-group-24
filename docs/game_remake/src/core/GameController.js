@@ -10,7 +10,7 @@ import { Player } from '../entities/Player.js';
 import { DataLoader } from '../data/DataLoader.js';
 import { rollSpeed } from './Dice.js';
 import { Renderer } from '../rendering/Renderer.js';
-import { rollRandomItem, rollRandomLoot, rollGoldDrop } from '../data/items.js';
+import { rollRandomItem, rollRandomLoot, rollGoldDrop, ItemDB } from '../data/items.js';
 import { GameStory } from './GameStory.js';
 import { EventTable } from '../data/EventTable.js';
 import { findPath, getReachableTiles } from '../utils/Pathfinder.js';
@@ -38,6 +38,8 @@ export class GameController {
     this.currentMissionName = null;
     this.merchantEncountered = false;
     this._isMoving = false;
+    this.isDevMode = false;
+    this._progressBarTitle = null;  // 保存进度条标题以便恢复
     this.rangeHighlight = null;
     this.gold = 0;
     // ── 两步移动新增状态 ──────────────────────────────────────────
@@ -52,9 +54,14 @@ export class GameController {
 
   _setupStates() {
     this.fsm.addState(GameState.CHARACTER_SELECT, {
-      enter: () => this.ui.showCharacterSelect(heroes => {
+      enter: () => this.ui.showCharacterSelect((heroes, difficulty) => {
         this.selectedHeroes = heroes.map(d => this._createHeroFromData(d));
-        this.fsm.transition(GameState.STORY);
+        // 开发者模式跳过剧情，直接进地图生成
+        if (this.isDevMode) {
+          this.fsm.transition(GameState.MAP_GENERATION);
+        } else {
+          this.fsm.transition(GameState.STORY);
+        }
       }),
       exit: () => this.ui.hideCharacterSelect(),
     });
@@ -96,15 +103,16 @@ export class GameController {
         ensureGrass(this.map, RUIN_LIST);
         ensureGrass(this.map, CORRUPTED_DEER_LIST);
 
-        // 双向传送阵
+        // 主地图传送阵指向新手村
         this.map.placeContent(mainQ, mainR, makePortal('Novice Village', noviceQ, noviceR), 0);
-        this.noviceVillage.placeContent(noviceQ, noviceR, makePortal('Main Map', mainQ, mainR), 0);
+        // 新手村开局传送阵已删除，任务完成后会动态创建
 
         // 批量放置 NPC
         for (const npc of NPC_LIST) {
           const targetMap = npc.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(npc.q, npc.r);
           if (tile && tile.type === TileType.GRASS) {
+            tile.isFixedEvent = true;  // 先标记为固定事件，这样 placeContent 中的 revealAround 不会揭示它
             let content;
             if (npc.name === 'INJURED VILLAGER') {
               content = makeInjuredVillager(npc.name, npc.dialogue);
@@ -120,6 +128,7 @@ export class GameController {
           const targetMap = village.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(village.q, village.r);
           if (tile && tile.type === TileType.GRASS) {
+            tile.isFixedEvent = true;  // 先标记为固定事件
             targetMap.placeContent(village.q, village.r, makeVillage(village.name), 0);
           }
         }
@@ -129,6 +138,7 @@ export class GameController {
           const targetMap = merchant.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(merchant.q, merchant.r);
           if (tile && tile.type === TileType.GRASS) {
+            tile.isFixedEvent = true;  // 先标记为固定事件
             targetMap.placeContent(merchant.q, merchant.r, makeMerchant(merchant.name), 0);
           }
         }
@@ -138,6 +148,7 @@ export class GameController {
           const targetMap = ruin.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(ruin.q, ruin.r);
           if (tile && tile.type === TileType.GRASS) {
+            tile.isFixedEvent = true;  // 先标记为固定事件
             const content = makeRuin(ruin.name, ruin.enemyName);
             content.description = ruin.description;
             content.postCombatMessage = ruin.postCombatMessage;
@@ -150,6 +161,7 @@ export class GameController {
           const targetMap = deer.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(deer.q, deer.r);
           if (tile && tile.type === TileType.GRASS) {
+            tile.isFixedEvent = true;  // 先标记为固定事件
             targetMap.placeContent(deer.q, deer.r, makeCorruptedDeer(deer.name), 0);
           }
         }
@@ -201,15 +213,27 @@ export class GameController {
                   }
                 }
         // ── 启动教程系统 ────────────────────────────────────────
-        this.tutorial = new TutorialManager(this);
-
+        if (!this.isDevMode) {
+          this.tutorial = new TutorialManager(this);
+        }
+        if (this.isDevMode) this._populateDevInventory();
         this.fsm.transition(GameState.MAP_EXPLORATION);
       }),
       exit: () => this.ui.hideMapGeneration(),
     });
 
     this.fsm.addState(GameState.MAP_EXPLORATION, {
-      enter: () => { this.turnCount = 0; this.ui.showMapUI(); this._startTurn(); },
+      enter: () => {
+        this.turnCount = 0;
+        this.ui.showMapUI();
+        // 根据当前地图设置进度条标题
+        if (this.currentMapName === 'Novice Village') {
+          this.ui.updateProgressBarTitle('🏘️ Novice Village');
+        } else {
+          this.ui.updateProgressBarTitle('🌍 Main World');
+        }
+        this._startTurn();
+      },
     });
 
     this.fsm.addState(GameState.COMBAT, {
@@ -275,28 +299,166 @@ export class GameController {
     this.currentBossContent = contentData;
     const isBoss = contentData.type === TileContentType.BOSS || contentData.type === 'boss';
     const level = contentData.level ?? 1;
-    const enemies = [];
 
-    if (isBoss) {
-      const enemy = new Enemy(
-        contentData.name || 'Elite Boss', 'boss', level,
-        { strength: 20 + level * 6, toughness: 16 + level * 5, agility: 10 + level * 2 }
-      );
-      enemy.id = 'e1_' + Date.now();
-      enemies.push(enemy);
-    } else {
-      const group = rollEncounter(level);
-      group.forEach((typeKey, i) => {
+    const buildEnemies = (typeKeys) => {
+      const enemies = [];
+      typeKeys.forEach((typeKey, i) => {
         const def = ENEMY_TYPES[typeKey];
         const e = new Enemy(def.name, def.type, level, def.statMod);
         e.id = `e${i + 1}_` + Date.now() + i;
+        e.skills = def.skills || [];
+        if (def.hpMulti && def.hpMulti !== 1) {
+          e.maxHp = Math.floor(e.maxHp * def.hpMulti);
+          e.hp = e.maxHp;
+        }
         enemies.push(e);
       });
+      return enemies;
+    };
+
+    const startCombat = (enemies) => {
+      this.combatManager = new CombatManager(this.selectedHeroes, enemies, this.ui);
+      this.combatManager.init();
+      this.ui.showCombatOverlay(this.combatManager);
+    };
+
+    if (isBoss) {
+      const enemy = new Enemy(
+          contentData.name || 'Elite Boss', 'boss', level,
+          { strength: 20 + level * 6, toughness: 16 + level * 5, agility: 10 + level * 2 }
+      );
+      enemy.id = 'e1_' + Date.now();
+      startCombat([enemy]);
+      return;
     }
 
-    this.combatManager = new CombatManager(this.selectedHeroes, enemies, this.ui);
-    this.combatManager.init();
-    this.ui.showCombatOverlay(this.combatManager);
+    if (this.isDevMode) {
+      const enemyKeys = Object.keys(ENEMY_TYPES);
+      const selected = [];   // 已选中的 key 列表，最多3个
+
+      // ── 创建 overlay 容器 ────────────────────────────────────────
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    z-index: 300; display: flex; align-items: center; justify-content: center;
+    font-family: sans-serif;
+  `;
+
+      const panel = document.createElement('div');
+      panel.style.cssText = `
+    background: rgba(10,8,6,0.97); border: 1px solid rgba(251,191,36,0.4);
+    border-radius: 14px; padding: 24px 28px; width: 520px; max-width: 94vw;
+    max-height: 85vh; display: flex; flex-direction: column; gap: 14px;
+    color: white;
+  `;
+
+      // 标题
+      const title = document.createElement('div');
+      title.style.cssText = 'font-size: 15px; font-weight: bold; color: #fbbf24; letter-spacing: 0.05em;';
+      title.textContent = `🛠️ Dev：选择上场敌人（最多3个，Level ${level}）`;
+
+      // 已选列表显示
+      const selectedInfo = document.createElement('div');
+      selectedInfo.style.cssText = 'font-size: 12px; color: #aaa; min-height: 18px;';
+      const refreshInfo = () => {
+        selectedInfo.textContent = selected.length === 0
+            ? '尚未选择任何敌人'
+            : '已选：' + selected.map(k => ENEMY_TYPES[k].name).join(' / ');
+      };
+      refreshInfo();
+
+      // 敌人按钮列表（可滚动）
+      const list = document.createElement('div');
+      list.style.cssText = `
+    display: flex; flex-direction: column; gap: 8px;
+    overflow-y: auto; max-height: 340px; padding-right: 4px;
+  `;
+
+      const btnMap = {};  // key -> button element，方便刷新样式
+
+      const refreshBtnStyle = (key) => {
+        const btn = btnMap[key];
+        const isSelected = selected.includes(key);
+        btn.style.background = isSelected ? 'rgba(251,191,36,0.18)' : 'rgba(255,255,255,0.04)';
+        btn.style.borderColor = isSelected ? '#fbbf24' : 'rgba(255,255,255,0.15)';
+        btn.style.color = isSelected ? '#fbbf24' : '#e5e7eb';
+      };
+
+      enemyKeys.forEach(key => {
+        const def = ENEMY_TYPES[key];
+        const btn = document.createElement('button');
+        btn.style.cssText = `
+      text-align: left; padding: 10px 14px; border-radius: 8px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.04);
+      color: #e5e7eb; transition: all 0.15s; font-size: 13px;
+    `;
+        btn.innerHTML = `<span style="font-weight:bold;">${def.name}</span>
+      <span style="font-size:11px; color:#9ca3af; margin-left:8px;">${def.desc ?? ''}</span>`;
+
+        btn.onclick = () => {
+          const idx = selected.indexOf(key);
+          if (idx !== -1) {
+            selected.splice(idx, 1);   // 取消选择
+          } else if (selected.length < 3) {
+            selected.push(key);        // 添加选择
+          }
+          refreshBtnStyle(key);
+          refreshInfo();
+          fightBtn.disabled = selected.length === 0;
+        };
+
+        btnMap[key] = btn;
+        list.appendChild(btn);
+      });
+
+      // 底部按钮行
+      const footer = document.createElement('div');
+      footer.style.cssText = 'display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px;';
+
+      const randomBtn = document.createElement('button');
+      randomBtn.textContent = '🎲 随机';
+      randomBtn.style.cssText = `
+    padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 13px;
+    border: 1px solid rgba(255,255,255,0.25); background: transparent; color: #d1d5db;
+  `;
+      randomBtn.onclick = () => {
+        document.body.removeChild(overlay);
+        startCombat(buildEnemies(rollEncounter(level)));
+      };
+
+      const fightBtn = document.createElement('button');
+      fightBtn.textContent = '⚔️ Fight！';
+      fightBtn.disabled = true;
+      fightBtn.style.cssText = `
+    padding: 8px 22px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold;
+    border: 1px solid #fbbf24; background: rgba(251,191,36,0.15); color: #fbbf24;
+    opacity: 0.4; transition: opacity 0.15s;
+  `;
+      fightBtn.onclick = () => {
+        if (selected.length === 0) return;
+        document.body.removeChild(overlay);
+        startCombat(buildEnemies(selected));
+      };
+
+      // disabled 时视觉反馈
+      const observer = new MutationObserver(() => {
+        fightBtn.style.opacity = fightBtn.disabled ? '0.4' : '1';
+        fightBtn.style.cursor  = fightBtn.disabled ? 'not-allowed' : 'pointer';
+      });
+      observer.observe(fightBtn, { attributes: true, attributeFilter: ['disabled'] });
+
+      footer.appendChild(randomBtn);
+      footer.appendChild(fightBtn);
+
+      panel.appendChild(title);
+      panel.appendChild(selectedInfo);
+      panel.appendChild(list);
+      panel.appendChild(footer);
+      overlay.appendChild(panel);
+      document.body.appendChild(overlay);
+    } else {
+      startCombat(buildEnemies(rollEncounter(level)));
+    }
   }
 
   _exitCombat() {
@@ -334,7 +496,16 @@ export class GameController {
     const roller = this.selectedHeroes.length > 0
       ? this.selectedHeroes.reduce((a, b) => ((a.speed ?? 0) >= (b.speed ?? 0) ? a : b))
       : this.player;
-    const total = rollSpeed(roller, 0.5, 20).gradeIndex + 1;
+
+    let total = this.isDevMode ? 999 : rollSpeed(roller, 0.5, 20).gradeIndex + 1;
+
+
+    const hasTravelerSet = this.selectedHeroes.some(hero =>
+        (hero.equipSlots ?? []).some(item => item?.effect === 'movement_plus_2')
+    );
+    if (hasTravelerSet) total += 2;
+
+
     this.player.movementPoints = total;
     this.ui.updateMovementUI(total);
     this.ui.updatePartyStatus(this.selectedHeroes);
@@ -543,7 +714,7 @@ export class GameController {
       EventTable.handleRuin(this, tile, c);
     } else if (c.type === TileContentType.CORRUPTED_DEER) {
       EventTable.handleCorruptedDeer(this, tile, c);
-    } else if (c.type === TileContentType.NPC) {
+    } else if (c.type === TileContentType.NPC || c.type === TileContentType.INJURED_VILLAGER) {
       EventTable.handleNPC(this, tile, c);
     } else if (c.type === TileContentType.SHOP) {
            EventTable.handleShop(this, tile, c);
@@ -580,6 +751,20 @@ export class GameController {
     this.ui.setProgressBarNormal();
     this.ui.updateProgressBar(0, maxTurns);
     this.ui.updateProgressBarTitle(`🎯 ${missionName}`);
+  }
+
+  // ── 更新进度条标题（根据当前任务或地图） ──────────────────────
+  _updateProgressBarTitle() {
+    let title;
+    if (this.currentMissionName) {
+      title = `🎯 ${this.currentMissionName}`;
+    } else if (this.currentMapName === 'Novice Village') {
+      title = '🏘️ Novice Village';
+    } else {
+      title = '🌍 Main World';
+    }
+    this._progressBarTitle = title;
+    this.ui.updateProgressBarTitle(title);
   }
 
   _executeTrapRoll() {
@@ -769,6 +954,14 @@ export class GameController {
         this.ui.updateMovementUI(this.player.movementPoints);
         this.ui.updatePartyStatus(this.selectedHeroes);
         this.ui.updateProgressBar(this.turnCount, this.currentMaxTurns);
+        // 设置进度条标题
+        if (this.currentMissionName) {
+          this.ui.updateProgressBarTitle(`🎯 ${this.currentMissionName}`);
+        } else if (this.currentMapName === 'Novice Village') {
+          this.ui.updateProgressBarTitle('🏘️ Novice Village');
+        } else {
+          this.ui.updateProgressBarTitle('🌍 Main World');
+        }
         if (this.bossMode) this.ui.updateBossMode();
 
         return true;
@@ -776,5 +969,14 @@ export class GameController {
         console.error("Save load error:", e);
         return false;
     }
+  }
+  startDevMode() {
+    this.fsm.transition(GameState.CHARACTER_SELECT);
+  }
+
+  _populateDevInventory() {
+    const storage = this.ui.inventoryUI;
+    DataLoader.getAllWeapons().forEach(w => storage.addToStorage({ ...w }));
+    ItemDB.forEach(it => storage.addToStorage({ ...it }));
   }
 }

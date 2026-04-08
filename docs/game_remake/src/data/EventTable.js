@@ -10,7 +10,7 @@ import {
 } from '../world/Tile.js';
 import { GameState } from '../core/Constants.js';
 import { rollSpeed } from '../core/Dice.js';
-import { rollRandomItem, rollRandomLoot, rollGoldDrop, rollShopInventory } from './items.js'; // ★ 新增 rollRandomLoot ★
+import { rollRandomItem, rollRandomLoot } from './items.js'; // ★ 新增 rollRandomLoot ★
 
 // ── 静态配置列表 ────────────────────────────────────────────────────
 
@@ -119,6 +119,11 @@ export const MAIN_SHOP_LIST = [
   { q: 5,  r: -3, name: 'Wilderness Shop' },
 ];
 
+
+export const MAIN_SHOP_LIST = [
+  { map: 'main', q: -3, r: 3 },
+  { map: 'main', q: 5,  r: -3 },
+];
 // ── EventTable 类 ───────────────────────────────────────────────────
 
 export class EventTable {
@@ -214,6 +219,8 @@ export class EventTable {
    * @param {Object} gameController
    */
   static handleTrap(gameController) {
+    // 触发陷阱时改变标题
+    gameController.ui.updateProgressBarTitle('💀 Find Village');
     gameController.ui.showEvent(
       this.EVENTS.TRAP.title,
       this.EVENTS.TRAP.description,
@@ -362,6 +369,8 @@ export class EventTable {
    * @param {Object} tile
    */
   static handleAltar(gameController, tile) {
+    // 触发祭坦时改变标题
+    gameController.ui.updateProgressBarTitle('💀 Find Village');
     gameController.ui.showEvent(
       this.EVENTS.ALTAR.title,
       this.EVENTS.ALTAR.description,
@@ -404,6 +413,8 @@ export class EventTable {
    * @param {Object} tile
    */
   static handleLighthouse(gameController, tile) {
+    // 触发灰塔时改变标题
+    gameController.ui.updateProgressBarTitle('💀 Find Village');
     gameController.ui.showEvent(
       this.EVENTS.LIGHTHOUSE.title,
       this.EVENTS.LIGHTHOUSE.description,
@@ -452,8 +463,8 @@ export class EventTable {
    * @param {Object} tile
    * @param {Object} content
    */
-  static handleNPC(gameController, tile, content) {
-    gameController.ui.showEvent(
+  static handleNPC(gameController, tile, content) {    // 触发遗迹时改变标题
+    gameController.ui.updateProgressBarTitle('💀 Find Village');    gameController.ui.showEvent(
       `👤 ${content.name}`,
       content.dialogue || 'Hello traveler!',
       [{ text: 'Continue', onClick: () => { } }]
@@ -493,6 +504,8 @@ export class EventTable {
                 {
                   text: 'Accept',
                   onClick: () => {
+                    // 切换到救援车队任务集
+                    gameController.tutorial.taskList.switchToMission('Rescue the Caravan');
                     gameController._startMission('Rescue the Caravan', 5);
                     gameController.ui.showEvent(
                       '✓ Quest Accepted',
