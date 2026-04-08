@@ -324,6 +324,62 @@ export class CombatManager {
     const statValue = this._getEffectiveAtk(attacker, statKey);
     const isEnemyAction = attacker?.type === 'enemy';
 
+    if (skill.type === 'ally_heal') {
+      const healTarget = (target && target !== 'aoe') ? target : attacker;
+      const amount = Math.max(1, Math.floor(skill.healAmount || 15));
+
+      if (healTarget.statusEffects?.anti_heal > 0) {
+        this.addLog(`${healTarget.name} is under anti-heal and cannot recover HP.`);
+        this.diceInfo = { isHeal: false, damage: 0, type: 'normal', targetId: healTarget.id };
+      } else {
+        healTarget.hp = Math.min(healTarget.maxHp || healTarget.hp, healTarget.hp + amount);
+        this.addLog(`${attacker.name} used [${skill.name}] and restored ${amount} HP to ${healTarget.name}.`);
+        this.diceInfo = { isHeal: true, damage: amount, targetId: healTarget.id };
+      }
+
+      this.phase = 'EXECUTING';
+      this.notifyUI();
+      return;
+    }
+
+    if (false && skill.type === 'ally_heal') {
+      const healTarget = (target && target !== 'aoe') ? target : attacker;
+      const amount = Math.max(1, Math.floor(skill.healAmount || 15));
+
+      if (healTarget.statusEffects?.anti_heal > 0) {
+        this.addLog(`馃毇 ${healTarget.name} is under anti-heal! Cannot recover HP!`);
+        this.diceInfo = { isHeal: false, damage: 0, type: 'normal', targetId: healTarget.id };
+      } else {
+        healTarget.hp = Math.min(healTarget.maxHp || healTarget.hp, healTarget.hp + amount);
+        this.addLog(`馃挌 ${attacker.name} used [${skill.name}]! ${healTarget.name} recovered ${amount} HP!`);
+        this.diceInfo = { isHeal: true, damage: amount, targetId: healTarget.id };
+      }
+
+      this.phase = 'EXECUTING';
+      this.notifyUI();
+      return;
+    }
+
+    if (skill.type === 'ally_buff') {
+      const buffTarget = (target && target !== 'aoe') ? target : attacker;
+      this.addLog(`${attacker.name} used [${skill.name}] on ${buffTarget.name}.`);
+      this._applyStatus(buffTarget, skill.statusEffect);
+      this.diceInfo = { isHeal: false, damage: 'BUFF', type: 'buff', targetId: buffTarget.id };
+      this.phase = 'EXECUTING';
+      this.notifyUI();
+      return;
+    }
+
+    if (false && skill.type === 'ally_buff') {
+      const buffTarget = (target && target !== 'aoe') ? target : attacker;
+      this.addLog(`馃敼 ${attacker.name} used [${skill.name}] on ${buffTarget.name}!`);
+      this._applyStatus(buffTarget, skill.statusEffect);
+      this.diceInfo = { isHeal: false, damage: 'BUFF', type: 'buff', targetId: buffTarget.id };
+      this.phase = 'EXECUTING';
+      this.notifyUI();
+      return;
+    }
+
     // Miss
     if (multiplier === 0) {
       this.diceInfo = { isHeal: false, damage: 0, type: 'miss', targetId: target?.id || attacker.id };
@@ -435,6 +491,36 @@ export class CombatManager {
 
     // ── ally_heal：治疗随机队友（Goblin Shaman）─────────────────────
     if (skill?.type === 'ally_heal') {
+      const candidates = aliveEnemies.filter(e => e.id !== this.activeUnit.id);
+      const healTarget = candidates.length > 0
+          ? candidates[Math.floor(Math.random() * candidates.length)]
+          : this.activeUnit;
+
+      this.currentAction = {
+        skill,
+        attacker: this.activeUnit,
+        target: healTarget,
+        multiplier: 1,
+        rollVal: 4,
+        textType: 'normal',
+        isHeal: true,
+      };
+      this.diceInfo = {
+        finalRoll: 4,
+        desc: 'Rolling',
+        attackerId: this.activeUnit.id,
+        targetId: healTarget.id,
+        isHeal: true,
+        skillType: skill.type,
+        skillPower: 0,
+        skipDice: true,
+      };
+      this.phase = 'ROLLING';
+      this.notifyUI();
+      return;
+    }
+
+    if (false && skill?.type === 'ally_heal') {
       const candidates  = aliveEnemies.filter(e => e.id !== this.activeUnit.id);
       const healTarget  = candidates.length > 0
           ? candidates[Math.floor(Math.random() * candidates.length)]
@@ -456,6 +542,33 @@ export class CombatManager {
 
     // ── ally_buff：给随机队友上 warcry（Goblin Shaman）──────────────
     if (skill?.type === 'ally_buff') {
+      const buffTarget = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+
+      this.currentAction = {
+        skill,
+        attacker: this.activeUnit,
+        target: buffTarget,
+        multiplier: 1,
+        rollVal: 4,
+        textType: 'normal',
+        isHeal: false,
+      };
+      this.diceInfo = {
+        finalRoll: 4,
+        desc: 'Rolling',
+        attackerId: this.activeUnit.id,
+        targetId: buffTarget.id,
+        isHeal: false,
+        skillType: skill.type,
+        skillPower: 0,
+        skipDice: true,
+      };
+      this.phase = 'ROLLING';
+      this.notifyUI();
+      return;
+    }
+
+    if (false && skill?.type === 'ally_buff') {
       const buffTarget = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
       this._applyStatus(buffTarget, skill.statusEffect);
       this.diceInfo = { isHeal: false, damage: 0, type: 'buff', targetId: buffTarget.id };
