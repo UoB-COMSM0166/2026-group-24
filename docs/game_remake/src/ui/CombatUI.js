@@ -286,6 +286,7 @@ const STATUS_ICONS = {
   rock_shield: { icon: '🛡️', color: '#94a3b8', label: 'Shield' },
   warcry:      { icon: '📣', color: '#f87171', label: 'WarCry' },
   heal_aura:   { icon: '💚', color: '#34d399', label: 'Regen' },
+  anti_heal:   { icon: '🚫', color: '#fb7185', label: 'Anti-Heal' },
 };
 
 const HpBar = ({ current, max, isEnemy, name, statusEffects }) => {

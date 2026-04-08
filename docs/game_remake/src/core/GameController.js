@@ -10,7 +10,7 @@ import { Player } from '../entities/Player.js';
 import { DataLoader } from '../data/DataLoader.js';
 import { rollSpeed } from './Dice.js';
 import { Renderer } from '../rendering/Renderer.js';
-import { rollRandomItem, rollRandomLoot } from '../data/items.js';
+import { rollRandomItem, rollRandomLoot, ItemDB } from '../data/items.js';
 import { GameStory } from './GameStory.js';
 import { EventTable } from '../data/EventTable.js';
 import { findPath, getReachableTiles } from '../utils/Pathfinder.js';
@@ -39,6 +39,7 @@ export class GameController {
     this.currentMissionName = null;
     this.merchantEncountered = false;
     this._isMoving = false;
+    this.isDevMode = false;
     this._progressBarTitle = null;  // 保存进度条标题以便恢复
     this.rangeHighlight = null;
     // ── 两步移动新增状态 ──────────────────────────────────────────
@@ -191,7 +192,7 @@ export class GameController {
         }
         // ── 启动教程系统 ────────────────────────────────────────
         this.tutorial = new TutorialManager(this);
-
+        if (this.isDevMode) this._populateDevInventory();
         this.fsm.transition(GameState.MAP_EXPLORATION);
       }),
       exit: () => this.ui.hideMapGeneration(),
@@ -286,6 +287,12 @@ export class GameController {
         const def = ENEMY_TYPES[typeKey];
         const e = new Enemy(def.name, def.type, level, def.statMod);
         e.id = `e${i + 1}_` + Date.now() + i;
+        e.skills = def.skills || [];
+        //精英敌人血量
+        if (def.hpMulti && def.hpMulti !== 1) {
+          e.maxHp = Math.floor(e.maxHp * def.hpMulti);
+          e.hp = e.maxHp;
+        }
         enemies.push(e);
       });
     }
@@ -792,5 +799,18 @@ export class GameController {
         console.error("Save load error:", e);
         return false;
     }
+  }
+  startDevMode() {
+    const allHeroes = DataLoader.getAllHeroes();
+    const pick = (id) => allHeroes.find(h => h.id === id);
+    const heroData = [pick('knight'), pick('wizard')].filter(Boolean);
+    this.selectedHeroes = heroData.map(d => this._createHeroFromData(d));
+    this.fsm.transition(GameState.MAP_GENERATION);
+  }
+
+  _populateDevInventory() {
+    const storage = this.ui.inventoryUI;
+    DataLoader.getAllWeapons().forEach(w => storage.addToStorage({ ...w }));
+    ItemDB.forEach(it => storage.addToStorage({ ...it }));
   }
 }
