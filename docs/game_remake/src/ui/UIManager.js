@@ -29,6 +29,7 @@ export class UIManager {
     this.onCombatEnd = callbacks.onCombatEnd ?? (() => { });
     this.inventoryUI = new InventoryUI();
     this.animFrameReq = null;
+
   }
 
   _drawHeroPreview(ctx, heroId, width, height, time) {
@@ -244,48 +245,27 @@ export class UIManager {
     if(this.els.partyStatus) this.els.partyStatus.style.display = 'flex';
     if (window.unmountCombatUI) window.unmountCombatUI();
   }
-  updateCombatUI(combatManager) {
-    if (!combatManager || !window.renderCombatUI) return;
-    this.inventoryUI?.update(combatManager.heroes);
-    const stateSnapshot = {
-      heroes: combatManager.heroes.map(h => ({ ...h, skills: h.skillSlots ? h.skillSlots.filter(s => s) : h.skills })),
-      enemies: [...combatManager.enemies],
-      phase: combatManager.phase,
-      activeUnit: combatManager.activeUnit ? { ...combatManager.activeUnit, skills: combatManager.activeUnit.skillSlots ? combatManager.activeUnit.skillSlots.filter(s => s) : combatManager.activeUnit.skills } : null,
-      turnOrder: [combatManager.activeUnit, ...combatManager.turnOrder].filter(Boolean),
-      logs: [...combatManager.logs],
-      diceInfo: combatManager.diceInfo
-    };
-    const callbacks = {
-      onStartBattle: () => { if(combatManager.startGame) combatManager.startGame(); else combatManager.phase = 'PLAYER_TURN'; this.updateCombatUI(combatManager); },
-      onSkillSelect: (skill) => combatManager.selectSkill(skill),
-      onTargetSelect: (targetId) => combatManager.executePlayerAction(targetId),
-      onRollComplete: () => combatManager.applyDamage(),
-      onExecuteComplete: () => combatManager.evaluateTurn(),
-      onFinishCombat: () => this.onCombatResult(combatManager.phase === 'WIN' ? 'win' : 'lose')
-    };
-    window.renderCombatUI('react-combat-root', stateSnapshot, callbacks);
-  }
+
   onCombatResult(result) { this.hideCombatOverlay(); this.onCombatEnd(result); }
   showEvent(title, desc, buttons = [], config = {}) {
     const { eventUI, eventTitle, eventDesc, eventButtons } = this.els;
     if (!eventUI) return;
-    
+
     const titleEl = document.getElementById('event-title');
     const descEl = document.getElementById('event-desc');
     const nameEl = document.getElementById('event-name');
     const avatarEl = document.getElementById('event-avatar');
     const pageEl = document.getElementById('event-page');
-    
+
     // 设置头像和名字（可选配置）
     if (nameEl) nameEl.textContent = config.name || '事件';
     if (avatarEl) avatarEl.textContent = config.avatar || '📋';
-    
+
     eventUI.style.display = 'flex';
     if (titleEl) titleEl.textContent = title;
     if (descEl) descEl.textContent = desc;
     if (pageEl) pageEl.textContent = ''; // 单页事件不显示页码
-    
+
     eventButtons.innerHTML = '';
     buttons.forEach(btn => {
       const button = document.createElement('button');
@@ -293,13 +273,13 @@ export class UIManager {
       button.style.cssText = "background: transparent; border: 1px solid rgba(251,191,36,0.5); border-radius: 6px; padding: 5px 18px; color: #fbbf24; font-family: sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s ease;";
       button.onmouseover = () => { button.style.background = 'rgba(251,191,36,0.1)'; };
       button.onmouseout = () => { button.style.background = 'transparent'; };
-      button.onclick = () => { 
-        eventUI.style.display = 'none'; 
+      button.onclick = () => {
+        eventUI.style.display = 'none';
         // 在事件对话框关闭后，调用恢复进度条标题的回调
         if (config.onClose) {
           setTimeout(() => config.onClose(), 50);
         }
-        if (btn.onClick) btn.onClick(); 
+        if (btn.onClick) btn.onClick();
       };
       eventButtons.appendChild(button);
     });
@@ -360,6 +340,9 @@ export class UIManager {
 
   hideStoryScreen() {
     this.els.storyScreen.style.display = 'none';
+  }
+  updateGold(amount) {
+      this.inventoryUI?.updateGold(amount);
   }
 
   /**
@@ -495,7 +478,7 @@ export class UIManager {
       box-shadow: 0 4px 20px rgba(0,0,0,0.6);
       overflow: hidden;
     `;
-    
+
     // 显示头像：如果提供了avatar键名，则从DataLoader获取图片
     if (avatar) {
       const avatarImg = DataLoader.getImage(avatar);
@@ -605,9 +588,8 @@ export class UIManager {
     // 显示第一个分段
     showSegment();
   }
-  // src/ui/UIManager.js  — PATCH: updated updateCombatUI method
-  // Replace the existing updateCombatUI method in your UIManager with this version.
-  // Everything else in UIManager stays the same.
+
+
 
   // ─── updateCombatUI (replace existing method) ────────────────────────────────
   updateCombatUI(combatManager) {
