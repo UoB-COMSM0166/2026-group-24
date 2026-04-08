@@ -61,12 +61,13 @@ async function init() {
     // 3. 显示标题页面，点击 START 后进入游戏
     const titleScreen = new TitleScreen(
       () => startGame(false), // 新游戏
-      () => startGame(true)   // 读取存档
+      () => startGame(true) ,  // 读取存档
+      () => startGame(false, true)  // 开发者模式
     );
     titleScreen.show();
 }
 
-function startGame(isLoad = false) {
+function startGame(isLoad = false, isDevMode = false) {
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
 
@@ -116,6 +117,7 @@ function startGame(isLoad = false) {
     // 初始化控制器
     const gameController = new GameController(map, player, ui, camera);
     window._gameController = gameController;
+    if (isDevMode) gameController.isDevMode = true;
     // 监听状态切换，切换音乐
     const origTransition = gameController.fsm.transition.bind(gameController.fsm);
     gameController.fsm.transition = function (state, ...args) {
@@ -162,6 +164,8 @@ function startGame(isLoad = false) {
              alert("读取存档文件失败/损坏！");
              gameController.fsm.transition(GameState.CHARACTER_SELECT);
         }
+    } else if (isDevMode) {
+        gameController.startDevMode();
     } else {
         gameController.fsm.transition(GameState.CHARACTER_SELECT);
     }

@@ -2,9 +2,10 @@
 // 采用 p5.js 绘制像素奇幻风背景，叠加 HTML/CSS 响应式 UI 菜单
 
 export class TitleScreen {
-  constructor(onStart, onContinue) {
+  constructor(onStart, onContinue, onDevMode) {
     this.onStart = onStart;
     this.onContinue = onContinue;
+    this.onDevMode = onDevMode;
     this._overlay = null;
     this._p5inst = null;
     this.globalVolume = 0.5;
@@ -109,6 +110,7 @@ export class TitleScreen {
         <button id="ts-btn-start" class="ts-btn">NEW GAME</button>
         <button id="ts-btn-continue" class="ts-btn">CONTINUE GAME</button>
         <button id="ts-btn-settings" class="ts-btn">SETTINGS</button>
+        <button id="ts-btn-dev" class="ts-btn" style="border-color:#27ae60;color:#2ecc71;font-size:11px;">DEV MODE</button>
       </div>
     `;
     overlay.appendChild(uiLayer);
@@ -198,7 +200,18 @@ export class TitleScreen {
         if (this._overlay) this._overlay.remove();
       }, 1000);
     });
-
+    const btnDev = uiLayer.querySelector('#ts-btn-dev');
+    btnDev.addEventListener('click', () => {
+      if (isStarting) return;
+      isStarting = true;
+      uiLayer.style.transition = 'opacity 0.5s ease-out';
+      uiLayer.style.opacity = '0';
+      if (this._p5inst) this._p5inst.triggerStart();
+      setTimeout(() => {
+        this.onDevMode?.();
+        if (this._overlay) this._overlay.remove();
+      }, 1000);
+    });
     // 5. p5.js 画布
     this._p5inst = new p5(sketch => {
       const W = window.innerWidth;
