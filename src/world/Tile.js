@@ -29,6 +29,7 @@ export const TileContentType = {
   RUIN: 'ruin',
   CORRUPTED_DEER: 'corruptedDeer',
   INJURED_VILLAGER: 'injuredVillager',
+    SHOP: 'shop',
 };
 
 // ── 共享坐标工具 ──────────────────────────────────────────────────
@@ -87,6 +88,9 @@ export function makeInjuredVillager(name = 'INJURED VILLAGER', dialogue = '') {
   return { type: TileContentType.INJURED_VILLAGER, name, dialogue };
 }
 
+export function makeShop(name = 'Shop') {
+  return { type: TileContentType.SHOP, name, iconType: 'purpleCircle' };
+}
 // ── Tile 类 ──────────────────────────────────────────────────────
 export class Tile {
 

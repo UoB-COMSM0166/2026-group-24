@@ -10,15 +10,14 @@ import { Player } from '../entities/Player.js';
 import { DataLoader } from '../data/DataLoader.js';
 import { rollSpeed } from './Dice.js';
 import { Renderer } from '../rendering/Renderer.js';
-import { rollRandomItem, rollRandomLoot, ItemDB } from '../data/items.js';
+import { rollRandomItem, rollRandomLoot, rollGoldDrop, ItemDB } from '../data/items.js';
 import { GameStory } from './GameStory.js';
 import { EventTable } from '../data/EventTable.js';
 import { findPath, getReachableTiles } from '../utils/Pathfinder.js';
 import { rollEncounter, ENEMY_TYPES } from '../data/EncounterTable.js';
 import { TutorialManager } from './TutorialManager.js';
-import { NOVICE_DUNGEON_LIST, NOVICE_TREASURE_LIST, NOVICE_ALTAR_LIST } from '../data/EventTable.js';
-import { makeDungeon, makeTreasure, makeAltar } from '../world/Tile.js';
-
+import { NOVICE_DUNGEON_LIST, NOVICE_TREASURE_LIST, NOVICE_ALTAR_LIST, NOVICE_SHOP_LIST, MAIN_SHOP_LIST } from '../data/EventTable.js';
+import { makeDungeon, makeTreasure, makeAltar, makeShop } from '../world/Tile.js';
 export class GameController {
   constructor(map, player, ui, camera) {
     this.map = map;
@@ -42,6 +41,7 @@ export class GameController {
     this.isDevMode = false;
     this._progressBarTitle = null;  // 保存进度条标题以便恢复
     this.rangeHighlight = null;
+    this.gold = 0;
     // ── 两步移动新增状态 ──────────────────────────────────────────
     this.pendingPath = null;      // A* 算出的待确认路径
     this.pendingTarget = null;    // 待确认目标格 {q, r}
@@ -194,7 +194,24 @@ export class GameController {
             tile.type = TileType.GRASS;
             this.noviceVillage.placeContent(ev.q, ev.r, makeAltar(), 0);
           }
+
         }
+        // ── 放置新手村商店 ──────────────────────────────────────
+                for (const ev of NOVICE_SHOP_LIST) {
+                  const tile = this.noviceVillage.getTile(ev.q, ev.r);
+                  if (tile) {
+                    tile.type = TileType.GRASS;
+                    this.noviceVillage.placeContent(ev.q, ev.r, makeShop(), 0);
+                  }
+                }
+                // ── 放置主地图商店 ──────────────────────────────────────
+                for (const ev of MAIN_SHOP_LIST) {
+                  const tile = this.map.getTile(ev.q, ev.r);
+                  if (tile) {
+                    tile.type = TileType.GRASS;
+                    this.map.placeContent(ev.q, ev.r, makeShop(), 0);
+                  }
+                }
         // ── 启动教程系统 ────────────────────────────────────────
         if (!this.isDevMode) {
           this.tutorial = new TutorialManager(this);
@@ -206,8 +223,8 @@ export class GameController {
     });
 
     this.fsm.addState(GameState.MAP_EXPLORATION, {
-      enter: () => { 
-        this.turnCount = 0; 
+      enter: () => {
+        this.turnCount = 0;
         this.ui.showMapUI();
         // 根据当前地图设置进度条标题
         if (this.currentMapName === 'Novice Village') {
@@ -215,7 +232,7 @@ export class GameController {
         } else {
           this.ui.updateProgressBarTitle('🌍 Main World');
         }
-        this._startTurn(); 
+        this._startTurn();
       },
     });
 
@@ -227,6 +244,9 @@ export class GameController {
         this.ui.updatePartyStatus(this.selectedHeroes);
         if (won) {
           const loot = rollRandomLoot();
+          const goldGained = rollGoldDrop(loot?.rarity ?? 'common');
+          this.gold = (this.gold ?? 0) + goldGained;
+          this.ui.updateGold?.(this.gold);
 
           // 先显示战斗后的故事对话（如果存在）
           if (this.currentBossContent?.postCombatMessage) {
@@ -699,6 +719,8 @@ export class GameController {
       EventTable.handleCorruptedDeer(this, tile, c);
     } else if (c.type === TileContentType.NPC || c.type === TileContentType.INJURED_VILLAGER) {
       EventTable.handleNPC(this, tile, c);
+    } else if (c.type === TileContentType.SHOP) {
+           EventTable.handleShop(this, tile, c);
     }
   }
 

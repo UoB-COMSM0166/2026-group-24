@@ -6,7 +6,7 @@ export class InventoryUI {
         this.heroes = [];
         this.activeIndex = 0;
         this.isOpen = false;
-
+ this.gold = 0;
         this.btn = document.createElement("button");
         this.btn.textContent = "🎒";
         this.btn.title = "Inventory (B)";
@@ -25,6 +25,28 @@ export class InventoryUI {
             "font-size:20px",
         ].join(";");
         document.body.appendChild(this.btn);
+
+// 常驻金币显示，紧贴背包按钮左侧
+this.goldTag = document.createElement('div');
+this.goldTag.style.cssText = [
+    'position:fixed',
+    'right:72px',       // 背包按钮宽46px + 右边18px + 8px间距
+    'top:18px',
+    'height:46px',
+    'display:flex',
+    'align-items:center',
+    'padding:0 12px',
+    'border-radius:12px',
+    'border:1px solid rgba(251,191,36,0.4)',
+    'background:rgba(20,20,40,0.85)',
+    'color:#fbbf24',
+    'font-weight:700',
+    'font-size:14px',
+    'z-index:150',
+    'pointer-events:none',
+].join(';');
+this.goldTag.textContent = '💰 0';
+document.body.appendChild(this.goldTag);
 
         this.panel = document.createElement("div");
         this.panel.style.cssText = [
@@ -82,9 +104,14 @@ export class InventoryUI {
 
         if (!heroes || heroes.length === 0) {
             this.panel.innerHTML = `
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                    <div style="font-weight:700;font-size:16px;">🎒 Inventory</div>
-                    <button id="inv-close" style="background:transparent;border:none;color:#aaa;cursor:pointer;">✕</button>
+
+                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                   <div style="display:flex;align-items:center;gap:12px;">
+                     <div style="font-weight:700;font-size:16px;">🎒 Inventory</div>
+                     <div id="inv-gold-display" style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);border-radius:8px;padding:3px 10px;color:#fbbf24;font-size:13px;font-weight:700;">💰 Gold: ${this.gold}</div>
+                   </div>
+                   <button id="inv-close" style="background:transparent;border:none;color:#aaa;cursor:pointer;">✕</button>
+                 </div>
                 </div>
                 <div style="opacity:.75;">No party info (select heroes first).</div>
             `;
@@ -161,11 +188,14 @@ export class InventoryUI {
     </div>
 `;
 
-        this.panel.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div style="font-weight:700;font-size:16px;">🎒 Inventory</div>
-        <button id="inv-close" style="background:transparent;border:none;color:#aaa;cursor:pointer;">✕</button>
-    </div>
+      this.panel.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                  <div style="font-weight:700;font-size:16px;">🎒 Inventory</div>
+                  <div id="inv-gold-display" style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);border-radius:8px;padding:3px 10px;color:#fbbf24;font-size:13px;font-weight:700;">💰 Gold: ${this.gold}</div>
+              </div>
+              <button id="inv-close" style="background:transparent;border:none;color:#aaa;cursor:pointer;">✕</button>
+          </div>
 
     <div style="display:flex;gap:12px;">
 
@@ -560,6 +590,14 @@ ${itemSlotsHTML}
 // 外部调用：获取共用存放区
     getStorage() {
         return this.sharedStorage;
+    }
+    updateGold(amount) {
+        this.gold = amount;
+        // 更新常驻标签
+        if (this.goldTag) this.goldTag.textContent = `💰 ${amount}`;
+        // 更新背包内标签（如果背包开着）
+        const goldEl = this.panel.querySelector('#inv-gold-display');
+        if (goldEl) goldEl.textContent = `💰 Gold: ${amount}`;
     }
 }
 function _getItemEmoji(iconType) {
