@@ -2,14 +2,15 @@
 import { rollAttack } from './Dice.js';
 
 // ── Status effect definitions ─────────────────────────────────────────────────
-// burn      : lose 5% maxHp per turn for 3 turns (fire)
-// frozen    : skip next turn (ice)
-// shock     : next damage received +30% for 2 turns (thunder)
-// poison    : lose 10 flat HP per turn for 3 turns (nature/toxic)
-// entangle  : cannot evade, damage received +20% for 2 turns (wood)
+// burn       : lose 5% maxHp per turn for 3 turns (fire)
+// frozen     : skip next turn (ice)
+// shock      : next damage received +30% for 2 turns (thunder)
+// poison     : lose 10 flat HP per turn for 3 turns (nature/toxic)
+// entangle   : cannot evade, damage received +20% for 2 turns (wood)
 // rock_shield: reduce next incoming damage by 50% (earth/block)
-// warcry    : own ATK +25% for 2 turns (knight buff)
-// heal_aura : regen 8% maxHp per turn for 3 turns (priest buff)
+// warcry     : own ATK +25% for 2 turns (knight buff)
+// heal_aura  : regen 8% maxHp per turn for 3 turns (priest buff)
+// anti_heal  : cannot recover HP for 2 turns (assassin debuff)  ← hub新增
 
 export class CombatManager {
   constructor(heroes, enemies, ui) {
@@ -35,7 +36,7 @@ export class CombatManager {
 
   init() {
     this.turnOrder = [...this.heroes, ...this.enemies]
-      .sort((a, b) => (b.speed || 0) - (a.speed || 0));
+        .sort((a, b) => (b.speed || 0) - (a.speed || 0));
     this.nextTurn();
   }
 
@@ -81,6 +82,7 @@ export class CombatManager {
         unit.statusEffects.heal_aura = 3;
         this.addLog(`💚 ${unit.name} channels Heal Aura! Regen 8% HP/turn (3 turns)`);
         break;
+        // ── hub新增：禁疗 ────────────────────────────────────────────
       case 'anti_heal':
         unit.statusEffects.anti_heal = 2;
         this.addLog(`🚫 ${unit.name} is Wounded! Cannot recover HP! (2 turns)`);
@@ -120,8 +122,8 @@ export class CombatManager {
       if (fx.heal_aura <= 0) delete fx.heal_aura;
     }
 
-    // Decrement turn-based buffs/debuffs
-    ['shock', 'entangle', 'warcry', 'anti_heal'].forEach(key => {  // ← 加了 'anti_heal'
+    // Decrement turn-based buffs/debuffs（hub新增 anti_heal）
+    ['shock', 'entangle', 'warcry', 'anti_heal'].forEach(key => {
       if (fx[key] > 0) {
         fx[key]--;
         if (fx[key] <= 0) {
@@ -268,9 +270,9 @@ export class CombatManager {
   executePlayerAction(targetId) {
     const { skill, attacker } = this.currentAction;
     this.currentAction.target =
-      targetId === 'aoe_target'
-        ? 'aoe'
-        : (this.enemies.find(e => e.id === targetId) || this.heroes.find(h => h.id === targetId));
+        targetId === 'aoe_target'
+            ? 'aoe'
+            : (this.enemies.find(e => e.id === targetId) || this.heroes.find(h => h.id === targetId));
 
     let result = rollAttack(attacker, 0.5, 6);
     let rollVal = Math.max(1, Math.min(6, Math.round(result.sampleRoll)));
@@ -286,7 +288,16 @@ export class CombatManager {
 
     const isHeal = skill.type === 'heal' || skill.type === 'buff';
     this.currentAction = { ...this.currentAction, multiplier, rollVal, textType, isHeal };
-    this.diceInfo = { finalRoll: rollVal, desc: 'Rolling' };
+
+    // ── 保留你的攻击动画扩展字段（attackerId / targetId / isHeal / skillType）──
+    this.diceInfo = {
+      finalRoll: rollVal,
+      desc: 'Rolling',
+      attackerId: attacker.id,
+      targetId: this.currentAction.target?.id || null,
+      isHeal: isHeal,
+      skillType: skill.type,
+    };
     this.phase = 'ROLLING';
     this.notifyUI();
   }
@@ -315,13 +326,13 @@ export class CombatManager {
       const healAmount = Math.max(1, Math.floor(statValue * (skill.power / 100) * multiplier));
       if (skill.power > 0) {
         const healTarget = (target && target !== 'aoe') ? target : attacker;
-        // ↓ 检查禁疗状态
+        // ── hub新增：禁疗状态检查 ──────────────────────────────────
         if (healTarget.statusEffects?.anti_heal > 0) {
           this.addLog(`🚫 ${healTarget.name} is under anti-heal! Cannot recover HP!`);
           this.diceInfo = { isHeal: false, damage: 0, type: 'normal', targetId: healTarget.id };
         } else {
           healTarget.hp = Math.min(healTarget.maxHp || 100, healTarget.hp + healAmount);
-          this.diceInfo = {isHeal: true, damage: healAmount, targetId: healTarget.id};
+          this.diceInfo = { isHeal: true, damage: healAmount, targetId: healTarget.id };
           this.addLog(`Rolled [${rollVal}] → Restored ${healAmount} HP`);
         }
       } else {
@@ -369,13 +380,13 @@ export class CombatManager {
 
   _rollLabel(textType) {
     return textType === 'perfect' ? '⚡ PERFECT! ×2.0'
-         : textType === 'crit'    ? '💥 CRIT! ×1.5'
-         : textType === 'weak'    ? '(Weak ×0.5)'
-         : textType === 'miss'    ? '💨 MISS'
-         : '';
+        : textType === 'crit'    ? '💥 CRIT! ×1.5'
+            : textType === 'weak'    ? '(Weak ×0.5)'
+                : textType === 'miss'    ? '💨 MISS'
+                    : '';
   }
 
-  // ── Enemy AI ──────────────────────────────────────────────────────
+  // ── Enemy AI（采用 hub 完整版，支持 buff/heal/aoe 等多种技能类型）────
   handleAI() {
     const aliveHeroes  = this.heroes.filter(h => this._isAlive(h));
     if (aliveHeroes.length === 0) return;
@@ -402,7 +413,7 @@ export class CombatManager {
           ? candidates[Math.floor(Math.random() * candidates.length)]
           : this.activeUnit;
       const amount = skill.healAmount || 15;
-      // ↓ 检查禁疗
+      // 检查禁疗
       if (healTarget.statusEffects?.anti_heal > 0) {
         this.addLog(`🚫 ${healTarget.name} cannot be healed!`);
         this.diceInfo = { isHeal: false, damage: 0, targetId: healTarget.id };
@@ -425,7 +436,8 @@ export class CombatManager {
       this.notifyUI();
       return;
     }
-    //精英怪回血+护盾
+
+    // ── self_restore：精英怪回血+护盾 ───────────────────────────────
     if (skill?.type === 'self_restore') {
       const healAmt = Math.floor(this.activeUnit.maxHp * (skill.healPct || 0.1));
       if (this.activeUnit.statusEffects?.anti_heal > 0) {
@@ -445,7 +457,7 @@ export class CombatManager {
     }
 
     // ── 攻击（single / aoe）或兜底普攻 ──────────────────────────────
-    const target   = aliveHeroes.sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+    const target    = aliveHeroes.sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
     const skillName = skill?.name    || 'Attack';
     const statKey   = skill?.statKey || 'strength';
     const power     = skill?.power   ?? 100;
