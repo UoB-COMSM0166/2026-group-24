@@ -702,7 +702,7 @@ const UnitDisplay = ({ unit, isEnemy, isActive, canTarget, onTarget, shakingId, 
       transform: isActive ? 'scale(1.05)' : 'scale(1)',
       transition: 'all 0.2s',
     }}
-      onClick={() => canTarget && onTarget(unit.id)}>
+     onClick={() => canTarget && isEnemy && onTarget(unit.id)}>
 
       {isActive && !canTarget && (
         <div style={{ fontSize:'9px', fontWeight:'bold', padding:'2px 8px', borderRadius:'999px',
@@ -1065,21 +1065,24 @@ const CombatApp = ({ state, callbacks }) => {
             );
           })()}
 
-          <div style={{ display:'flex', gap:'80px', alignItems:'flex-end', minWidth:'200px' }}>
-            {showDice ? (
-              <div style={{ textAlign:'center' }}>
-                <DiceSVG value={diceValue} rolling={phase==='ROLLING'}/>
-                <div style={{ color:'#fbbf24', fontSize:'11px', fontWeight:'bold', marginTop:'6px',
-                  animation:'hp-pulse 0.8s ease-in-out infinite', letterSpacing:'0.08em' }}>
-                  {phase==='ROLLING' ? 'ROLLING…'
-                    : diceValue<=2 ? '💨 WEAK ×0.5'
-                    : diceValue<=4 ? '⚔ HIT ×1.0'
-                    : diceValue===5 ? '💥 HEAVY ×1.2'
-                    : '⚡ CRIT! ×1.5'}
-                </div>
-                <div style={{ color:'#57534e', fontSize:'9px', fontFamily:'monospace', marginTop:'2px' }}>[ {diceValue} ]</div>
-              </div>
-            ) : (phase==='WIN' || phase==='LOSE') ? (
+          {showDice && (
+                      <div style={{ position:'absolute', left:'50%', top:'50%', transform:'translate(-50%, -50%)',
+                        zIndex:30, textAlign:'center', pointerEvents:'none' }}>
+                        <DiceSVG value={diceValue} rolling={phase==='ROLLING'}/>
+                        <div style={{ color:'#fbbf24', fontSize:'11px', fontWeight:'bold', marginTop:'6px',
+                          animation:'hp-pulse 0.8s ease-in-out infinite', letterSpacing:'0.08em' }}>
+                          {phase==='ROLLING' ? 'ROLLING…'
+                            : diceValue<=2 ? '💨 WEAK ×0.5'
+                            : diceValue<=4 ? '⚔ HIT ×1.0'
+                            : diceValue===5 ? '💥 HEAVY ×1.2'
+                            : '⚡ CRIT! ×1.5'}
+                        </div>
+                        <div style={{ color:'#57534e', fontSize:'9px', fontFamily:'monospace', marginTop:'2px' }}>[ {diceValue} ]</div>
+                      </div>
+                    )}
+
+                    <div style={{ display:'flex', gap:'80px', alignItems:'flex-end', minWidth:'200px' }}>
+                      {(phase==='WIN' || phase==='LOSE') ? (
               <div style={{ textAlign:'center', position:'absolute', left:'50%', top:'50%', transform:'translate(-50%,-50%)', zIndex:20 }}>
                 <div style={{ fontSize:'3rem', fontWeight:'900', marginBottom:'8px',
                   color: phase==='WIN'?'#fbbf24':'#ef4444',
@@ -1190,6 +1193,31 @@ const CombatApp = ({ state, callbacks }) => {
               justifyContent:'center', gap:'6px', background:'rgba(127,29,29,0.15)',
               border:'1px dashed rgba(248,113,113,0.4)', borderRadius:'10px' }}>
               <div style={{ color:'#f87171', fontWeight:'bold', fontSize:'12px' }}>🎯 Click an enemy to target</div>
+              <button onClick={() => onSkillSelect(null)} style={{
+                background:'rgba(28,25,23,0.8)', border:'1px solid #57534e', color:'#a8a29e',
+                padding:'3px 12px', borderRadius:'6px', cursor:'pointer', fontSize:'10px' }}>
+                Cancel
+              </button>
+            </div>
+          ) : phase === 'AWAIT_ALLY_TARGET' ? (
+            <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center',
+              justifyContent:'center', gap:'6px', background:'rgba(6,78,59,0.15)',
+              border:'1px dashed rgba(52,211,153,0.4)', borderRadius:'10px' }}>
+              <div style={{ color:'#34d399', fontWeight:'bold', fontSize:'12px' }}>💚 Select heal target</div>
+              <div style={{ display:'flex', gap:'8px' }}>
+                {heroes.filter(h => h.hp > 0).map(h => (
+                  <button key={h.id} onClick={() => onTargetSelect(h.id)} style={{
+                    background: h.id === activeUnit?.id ? 'rgba(52,211,153,0.25)' : 'rgba(28,25,23,0.8)',
+                    border: `2px solid ${h.id === activeUnit?.id ? '#34d399' : '#57534e'}`,
+                    color: '#d6d3d1', padding:'8px 16px', borderRadius:'8px', cursor:'pointer',
+                    fontSize:'12px', fontWeight:'bold', transition:'all 0.15s' }}>
+                    {h.id === activeUnit?.id ? '💚 ' : ''}{h.name}
+                    <div style={{ fontSize:'10px', color:'#78716c', marginTop:'2px' }}>
+                      {h.hp}/{h.maxHp} HP
+                    </div>
+                  </button>
+                ))}
+              </div>
               <button onClick={() => onSkillSelect(null)} style={{
                 background:'rgba(28,25,23,0.8)', border:'1px solid #57534e', color:'#a8a29e',
                 padding:'3px 12px', borderRadius:'6px', cursor:'pointer', fontSize:'10px' }}>

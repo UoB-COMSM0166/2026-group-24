@@ -421,11 +421,11 @@
           "id": "heal_prayer",
           "name": "Heal Prayer",
           "type": "heal",
-          "target": "self",
+          "target": "ally",
           "power": 80,
           "statKey": "talent",
           "statusEffect": null,
-          "desc": "Restore 80% TAL as HP"
+          "desc": "Heal self or ally for 80% TAL"
         }
       ]
     },
@@ -550,11 +550,11 @@
           "id": "earth_heal",
           "name": "Earth Heal",
           "type": "heal",
-          "target": "self",
+          "target": "ally",
           "power": 120,
           "statKey": "talent",
           "statusEffect": "heal_aura",
-          "desc": "120% TAL heal + Regen 3 turns"
+          "desc": "Heal self or ally 120% TAL + Regen 3 turns"
         }
       ]
     },
@@ -664,11 +664,11 @@
           "id": "nature_heal",
           "name": "Nature Heal",
           "type": "heal",
-          "target": "self",
+          "target": "aoe",
           "power": 70,
           "statKey": "awareness",
           "statusEffect": "heal_aura",
-          "desc": "Heal + Regen for 2 turns"
+          "desc": "Heal all allies + Regen for 2 turns"
         },
         {
           "id": "poison_arrow",
