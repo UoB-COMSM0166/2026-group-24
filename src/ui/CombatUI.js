@@ -577,20 +577,20 @@ const CombatApp = ({ state, callbacks }) => {
   };
 
   // ── Pick which attack anim to use based on skill type ───────────
-    const pickAttackAnim = (attackerId, skillType) => {
-      // Enemies don't have attack anims — skip
-      const isHero = heroes.some(h => h.id === attackerId);
-      if (!isHero) return 'attack1';
-      // Wizard: only has attack1 & attack2
-      if (attackerId === 'wizard') {
-        return skillType === 'magic' ? 'attack2' : 'attack1';
-      }
-      // Knight/Priest/Ranger: attack1=normal, attack2=heavy, attack3=magic
-      if (skillType === 'magic')  return 'attack3';
-      if (skillType === 'debuff') return 'attack1';
-      // For physical attacks, default attack1
-      return 'attack1';
-    };
+    const pickAttackAnim = (attackerId, skillType, skillPower = 0) => {
+          const isHero = heroes.some(h => h.id === attackerId);
+          if (!isHero) return 'attack1';
+
+          // Wizard: only attack1 & attack2, split by power
+          if (attackerId === 'wizard') {
+            return skillPower >= 140 ? 'attack2' : 'attack1';
+          }
+
+          // Knight/Priest/Ranger: three tiers by power
+          if (skillPower >= 150) return 'attack3';
+          if (skillPower >= 120) return 'attack2';
+          return 'attack1';
+        };
 
     // ── Compute pixel offset from attacker to target ────────────────
     const getChargeOffset = (attackerId, targetId) => {
@@ -607,26 +607,39 @@ const CombatApp = ({ state, callbacks }) => {
     };
 
     // ── Start the charge→attack→return sequence ─────────────────────
-    const startAttackAnim = (attackerId, targetId, skillType, isHeal) => {
+    const startAttackAnim = (attackerId, targetIdArg, skillType, isHeal, skillPower = 0) => {
+      let targetId = targetIdArg;
       const isHero = heroes.some(h => h.id === attackerId);
-      const isRanged = attackerId === 'wizard' || isHeal;
+      const animName = pickAttackAnim(attackerId, skillType, skillPower);
 
-      if (isRanged || !isHero) {
-        // Ranged / enemy / heal: skip charge, play attack in place, then proceed
-        if (isHero && !isHeal) {
-          // Wizard: play attack animation in place
-          setAnimState({ attackerId, targetId, phase: 'attack', skillType });
-        } else {
-          // Enemy or heal: skip animation entirely
-          onRollComplete();
-        }
+      const isRangedAttack = attackerId === 'wizard'
+        || (attackerId === 'ranger' && animName !== 'attack1');
+
+      if (!isHero) {
+        onRollComplete();
         return;
       }
 
-      // Melee hero: charge toward enemy
+      if (isHeal) {
+        onRollComplete();
+        return;
+      }
+
+      if (isRangedAttack) {
+        setAnimState({ attackerId, targetId, phase: 'attack', skillType, skillPower });
+        return;
+      }
+
+      // AOE: charge toward first alive enemy
+      if (!unitRefsMap.current[targetId]) {
+        const firstEnemy = enemies.find(e => e.hp > 0);
+        if (firstEnemy) targetId = firstEnemy.id;
+      }
+
+      // Melee: charge toward enemy
       const offset = getChargeOffset(attackerId, targetId);
       setChargeOffset(offset);
-      setAnimState({ attackerId, targetId, phase: 'charge', skillType });
+      setAnimState({ attackerId, targetId, phase: 'charge', skillType, skillPower });
     };
 
     // ── Called when charge CSS transition ends ──────────────────────
@@ -638,20 +651,25 @@ const CombatApp = ({ state, callbacks }) => {
 
     // ── Called when attack AnimatedSprite finishes its one-shot ─────
     const onAttackAnimDone = () => {
-      if (!animState) return;
-      const attackerId = animState.attackerId;
-      const isRanged = attackerId === 'wizard';
-      onRollComplete();
-      if (isRanged) {
-        // Wizard: no return phase, just clear anim state
-        setTimeout(() => setAnimState(null), 200);
-      } else {
-        setTimeout(() => {
-          setAnimState(prev => prev ? { ...prev, phase: 'return' } : null);
-          setChargeOffset({ x: 0, y: 0 });
-        }, 200);
-      }
-    };
+          if (!animState) return;
+          const attackerId = animState.attackerId;
+          const animName = pickAttackAnim(attackerId, animState.skillType, animState.skillPower);
+          const isRangedAttack = attackerId === 'wizard'
+            || (attackerId === 'ranger' && animName !== 'attack1');
+
+          onRollComplete();
+
+          if (isRangedAttack) {
+            // Ranged: no return phase
+            setTimeout(() => setAnimState(null), 200);
+          } else {
+            // Melee: return phase
+            setTimeout(() => {
+              setAnimState(prev => prev ? { ...prev, phase: 'return' } : null);
+              setChargeOffset({ x: 0, y: 0 });
+            }, 200);
+          }
+        };
     // ── Called when return CSS transition ends ──────────────────────
     const onReturnArrived = () => {
       setAnimState(null);
@@ -669,7 +687,7 @@ const CombatApp = ({ state, callbacks }) => {
             setDiceValue(diceInfo.finalRoll);
             console.log('[Dice done]', 'attackerId:', diceInfo.attackerId, 'targetId:', diceInfo.targetId, 'skillType:', diceInfo.skillType);
             setTimeout(() => {
-              startAttackAnim(diceInfo.attackerId, diceInfo.targetId, diceInfo.skillType, diceInfo.isHeal);
+              startAttackAnim(diceInfo.attackerId, diceInfo.targetId, diceInfo.skillType, diceInfo.isHeal, diceInfo.skillPower || 0);
             }, 500);
           }
         }, 55);
@@ -766,7 +784,7 @@ const CombatApp = ({ state, callbacks }) => {
                                       heroTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
                                       heroTransitionClass = 'unit-charge';
                                     } else if (animState.phase === 'attack') {
-                                      heroAnimAction = pickAttackAnim(h.id, animState.skillType);
+                                      heroAnimAction = pickAttackAnim(h.id, animState.skillType, animState.skillPower);
                                       heroTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
                                       heroOnAnimComplete = onAttackAnimDone;
                                     } else if (animState.phase === 'return') {
