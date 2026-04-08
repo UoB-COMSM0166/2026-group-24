@@ -17,6 +17,8 @@ export class DataLoader {
   // ★ 新增：存储敌人的动画资源
   static enemyAnimations = {
       stone_golem: { idle: [], hit: [], death: [], run: [], attack: [] },
+      elite: { idle: [], hit: [], death: [], run: [], attack: [] },
+      healer: { idle: [], hit: [], death: [], run: [], attack: [], heal: [] },
       warrior: { idle: null, hit: null, death: null, run: null, attack: null },
       swift_assassin: { idle: null, hit: null, death: null, run: null, attack: null },
       mage: { idle: null, hit: null, death: null, run: null, attack: null }
@@ -153,6 +155,41 @@ export class DataLoader {
     });
 
     // ★ 新增：加载其余敌人的单张精灵图 (Sprite Sheets) ★
+    const eliteConfig = { idle: 8, hit: 6, death: 19, run: 8, attack: 26 };
+    Object.entries(eliteConfig).forEach(([action, count]) => {
+        let folder, prefix;
+        if (action === 'idle') { folder = 'Idle'; prefix = 'idle_'; }
+        else if (action === 'hit') { folder = 'Hit'; prefix = 'take_hit_'; }
+        else if (action === 'death') { folder = 'Death'; prefix = 'death_'; }
+        else if (action === 'run') { folder = 'Run'; prefix = 'run_'; }
+        else if (action === 'attack') { folder = 'Attack'; prefix = '3_atk_'; }
+
+        const task = Promise.all(
+            Array.from({length: count}, (_, i) => loadImg(`./resource/model/enemy/elite/${folder}/${prefix}${i+1}.png`))
+        ).then(imgs => {
+            this.enemyAnimations.elite[action] = imgs.filter(Boolean);
+        });
+        animTasks.push(task);
+    });
+
+    const healerConfig = { idle: 8, hit: 7, death: 16, run: 10, attack: 7, heal: 12 };
+    Object.entries(healerConfig).forEach(([action, count]) => {
+        let folder, prefix;
+        if (action === 'idle') { folder = 'Idle'; prefix = 'idle_'; }
+        else if (action === 'hit') { folder = 'Hit'; prefix = 'take_hit_'; }
+        else if (action === 'death') { folder = 'Death'; prefix = 'death_'; }
+        else if (action === 'run') { folder = 'Run'; prefix = 'walk_'; }
+        else if (action === 'attack') { folder = 'Attack/attack'; prefix = '1_atk_'; }
+        else if (action === 'heal') { folder = 'Attack/heal'; prefix = 'heal_'; }
+
+        const task = Promise.all(
+            Array.from({length: count}, (_, i) => loadImg(`./resource/model/enemy/healer/${folder}/${prefix}${i+1}.png`))
+        ).then(imgs => {
+            this.enemyAnimations.healer[action] = imgs.filter(Boolean);
+        });
+        animTasks.push(task);
+    });
+
     const enemySpriteConfig = {
         warrior: { idle: 'Idle/Idle.png', hit: 'Hit/Take Hit.png', death: 'Death/Death.png', run: 'Run/Walk.png', attack: 'Attack/Attack.png' },
         swift_assassin: { idle: 'Idle/Idle.png', hit: 'Hit/Take hit.png', death: 'Death/Death.png', run: 'Run/Run.png', attack: 'Attack/Attack2.png' },

@@ -311,25 +311,40 @@ if (heroId === 'wizard') {
 
 const ENEMY_ANIM_CONFIG = {
   stone_golem: {
-    idle:   { frames: 6, interval: 140, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
-    hit:    { frames: 5, interval: 85, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
-    death:  { frames: 22, interval: 90, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
-    run:    { frames: 12, interval: 70, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
-    attack: { frames: 15, interval: 65, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
+    idle:   { frames: 6, interval: 140, mode: 'sequence', height: 72, scale: 2.55, ty: -5, faceLeftFlip: false },
+    hit:    { frames: 5, interval: 85, mode: 'sequence', height: 72, scale: 2.55, ty: -5, faceLeftFlip: false },
+    death:  { frames: 22, interval: 90, mode: 'sequence', height: 72, scale: 2.55, ty: -5, faceLeftFlip: false },
+    run:    { frames: 12, interval: 70, mode: 'sequence', height: 72, scale: 2.55, ty: -5, faceLeftFlip: false },
+    attack: { frames: 15, interval: 65, mode: 'sequence', height: 72, scale: 2.55, ty: -5, faceLeftFlip: false },
+  },
+  elite: {
+    idle:   { frames: 8, interval: 120, mode: 'sequence', height: 70, scale: 2.5, ty: 16, faceLeftFlip: true },
+    hit:    { frames: 6, interval: 85, mode: 'sequence', height: 70, scale: 2.5, ty: 16, faceLeftFlip: true },
+    death:  { frames: 19, interval: 90, mode: 'sequence', height: 70, scale: 2.5, ty: 16, faceLeftFlip: true },
+    run:    { frames: 8, interval: 75, mode: 'sequence', height: 70, scale: 2.5, ty: 16, faceLeftFlip: true },
+    attack: { frames: 26, interval: 55, mode: 'sequence', height: 70, scale: 2.5, ty: 16, faceLeftFlip: true },
+  },
+  healer: {
+    idle:   { frames: 8, interval: 120, mode: 'sequence', height: 70, scale: 2.45, ty: 16, faceLeftFlip: true },
+    hit:    { frames: 7, interval: 85, mode: 'sequence', height: 70, scale: 2.45, ty: 16, faceLeftFlip: true },
+    death:  { frames: 16, interval: 90, mode: 'sequence', height: 70, scale: 2.45, ty: 16, faceLeftFlip: true },
+    run:    { frames: 10, interval: 72, mode: 'sequence', height: 70, scale: 2.45, ty: 16, faceLeftFlip: true },
+    attack: { frames: 7, interval: 70, mode: 'sequence', height: 70, scale: 2.45, ty: 16, faceLeftFlip: true },
+    heal:   { frames: 12, interval: 68, mode: 'sequence', height: 70, scale: 2.45, ty: 16, faceLeftFlip: true },
   },
   warrior: {
-    idle:   { frames: 4, interval: 150, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
-    hit:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
-    death:  { frames: 4, interval: 120, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
-    run:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
-    attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
+    idle:   { frames: 4, interval: 150, mode: 'sheet', scale: 2.85, ty: 130, faceLeftFlip: true },
+    hit:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.85, ty: 130, faceLeftFlip: true },
+    death:  { frames: 4, interval: 120, mode: 'sheet', scale: 2.85, ty: 130, faceLeftFlip: true },
+    run:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.85, ty: 130, faceLeftFlip: true },
+    attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.85, ty: 130, faceLeftFlip: true },
   },
   mage: {
-    idle:   { frames: 4, interval: 150, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
-    hit:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
-    death:  { frames: 4, interval: 120, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
-    run:    { frames: 8, interval: 75, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
-    attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
+    idle:   { frames: 4, interval: 150, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    hit:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    death:  { frames: 4, interval: 120, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    run:    { frames: 8, interval: 75, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
   },
   swift_assassin: {
     idle:   { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 42, faceLeftFlip: true },
@@ -355,7 +370,7 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
       || ENEMY_ANIM_CONFIG[enemyKey]?.idle
       || { frames: 1, interval: 1000, mode: 'sheet', scale: 2.0, ty: 30 };
 
-    const isOneShot = action === 'hit' || action === 'death' || action === 'attack';
+    const isOneShot = action === 'hit' || action === 'death' || action === 'attack' || action === 'heal';
     setFrame(0);
 
     const timer = setInterval(() => {
@@ -722,7 +737,12 @@ const CombatApp = ({ state, callbacks }) => {
           if (!attacker) return false;
 
           if (!isHero) {
-            return attacker.enemyKey === 'mage' || attacker.monsterType === 'mage';
+            const enemyKey = attacker.enemyKey || attacker.monsterType;
+            if (enemyKey === 'mage') return true;
+            if (enemyKey === 'healer' && ['ally_heal', 'ally_buff', 'self_restore'].includes(skillType)) {
+              return true;
+            }
+            return false;
           }
 
           // Wizard: only attack1 & attack2, split by power
@@ -735,7 +755,14 @@ const CombatApp = ({ state, callbacks }) => {
 
     const pickAttackAnim = (attackerId, skillType, skillPower = 0) => {
           const isHero = heroes.some(h => h.id === attackerId);
-          if (!isHero) return 'attack';
+          if (!isHero) {
+            const attacker = getUnitById(attackerId);
+            const enemyKey = attacker?.enemyKey || attacker?.monsterType;
+            if (enemyKey === 'healer' && ['ally_heal', 'ally_buff', 'self_restore'].includes(skillType)) {
+              return 'heal';
+            }
+            return 'attack';
+          }
 
           // Wizard: only attack1 & attack2, split by power
           if (attackerId === 'wizard') {
@@ -767,8 +794,9 @@ const CombatApp = ({ state, callbacks }) => {
       let targetId = targetIdArg;
       const isHero = heroes.some(h => h.id === attackerId);
       const rangedAttack = isRangedAttack(attackerId, skillType, skillPower);
+      const enemySupportAnim = !isHero && ['ally_heal', 'ally_buff', 'self_restore'].includes(skillType);
 
-      if (isHeal) {
+      if (isHeal && !enemySupportAnim) {
         onRollComplete();
         return;
       }
@@ -850,6 +878,8 @@ const CombatApp = ({ state, callbacks }) => {
       if (phase === 'EXECUTING' && diceInfo) {
         if (diceInfo.isHeal) {
           addFloat(`+${diceInfo.damage}`, 'heal', diceInfo.targetId);
+        } else if (diceInfo.type === 'buff') {
+          addFloat(diceInfo.damage || 'BUFF', 'buff', diceInfo.targetId);
         } else {
           setShakingId(diceInfo.targetId);
           addFloat(diceInfo.damage, diceInfo.type || 'dmg', diceInfo.targetId);
@@ -968,7 +998,7 @@ const CombatApp = ({ state, callbacks }) => {
                                     >
                                       {floatingTexts.filter(f => f.unitId === h.id).map(f => (
                                         <div key={f.id} className="float-text" style={{ top:'-10px',
-                                          color: f.type==='heal'?'#4ade80': f.type==='perfect'?'#fbbf24':
+                                          color: f.type==='heal'?'#4ade80': f.type==='buff'?'#fbbf24': f.type==='perfect'?'#fbbf24':
                                                  f.type==='crit'?'#f97316': f.type==='weak'?'#94a3b8':'#f87171' }}>
                                           {f.type==='heal' ? `+${f.value}` : f.value}
                                         </div>
@@ -1032,7 +1062,7 @@ const CombatApp = ({ state, callbacks }) => {
                   enemyTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
                   enemyTransitionClass = 'unit-charge';
                 } else if (animState.phase === 'attack') {
-                  enemyAnimAction = 'attack';
+                  enemyAnimAction = pickAttackAnim(e.id, animState.skillType, animState.skillPower);
                   enemyTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
                   enemyOnAnimComplete = onAttackAnimDone;
                 } else if (animState.phase === 'return') {
@@ -1060,7 +1090,7 @@ const CombatApp = ({ state, callbacks }) => {
                     }}>
                   {floatingTexts.filter(f => f.unitId === e.id).map(f => (
                     <div key={f.id} className="float-text" style={{ top:'-10px',
-                      color: f.type==='heal'?'#4ade80': f.type==='perfect'?'#fbbf24':
+                      color: f.type==='heal'?'#4ade80': f.type==='buff'?'#fbbf24': f.type==='perfect'?'#fbbf24':
                              f.type==='crit'?'#f97316': f.type==='weak'?'#94a3b8':'#f87171' }}>
                       {f.type==='heal' ? `+${f.value}` : f.value}
                     </div>
