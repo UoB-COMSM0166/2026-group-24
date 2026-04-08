@@ -3,20 +3,32 @@ export class DataLoader {
   static heroMap = null;
   static skillMap = null;
   static weaponMap = null;
-  static trinketMap = null;  // ★ 新增：饰品数据 Map ★
+  static trinketMap = null;  
   static images = {};
   static audio = {};
 
-  // 存储角色序列帧动画 [heroId][action]
   static animations = {
       knight: { idle: [], hit: [], death: [], run: [], attack1: [], attack2: [], attack3: [] },
       priest: { idle: [], hit: [], death: [], run: [], attack1: [], attack2: [], attack3: [] },
       ranger: { idle: [], hit: [], death: [], run: [], attack1: [], attack2: [], attack3: [] },
       wizard: { idle: null, hit: null, death: null, attack1: null, attack2: null }
-    };
+  };
+
+  // ★ 新增：存储敌人的动画资源
+  static enemyAnimations = {
+      stone_golem: { idle: [], hit: [], death: [], run: [], attack: [] },
+      warrior: { idle: null, hit: null, death: null, run: null, attack: null },
+      swift_assassin: { idle: null, hit: null, death: null, run: null, attack: null },
+      mage: { idle: null, hit: null, death: null, run: null, attack: null }
+  };
+
+  // ★ 新增：获取敌人动画的方法
+  static getEnemyAnim(key, action = 'idle') {
+      let actualKey = key === 'stone-golem' ? 'stone_golem' : key;
+      return this.enemyAnimations[actualKey] ? this.enemyAnimations[actualKey][action] : null;
+  }
 
   static async loadAll() {
-    // 1. 加载 JSON 数据
     const [heroRes, skillRes, weaponRes] = await Promise.all([
       fetch('./src/data/heroes.json'),
       fetch('./src/data/skills.json'),
@@ -31,7 +43,6 @@ export class DataLoader {
     this.skillMap  = new Map(skillData.skills.map(s => [s.id, s]));
     this.weaponMap = new Map((weaponData.weapons || []).map(w => [w.id, w]));
 
-    // --- 动画资源加载工具 ---
     const loadImg = (path) => new Promise(res => {
       const img = new Image();
       img.src = path;
@@ -39,7 +50,6 @@ export class DataLoader {
       img.onerror = () => res(null);
     });
 
-    // 2. 预加载基础图像资源
     const imagePaths = {
       'village': 'resource/img/map/chapter1/village.png',
       'merchant': 'resource/img/map/chapter1/merchant.png',
@@ -90,7 +100,6 @@ export class DataLoader {
       'bloodthirst_mask':  './resource/img/items/daifu.png',
     };
 
-    // --- 动画加载任务 (英雄序列帧) ---
     const animConfig = {
           knight: { idle: 8, hit: 6, death: 13, run: 8, attack1: 11, attack2: 19, attack3: 28 },
           priest: { idle: 6, hit: 6, death: 18, run: 8, attack1: 6, attack2: 12, attack3: 23 },
@@ -99,10 +108,8 @@ export class DataLoader {
 
     const animTasks = [];
 
-    // 加载 Knight, Priest, Ranger
     Object.entries(animConfig).forEach(([hero, actions]) => {
       Object.entries(actions).forEach(([action, count]) => {
-              // Build folder path and file prefix based on action type
               let folder, prefix;
               if (action === 'idle')          { folder = 'Idle';              prefix = 'idle_'; }
               else if (action === 'hit')      { folder = 'Hit';              prefix = 'take_hit_'; }
@@ -121,15 +128,45 @@ export class DataLoader {
             });
     });
 
-    // 加载 Wizard (精灵图)
     animTasks.push(loadImg('./resource/model/wizard/Idle/Idle.png').then(img => { this.animations.wizard.idle = img; }));
     animTasks.push(loadImg('./resource/model/wizard/Hit/Hit.png').then(img => { this.animations.wizard.hit = img; }));
     animTasks.push(loadImg('./resource/model/wizard/Death/Death.png').then(img => { this.animations.wizard.death = img; }));
-    // Wizard attack sprite sheets (8 frames each, horizontal)
-        animTasks.push(loadImg('./resource/model/wizard/Attack/Attack1.png').then(img => { this.animations.wizard.attack1 = img; }));
-        animTasks.push(loadImg('./resource/model/wizard/Attack/Attack2.png').then(img => { this.animations.wizard.attack2 = img; }));
+    animTasks.push(loadImg('./resource/model/wizard/Attack/Attack1.png').then(img => { this.animations.wizard.attack1 = img; }));
+    animTasks.push(loadImg('./resource/model/wizard/Attack/Attack2.png').then(img => { this.animations.wizard.attack2 = img; }));
 
-    // 基础图片加载
+    // ★ 新增：加载敌人 Stone Golem 序列帧动画 ★
+    const golemConfig = { idle: 6, hit: 5, death: 22, run: 12, attack: 15 };
+    Object.entries(golemConfig).forEach(([action, count]) => {
+        let folder, prefix;
+        if (action === 'idle') { folder = 'Idle'; prefix = 'demon_idle_'; }
+        else if (action === 'hit') { folder = 'Hit'; prefix = 'demon_take_hit_'; }
+        else if (action === 'death') { folder = 'Death'; prefix = 'demon_death_'; }
+        else if (action === 'run') { folder = 'Run'; prefix = 'demon_walk_'; }
+        else if (action === 'attack') { folder = 'Attack'; prefix = 'demon_cleave_'; }
+
+        const task = Promise.all(
+            Array.from({length: count}, (_, i) => loadImg(`./resource/model/enemy/stone-golem/${folder}/${prefix}${i+1}.png`))
+        ).then(imgs => {
+            this.enemyAnimations.stone_golem[action] = imgs.filter(Boolean);
+        });
+        animTasks.push(task);
+    });
+
+    // ★ 新增：加载其余敌人的单张精灵图 (Sprite Sheets) ★
+    const enemySpriteConfig = {
+        warrior: { idle: 'Idle/Idle.png', hit: 'Hit/Take Hit.png', death: 'Death/Death.png', run: 'Run/Walk.png', attack: 'Attack/Attack.png' },
+        swift_assassin: { idle: 'Idle/Idle.png', hit: 'Hit/Take hit.png', death: 'Death/Death.png', run: 'Run/Run.png', attack: 'Attack/Attack2.png' },
+        mage: { idle: 'Idle/Idle.png', hit: 'Hit/Take Hit.png', death: 'Death/Death.png', run: 'Run/Run.png', attack: 'Attack/Attack.png' }
+    };
+
+    Object.entries(enemySpriteConfig).forEach(([enemy, actions]) => {
+        Object.entries(actions).forEach(([action, path]) => {
+            animTasks.push(loadImg(`./resource/model/enemy/${enemy}/${path}`).then(img => {
+                this.enemyAnimations[enemy][action] = img;
+            }));
+        });
+    });
+
     const imagePromises = Object.entries(imagePaths).map(([name, path]) => {
       return new Promise((resolve) => {
         const img = new Image();
@@ -139,7 +176,6 @@ export class DataLoader {
       });
     });
 
-    // 音频加载
     const audioPaths = {
       'map_bgm': './resource/music/map.mp3',
       'fight_bgm': './resource/music/fight.mp3'
@@ -160,7 +196,6 @@ export class DataLoader {
     console.log('[DataLoader] All assets and animations loaded');
   }
 
-  // 修正：支持获取指定动作的动画
   static getAnim(key, action = 'idle') { 
     return this.animations[key] ? this.animations[key][action] : null; 
   }
