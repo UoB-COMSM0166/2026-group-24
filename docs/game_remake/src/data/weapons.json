@@ -25,10 +25,10 @@
           "name": "Heavy Strike",
           "type": "attack",
           "target": "single",
-          "power": 160,
+          "power": 140,
           "statKey": "strength",
           "statusEffect": null,
-          "desc": "160% STR, high damage"
+          "desc": "140% STR, high damage"
         }
       ]
     },
@@ -160,7 +160,7 @@
           "name": "Firestorm",
           "type": "attack",
           "target": "aoe",
-          "power": 130,
+          "power": 150,
           "statKey": "strength",
           "statusEffect": "burn",
           "statusChance": {
@@ -169,7 +169,7 @@
             "5": 0.8,
             "6": 1.0
           },
-          "desc": "130% STR AOE fire + Burn all"
+          "desc": "150% STR AOE fire + Burn all"
         },
         {
           "id": "burning_ground",
@@ -649,7 +649,7 @@
           "name": "Entangle Arrow",
           "type": "attack",
           "target": "single",
-          "power": 100,
+          "power": 130,
           "statKey": "awareness",
           "statusEffect": "entangle",
           "statusChance": {
@@ -658,7 +658,7 @@
             "5": 0.8,
             "6": 1.0
           },
-          "desc": "100% AWR + Entangle target"
+          "desc": "130% AWR + Entangle target"
         },
         {
           "id": "nature_heal",
