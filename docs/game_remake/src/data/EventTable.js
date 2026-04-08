@@ -646,6 +646,24 @@ static handleShop(gameController, tile, content) {
     _isRefresh: true,
   };
 
+ // 第一次进入商店时弹出教程
+ const tutorial = window._gameController?.tutorial;
+ if (tutorial && !tutorial._introducedEvents?.has('shop')) {
+   tutorial._introducedEvents?.add('shop');
+   tutorial._dialogue?.show(
+     { name: '老向导', avatar: '🧙', lines: [
+       '哦！这是一家商店！冒险途中最重要的补给站。',
+       '每家商店都有一把随机武器和三件道具，记住——武器认主人，Knight的大剑Wizard拿不动，买之前看清楚适用职业！',
+       '商店还提供神圣祝福，花点金币就能给全队回血。血量告急的时候别忘了这个选项！',
+       '每家商店的货物是固定的，不满意可以花金币刷新换一批。不同地方的商店货物互不影响，多跑几家也是个办法！',
+       '金币来之不易，买东西前想清楚优先级——武器能直接提升战斗力，道具则是关键时刻的救命稻草。',
+     ]},
+     () => openShop()
+   );
+ } else {
+   openShop();
+ }
+
   const openShop = () => {
     const fullInventory = [...tile._shopInventory, healOption, refreshOption];
     ShopUI.show(
