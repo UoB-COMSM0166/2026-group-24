@@ -10,7 +10,7 @@ import {
 } from '../world/Tile.js';
 import { GameState } from '../core/Constants.js';
 import { rollSpeed } from '../core/Dice.js';
-import { rollRandomItem, rollRandomLoot } from './items.js'; // ★ 新增 rollRandomLoot ★
+import { rollRandomItem, rollRandomLoot, rollGoldDrop, rollShopInventory } from './items.js';// ★ 新增 rollRandomLoot ★
 
 // ── 静态配置列表 ────────────────────────────────────────────────────
 
@@ -114,10 +114,7 @@ export const NOVICE_SHOP_LIST = [
   { q: 0, r: 2, name: 'shop' },
 ];
 
-export const MAIN_SHOP_LIST = [
-  { q: -3, r: -3, name: 'Forest Shop' },
-  { q: 5,  r: -3, name: 'Wilderness Shop' },
-];
+
 
 
 export const MAIN_SHOP_LIST = [
@@ -625,21 +622,45 @@ export class EventTable {
     step1();
   }
 
-static async handleShop(gameController, tile, content) {
-  const { ShopUI } = await import('../ui/ShopUI.js');
-  const { rollShopInventory } = await import('./items.js');
+static handleShop(gameController, tile, content) {
   const inventory = rollShopInventory(3);
-  ShopUI.show(
-    inventory,
-    gameController.gold ?? 0,
-    (item) => {
-      gameController.gold = (gameController.gold ?? 0) - item._shopPrice;
-      gameController.ui.updateGold?.(gameController.gold);
-      gameController.ui.inventoryUI.addToStorage(item);
-      gameController.ui.updatePartyStatus(gameController.selectedHeroes);
-    },
-    () => {}
-  );
+  const shopName = content.name || 'Shop';
+
+  const showShop = () => {
+    const itemLines = inventory.map((item, i) =>
+      `${i + 1}. ${item.name} (${item.rarity}) — ${item._shopPrice} 💰`
+    ).join('\n');
+
+    const buttons = inventory.map((item, i) => ({
+      text: `Buy: ${item.name} (${item._shopPrice}💰)`,
+      onClick: () => {
+        if ((gameController.gold ?? 0) < item._shopPrice) {
+          gameController.ui.showEvent('❌ Not enough gold', `You need ${item._shopPrice} 💰 but only have ${gameController.gold ?? 0} 💰`, [
+            { text: 'Back', onClick: showShop }
+          ]);
+          return;
+        }
+        gameController.gold = (gameController.gold ?? 0) - item._shopPrice;
+        gameController.ui.updateGold?.(gameController.gold);
+        gameController.ui.inventoryUI.addToStorage({ ...item });
+        gameController.ui.updatePartyStatus(gameController.selectedHeroes);
+        gameController.ui.showEvent('✅ Purchased!', `You bought ${item.name}!`, [
+          { text: 'Continue Shopping', onClick: showShop },
+          { text: 'Leave', onClick: () => {} }
+        ]);
+      }
+    }));
+
+    buttons.push({ text: 'Leave', onClick: () => {} });
+
+    gameController.ui.showEvent(
+      `🛒 ${shopName}`,
+      `Your gold: ${gameController.gold ?? 0} 💰\n\n${itemLines}`,
+      buttons
+    );
+  };
+
+  showShop();
 }
 
   // ── 事件处理：遗迹 ───────────────────────────────────────────────

@@ -29,10 +29,7 @@ export class UIManager {
     this.onCombatEnd = callbacks.onCombatEnd ?? (() => { });
     this.inventoryUI = new InventoryUI();
     this.animFrameReq = null;
-    this._goldEl = document.createElement('div');
-    this._goldEl.style.cssText = 'position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(10,8,6,0.85);border:1px solid rgba(251,191,36,0.4);border-radius:10px;padding:6px 16px;color:#fbbf24;font-family:sans-serif;font-weight:700;font-size:14px;z-index:200;display:none;pointer-events:none;';
-    this._goldEl.textContent = '💰 0';
-    document.body.appendChild(this._goldEl);
+
   }
 
   _drawHeroPreview(ctx, heroId, width, height, time) {
@@ -248,28 +245,7 @@ export class UIManager {
     if(this.els.partyStatus) this.els.partyStatus.style.display = 'flex';
     if (window.unmountCombatUI) window.unmountCombatUI();
   }
-  updateCombatUI(combatManager) {
-    if (!combatManager || !window.renderCombatUI) return;
-    this.inventoryUI?.update(combatManager.heroes);
-    const stateSnapshot = {
-      heroes: combatManager.heroes.map(h => ({ ...h, skills: h.skillSlots ? h.skillSlots.filter(s => s) : h.skills })),
-      enemies: [...combatManager.enemies],
-      phase: combatManager.phase,
-      activeUnit: combatManager.activeUnit ? { ...combatManager.activeUnit, skills: combatManager.activeUnit.skillSlots ? combatManager.activeUnit.skillSlots.filter(s => s) : combatManager.activeUnit.skills } : null,
-      turnOrder: [combatManager.activeUnit, ...combatManager.turnOrder].filter(Boolean),
-      logs: [...combatManager.logs],
-      diceInfo: combatManager.diceInfo
-    };
-    const callbacks = {
-      onStartBattle: () => { if(combatManager.startGame) combatManager.startGame(); else combatManager.phase = 'PLAYER_TURN'; this.updateCombatUI(combatManager); },
-      onSkillSelect: (skill) => combatManager.selectSkill(skill),
-      onTargetSelect: (targetId) => combatManager.executePlayerAction(targetId),
-      onRollComplete: () => combatManager.applyDamage(),
-      onExecuteComplete: () => combatManager.evaluateTurn(),
-      onFinishCombat: () => this.onCombatResult(combatManager.phase === 'WIN' ? 'win' : 'lose')
-    };
-    window.renderCombatUI('react-combat-root', stateSnapshot, callbacks);
-  }
+
   onCombatResult(result) { this.hideCombatOverlay(); this.onCombatEnd(result); }
   showEvent(title, desc, buttons = [], config = {}) {
     const { eventUI, eventTitle, eventDesc, eventButtons } = this.els;
@@ -612,10 +588,8 @@ export class UIManager {
     // 显示第一个分段
     showSegment();
   }
-  showChestReward(item, onClose) { ChestAnimation.play(item, onClose ?? (() => {})); }
-  // src/ui/UIManager.js  — PATCH: updated updateCombatUI method
-  // Replace the existing updateCombatUI method in your UIManager with this version.
-  // Everything else in UIManager stays the same.
+
+
 
   // ─── updateCombatUI (replace existing method) ────────────────────────────────
   updateCombatUI(combatManager) {
