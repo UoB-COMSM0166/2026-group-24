@@ -346,6 +346,9 @@ export class GameController {
           }
       );
       boss.id     = 'e1_' + Date.now();
+      boss.enemyKey = 'dark_overlord';
+      boss.enemyCategory = def.type;
+      boss.monsterType = 'boss';
       boss.skills = def.skills;
 
       // HP 也翻倍（Enemy 构造时已按 level 算好，再 ×2）

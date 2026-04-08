@@ -17,6 +17,7 @@ export class DataLoader {
   // ★ 新增：存储敌人的动画资源
   static enemyAnimations = {
       stone_golem: { idle: [], hit: [], death: [], run: [], attack: [] },
+      dark_overlord: { idle: null, hit: null, death: null, run: null, attack: null, single: null, group: null, prey: null, heal: null },
       elite: { idle: [], hit: [], death: [], run: [], attack: [] },
       healer: { idle: [], hit: [], death: [], run: [], attack: [], heal: [] },
       warrior: { idle: null, hit: null, death: null, run: null, attack: null },
@@ -191,6 +192,17 @@ export class DataLoader {
     });
 
     const enemySpriteConfig = {
+        dark_overlord: {
+            idle: 'Idle/Idle.png',
+            hit: 'Hit/Hurt.png',
+            death: 'Death/Death.png',
+            run: 'Run/Run.png',
+            attack: 'Attack/sigle/crouch_attacks.png',
+            single: 'Attack/sigle/crouch_attacks.png',
+            group: 'Attack/group/attack_from_air.png',
+            prey: 'Attack/prey/Pray.png',
+            heal: 'Attack/heal/heal.png'
+        },
         warrior: { idle: 'Idle/Idle.png', hit: 'Hit/Take Hit.png', death: 'Death/Death.png', run: 'Run/Walk.png', attack: 'Attack/Attack.png' },
         swift_assassin: { idle: 'Idle/Idle.png', hit: 'Hit/Take hit.png', death: 'Death/Death.png', run: 'Run/Run.png', attack: 'Attack/Attack2.png' },
         mage: { idle: 'Idle/Idle.png', hit: 'Hit/Take Hit.png', death: 'Death/Death.png', run: 'Run/Run.png', attack: 'Attack/Attack.png' }
@@ -198,7 +210,8 @@ export class DataLoader {
 
     Object.entries(enemySpriteConfig).forEach(([enemy, actions]) => {
         Object.entries(actions).forEach(([action, path]) => {
-            animTasks.push(loadImg(`./resource/model/enemy/${enemy}/${path}`).then(img => {
+            const assetRoot = enemy === 'dark_overlord' ? 'legendary_knight' : enemy;
+            animTasks.push(loadImg(`./resource/model/enemy/${assetRoot}/${path}`).then(img => {
                 this.enemyAnimations[enemy][action] = img;
             }));
         });

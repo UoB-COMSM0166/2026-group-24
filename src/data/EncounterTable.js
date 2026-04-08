@@ -122,7 +122,7 @@ export const ENEMY_TYPES = {
     ],
   },
   dark_overlord: {
-    name: 'Dark Overlord',
+    name: 'Corfus, Legendary Knight of the Royal City',
     type: 'boss',
     hpMulti: 2.0,
     desc: 'Boss: overwhelming power, multi-status attacks, self-empowerment',
@@ -159,6 +159,14 @@ export const ENEMY_TYPES = {
         target:        'self',
         statusEffects: ['rock_shield', 'warcry', 'heal_aura'],
         desc:          'Grant self Rock Shield + Warcry + Heal Aura simultaneously',
+      },
+      {
+        id:      'boss_dark_recovery',
+        name:    'Dark Recovery',
+        type:    'self_heal',
+        target:  'self',
+        healPct: 0.15,
+        desc:    'Recover 15% max HP',
       },
     ],
   },
