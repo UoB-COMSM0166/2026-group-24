@@ -326,12 +326,30 @@ export class GameController {
     };
 
     if (isBoss) {
-      const enemy = new Enemy(
-          contentData.name || 'Elite Boss', 'boss', level,
-          { strength: 20 + level * 6, toughness: 16 + level * 5, agility: 10 + level * 2 }
+      const def = ENEMY_TYPES.dark_overlord;
+
+      // 数值 = 普通小怪同 level 基础值 × 2（普通公式见 Enemy.js 注释）
+      const boss = new Enemy(
+          contentData.name || def.name,
+          'boss',
+          level,
+          {
+            strength:  Math.floor((15 + (level - 1) * 4)   * 4),
+            intellect: Math.floor((6  + (level - 1) * 2)   * 4),
+            toughness: Math.floor((5  + (level - 1) * 1.5) * 4),
+            awareness: Math.floor((8  + (level - 1) * 2)   * 4),
+            talent:    Math.floor((5  + (level - 1) * 1)   * 4),
+            agility:   Math.floor((8  + (level - 1) * 2)   * 4),
+          }
       );
-      enemy.id = 'e1_' + Date.now();
-      startCombat([enemy]);
+      boss.id     = 'e1_' + Date.now();
+      boss.skills = def.skills;
+
+      // HP 也翻倍（Enemy 构造时已按 level 算好，再 ×2）
+      boss.maxHp = Math.floor(boss.maxHp * 10);
+      boss.hp    = boss.maxHp;
+
+      startCombat([boss]);
       return;
     }
 

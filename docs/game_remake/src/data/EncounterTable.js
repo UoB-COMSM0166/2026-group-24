@@ -121,6 +121,47 @@ export const ENEMY_TYPES = {
       },
     ],
   },
+  dark_overlord: {
+    name: 'Dark Overlord',
+    type: 'boss',
+    hpMulti: 2.0,
+    desc: 'Boss: overwhelming power, multi-status attacks, self-empowerment',
+    skills: [
+      // ① 单体高伤 + 100% 冻结
+      {
+        id:           'boss_glacial_judgment',
+        name:         'Glacial Judgment',
+        type:         'attack',
+        target:       'single',
+        power:        190,           // 普通小怪约 100，高伤定为 160
+        statKey:      'strength',
+        statusEffect: 'frozen',
+        statusChance: 1.0,           // 100% 冻结
+        desc:         '160% STR single strike — always Freezes target',
+      },
+      // ② 群体攻击 + 40% 概率同时附加感电+燃烧
+      {
+        id:                 'boss_infernal_storm',
+        name:               'Infernal Storm',
+        type:               'attack',
+        target:             'aoe',
+        power:              150,
+        statKey:            'strength',
+        multiStatusEffects: ['shock', 'burn'],  // 新字段：同时触发两个状态
+        statusChance:       0.4,                 // 40% 概率
+        desc:               '120% STR AOE — 40% to apply Shock + Burn to all',
+      },
+      // ③ 给自己附加全部正面效果
+      {
+        id:            'boss_dark_empowerment',
+        name:          'Dark Empowerment',
+        type:          'multi_buff',    // 新技能类型
+        target:        'self',
+        statusEffects: ['rock_shield', 'warcry', 'heal_aura'],
+        desc:          'Grant self Rock Shield + Warcry + Heal Aura simultaneously',
+      },
+    ],
+  },
 };
 
 export const ENCOUNTER_TABLE = {
