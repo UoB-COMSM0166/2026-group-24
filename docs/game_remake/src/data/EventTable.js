@@ -623,24 +623,59 @@ export class EventTable {
   }
 
 static handleShop(gameController, tile, content) {
-  const inventory = rollShopInventory(3);
+  if (!tile._shopInventory) {
+    tile._shopInventory = rollShopInventory();
+  }
   const shopName = content.name || 'Shop';
 
-  ShopUI.show(
-    shopName,
-    inventory,
-    gameController.gold ?? 0,
+  const healOption = {
+    name: 'Divine Blessing',
+    desc: 'Restore 30% HP to all heroes.',
+    rarity: 'common',
+    icon: 'potion',
+    _shopPrice: 30,
+    _isHeal: true,
+  };
 
-    (item) => {
-      gameController.gold = (gameController.gold ?? 0) - item._shopPrice;
-      gameController.ui.updateGold?.(gameController.gold);
-      gameController.ui.inventoryUI.addToStorage({ ...item });
-      gameController.ui.updatePartyStatus(gameController.selectedHeroes);
-      return gameController.gold;
-    },
+  const refreshOption = {
+    name: 'Refresh Stock',
+    desc: 'Reroll all items in the shop.',
+    rarity: 'common',
+    icon: 'clover',
+    _shopPrice: 80,
+    _isRefresh: true,
+  };
 
-    () => {}
-  );
+  const openShop = () => {
+    const fullInventory = [...tile._shopInventory, healOption, refreshOption];
+    ShopUI.show(
+      shopName,
+      fullInventory,
+      gameController.gold ?? 0,
+      (item) => {
+        if (item._isRefresh) {
+          tile._shopInventory = rollShopInventory();
+          gameController.gold = (gameController.gold ?? 0) - item._shopPrice;
+          gameController.ui.updateGold?.(gameController.gold);
+          setTimeout(() => openShop(), 200);
+          return gameController.gold;
+        }
+        if (item._isHeal) {
+          EventTable.applyAltarHealing(gameController);
+        }
+        gameController.gold = (gameController.gold ?? 0) - item._shopPrice;
+        gameController.ui.updateGold?.(gameController.gold);
+        if (!item._isHeal) {
+          gameController.ui.inventoryUI.addToStorage({ ...item });
+        }
+        gameController.ui.updatePartyStatus(gameController.selectedHeroes);
+        return gameController.gold;
+      },
+      () => {}
+    );
+  };
+
+  openShop();
 }
 
   // ── 事件处理：遗迹 ───────────────────────────────────────────────

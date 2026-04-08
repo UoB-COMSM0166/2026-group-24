@@ -1,8 +1,4 @@
 // src/ui/ShopUI.js
-// ══════════════════════════════════════════════════════════════════════
-// 精美商店 UI 组件
-// 用法：ShopUI.show(shopName, inventory, gold, onBuy, onLeave)
-// ══════════════════════════════════════════════════════════════════════
 
 const RARITY_STYLE = {
   legendary: { color: '#f97316', glow: 'rgba(249,115,22,0.35)', label: 'LEGENDARY', bg: 'rgba(249,115,22,0.08)' },
@@ -17,8 +13,6 @@ function getRarity(item) {
 }
 
 function getItemIcon(item) {
-  // 武器判断：有 skills 数组
-  const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
   const icons = {
     sword: '⚔️', shield: '🛡️', potion: '🧪', boots: '👟',
     clover: '🍀', bracelet: '📿', ring_strength: '💍',
@@ -26,6 +20,7 @@ function getItemIcon(item) {
     bloodthirst_mask: '😈',
   };
   if (item?.icon && icons[item.icon]) return icons[item.icon];
+  const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
   return isWeapon ? '⚔️' : '💍';
 }
 
@@ -37,204 +32,111 @@ function buildItemCard(item, index, gold, purchased) {
   const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
 
   const statBonusHTML = item.statBonus && Object.keys(item.statBonus).length > 0
-    ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
-        ${Object.entries(item.statBonus).map(([k,v]) =>
-          `<span style="background:rgba(255,255,255,0.07);border-radius:4px;padding:1px 6px;font-size:10px;color:#94a3b8;">+${v} ${k.toUpperCase()}</span>`
-        ).join('')}
-       </div>`
-    : '';
-
-  const skillsHTML = isWeapon && item.skills?.length
-    ? `<div style="margin-top:6px;font-size:10px;color:#94a3b8;">
-        Skills: ${item.skills.map(s => s.name ?? s).join(', ')}
-       </div>`
+    ? `<div style="font-size:10px;color:#475569;">${Object.entries(item.statBonus).map(([k,v]) => `+${v} ${k.toUpperCase()}`).join(' · ')}</div>`
     : '';
 
   const ownerTag = item.owner
-    ? `<span style="font-size:10px;padding:1px 7px;border-radius:4px;background:rgba(255,255,255,0.07);color:#94a3b8;">${item.owner}</span>`
+    ? ` · <span style="color:#64748b;">${item.owner}</span>`
     : '';
 
   return `
     <div class="shop-item-card" data-index="${index}" style="
       position:relative;
       background:${isBought ? 'rgba(255,255,255,0.02)' : r.bg};
-      border:1px solid ${isBought ? 'rgba(255,255,255,0.06)' : r.color + '55'};
-      border-radius:14px;
-      padding:16px;
+      border:0.5px solid ${isBought ? 'rgba(255,255,255,0.06)' : r.color + '55'};
+      border-radius:12px;
+      padding:12px;
       display:flex;
       flex-direction:column;
-      gap:8px;
-      transition:all 0.2s;
-      opacity:${isBought ? '0.45' : '1'};
-      ${isBought ? '' : `box-shadow:0 0 0 0 ${r.glow};`}
+      gap:7px;
+      opacity:${isBought ? '0.35' : '1'};
+      transition:transform 0.15s;
     ">
-      ${isBought ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:14px;background:rgba(0,0,0,0.35);font-size:13px;color:#94a3b8;font-style:italic;z-index:2;">Sold</div>` : ''}
+      ${isBought ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(0,0,0,0.3);font-size:12px;color:#64748b;z-index:2;">Sold</div>` : ''}
 
-      <!-- Header: icon + name + rarity -->
-      <div style="display:flex;align-items:flex-start;gap:12px;">
-        <div style="
-          width:48px;height:48px;flex-shrink:0;
-          border-radius:12px;
-          background:rgba(255,255,255,0.05);
-          border:1px solid ${r.color}44;
-          display:flex;align-items:center;justify-content:center;
-          font-size:22px;
-        ">${icon}</div>
+      <div style="display:flex;align-items:center;gap:9px;">
+        <div style="width:40px;height:40px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,0.04);border:0.5px solid ${r.color}33;display:flex;align-items:center;justify-content:center;font-size:18px;">${icon}</div>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.name}</div>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:10px;font-weight:800;letter-spacing:0.08em;color:${r.color};text-transform:uppercase;">${r.label}</span>
-            ${ownerTag}
-          </div>
+          <div style="font-size:12px;font-weight:500;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.name}</div>
+          <div style="font-size:10px;color:${r.color};letter-spacing:0.05em;">${r.label}${ownerTag}</div>
         </div>
       </div>
 
-      <!-- Desc -->
-      ${item.desc ? `<div style="font-size:11px;color:#64748b;line-height:1.5;">${item.desc}</div>` : ''}
-
       ${statBonusHTML}
-      ${skillsHTML}
+      ${item.desc ? `<div style="font-size:10px;color:#475569;line-height:1.4;">${item.desc}</div>` : ''}
 
-      <!-- Footer: price + buy button -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);">
-        <div style="font-size:15px;font-weight:800;color:#fbbf24;">💰 ${item._shopPrice}</div>
-        ${isBought
-          ? ''
-          : `<button class="shop-buy-btn" data-index="${index}" style="
-              padding:7px 18px;
-              border-radius:8px;
-              border:1px solid ${canAfford ? r.color + 'aa' : 'rgba(255,255,255,0.1)'};
-              background:${canAfford ? r.color + '22' : 'rgba(255,255,255,0.04)'};
-              color:${canAfford ? r.color : '#475569'};
-              font-size:12px;
-              font-weight:700;
-              cursor:${canAfford ? 'pointer' : 'not-allowed'};
-              transition:all 0.15s;
-              letter-spacing:0.04em;
-            " ${canAfford ? '' : 'disabled'}>
-              ${canAfford ? 'BUY' : 'Too poor'}
-            </button>`
-        }
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-top:7px;border-top:0.5px solid rgba(255,255,255,0.06);margin-top:auto;">
+        <div style="font-size:13px;font-weight:500;color:#fbbf24;">💰 ${item._shopPrice}</div>
+        ${isBought ? '' : `
+          <button class="shop-buy-btn" data-index="${index}" style="
+            padding:5px 13px;border-radius:7px;
+            border:0.5px solid ${canAfford ? r.color + '88' : 'rgba(255,255,255,0.08)'};
+            background:${canAfford ? r.color + '18' : 'rgba(255,255,255,0.03)'};
+            color:${canAfford ? r.color : '#334155'};
+            font-size:11px;cursor:${canAfford ? 'pointer' : 'not-allowed'};
+          " ${canAfford ? '' : 'disabled'}>BUY</button>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+function buildServiceCard(icon, title, desc, price, btnLabel, btnColor, btnBg, btnBorder, actionAttr, canAfford) {
+  return `
+    <div style="
+      background:${btnBg.replace('0.12','0.05')};
+      border:0.5px solid ${btnBorder.replace('0.5','0.2')};
+      border-radius:12px;padding:12px;
+      display:flex;align-items:center;gap:12px;
+    ">
+      <div style="width:40px;height:40px;flex-shrink:0;border-radius:10px;background:${btnBg};border:0.5px solid ${btnBorder};display:flex;align-items:center;justify-content:center;font-size:18px;">${icon}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:500;color:#f1f5f9;">${title}</div>
+        <div style="font-size:10px;color:#475569;margin-top:2px;">${desc}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:13px;font-weight:500;color:#fbbf24;margin-bottom:4px;">💰 ${price}</div>
+        <button class="shop-service-btn" ${actionAttr} style="
+          padding:5px 13px;border-radius:7px;
+          border:0.5px solid ${canAfford ? btnBorder : 'rgba(255,255,255,0.08)'};
+          background:${canAfford ? btnBg : 'rgba(255,255,255,0.03)'};
+          color:${canAfford ? btnColor : '#334155'};
+          font-size:11px;cursor:${canAfford ? 'pointer' : 'not-allowed'};
+        " ${canAfford ? '' : 'disabled'}>${btnLabel}</button>
       </div>
     </div>
   `;
 }
 
 export class ShopUI {
-  /**
-   * @param {string} shopName
-   * @param {Array}  inventory   - rollShopInventory() 结果
-   * @param {number} gold        - 当前金币
-   * @param {Function} onBuy    - (item, index) => void  购买回调
-   * @param {Function} onLeave  - () => void             离开回调
-   */
   static show(shopName, inventory, gold, onBuy, onLeave) {
-    // 清理已有弹窗
     document.getElementById('shop-overlay')?.remove();
 
     const purchased = new Set();
 
+    // 分离商品和服务
+    const items = inventory.filter(i => !i._isHeal && !i._isRefresh);
+    const healItem = inventory.find(i => i._isHeal);
+    const refreshItem = inventory.find(i => i._isRefresh);
+
     const overlay = document.createElement('div');
     overlay.id = 'shop-overlay';
     overlay.style.cssText = `
-      position:fixed;
-      inset:0;
-      z-index:300;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:rgba(0,0,0,0.72);
-      backdrop-filter:blur(6px);
-      animation:shopFadeIn 0.2s ease;
-      font-family:'Segoe UI', system-ui, sans-serif;
+      position:fixed;inset:0;z-index:300;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);
+      font-family:'Segoe UI',system-ui,sans-serif;
     `;
 
-    const rebuildPanel = (currentGold) => {
-      panel.innerHTML = buildShopHTML(shopName, inventory, currentGold, purchased);
-      attachEvents(currentGold);
-    };
-
-    const buildShopHTML = (name, inv, currentGold, purchased) => `
-      <style>
-        @keyframes shopFadeIn { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
-        @keyframes shopSlideIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-        .shop-item-card:not([style*="opacity:0"]):hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important; }
-        .shop-buy-btn:not(:disabled):hover { filter:brightness(1.2); transform:scale(1.05); }
-      </style>
-
-      <!-- Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <div>
-          <div style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#64748b;margin-bottom:3px;">Welcome to</div>
-          <div style="font-size:22px;font-weight:900;color:#f1f5f9;letter-spacing:-0.01em;">🛒 ${name}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="
-            background:rgba(251,191,36,0.12);
-            border:1px solid rgba(251,191,36,0.35);
-            border-radius:10px;
-            padding:8px 16px;
-            font-size:16px;font-weight:800;color:#fbbf24;
-          ">💰 ${currentGold}</div>
-          <button id="shop-close-btn" style="
-            width:36px;height:36px;border-radius:10px;
-            border:1px solid rgba(255,255,255,0.12);
-            background:rgba(255,255,255,0.06);
-            color:#94a3b8;font-size:18px;cursor:pointer;
-            display:flex;align-items:center;justify-content:center;
-            transition:all 0.15s;
-          ">✕</button>
-        </div>
-      </div>
-
-      <!-- Divider -->
-      <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);margin-bottom:20px;"></div>
-
-      <!-- Item grid -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;animation:shopSlideIn 0.25s ease 0.05s both;">
-        ${inv.map((item, i) => buildItemCard(item, i, currentGold, purchased)).join('')}
-      </div>
-
-      <!-- Footer -->
-      <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:11px;color:#475569;">Items are one-time purchase only</div>
-        <button id="shop-leave-btn" style="
-          padding:9px 28px;
-          border-radius:10px;
-          border:1px solid rgba(255,255,255,0.15);
-          background:rgba(255,255,255,0.06);
-          color:#94a3b8;
-          font-size:13px;font-weight:600;
-          cursor:pointer;
-          transition:all 0.15s;
-          letter-spacing:0.04em;
-        ">Leave Shop</button>
-      </div>
+    const panel = document.createElement('div');
+    panel.style.cssText = `
+      width:680px;max-width:calc(100vw - 40px);max-height:90vh;
+      overflow-y:auto;
+      background:#0f111c;
+      border:0.5px solid rgba(255,255,255,0.09);
+      border-radius:20px;padding:22px;
+      box-shadow:0 24px 64px rgba(0,0,0,0.7);
     `;
-
-    const attachEvents = (currentGold) => {
-      panel.querySelector('#shop-close-btn')?.addEventListener('click', closeShop);
-      panel.querySelector('#shop-leave-btn')?.addEventListener('click', closeShop);
-
-      panel.querySelectorAll('.shop-buy-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const idx = parseInt(btn.dataset.index);
-          const item = inventory[idx];
-          if (!item || purchased.has(idx)) return;
-          if ((currentGold) < item._shopPrice) return;
-
-          purchased.add(idx);
-          const newGold = onBuy(item, idx); // 回调返回新金币数
-          rebuildPanel(typeof newGold === 'number' ? newGold : currentGold - item._shopPrice);
-        });
-      });
-
-      // Hover effects
-      panel.querySelector('#shop-leave-btn')?.addEventListener('mouseenter', e => { e.target.style.color = '#f1f5f9'; e.target.style.background = 'rgba(255,255,255,0.1)'; });
-      panel.querySelector('#shop-leave-btn')?.addEventListener('mouseleave', e => { e.target.style.color = '#94a3b8'; e.target.style.background = 'rgba(255,255,255,0.06)'; });
-      panel.querySelector('#shop-close-btn')?.addEventListener('mouseenter', e => { e.target.style.color = '#f1f5f9'; e.target.style.background = 'rgba(255,255,255,0.1)'; });
-      panel.querySelector('#shop-close-btn')?.addEventListener('mouseleave', e => { e.target.style.color = '#94a3b8'; e.target.style.background = 'rgba(255,255,255,0.06)'; });
-    };
 
     const closeShop = () => {
       overlay.style.opacity = '0';
@@ -242,26 +144,103 @@ export class ShopUI {
       setTimeout(() => { overlay.remove(); onLeave?.(); }, 150);
     };
 
-    // Click outside to close
-    overlay.addEventListener('click', e => { if (e.target === overlay) closeShop(); });
+    const rebuildPanel = (currentGold) => {
+      panel.innerHTML = buildHTML(currentGold);
+      attachEvents(currentGold);
+    };
 
-    const panel = document.createElement('div');
-    panel.style.cssText = `
-      width:680px;
-      max-width:calc(100vw - 40px);
-      max-height:88vh;
-      overflow-y:auto;
-      background:linear-gradient(160deg, rgba(15,17,28,0.98) 0%, rgba(8,10,20,0.99) 100%);
-      border:1px solid rgba(255,255,255,0.09);
-      border-radius:20px;
-      padding:24px;
-      box-shadow:0 24px 64px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.06);
-      animation:shopFadeIn 0.2s ease;
+    const buildHTML = (currentGold) => `
+      <style>
+        .shop-item-card:hover { transform:translateY(-2px); }
+        .shop-buy-btn:not(:disabled):hover { filter:brightness(1.3); }
+        .shop-service-btn:not(:disabled):hover { filter:brightness(1.3); }
+      </style>
+
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div>
+          <div style="font-size:11px;letter-spacing:0.12em;color:#475569;margin-bottom:2px;">WELCOME TO</div>
+          <div style="font-size:19px;font-weight:500;color:#f1f5f9;">🛒 ${shopName}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="background:rgba(251,191,36,0.1);border:0.5px solid rgba(251,191,36,0.3);border-radius:10px;padding:6px 14px;font-size:15px;font-weight:500;color:#fbbf24;">💰 ${currentGold}</div>
+          <button id="shop-close-btn" style="width:32px;height:32px;border-radius:8px;border:0.5px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#64748b;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+      </div>
+
+      <div style="height:0.5px;background:rgba(255,255,255,0.07);margin-bottom:16px;"></div>
+
+      <!-- 商品区 -->
+      <div style="font-size:11px;letter-spacing:0.1em;color:#475569;margin-bottom:10px;">ITEMS FOR SALE</div>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px;">
+        ${items.map((item, i) => buildItemCard(item, i, currentGold, purchased)).join('')}
+      </div>
+
+      <div style="height:0.5px;background:rgba(255,255,255,0.07);margin-bottom:14px;"></div>
+
+      <!-- 服务区 -->
+      <div style="font-size:11px;letter-spacing:0.1em;color:#475569;margin-bottom:10px;">SERVICES</div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:18px;">
+        ${healItem ? buildServiceCard(
+          '✨', healItem.name, healItem.desc, healItem._shopPrice,
+          'USE', '#22c55e', 'rgba(34,197,94,0.1)', 'rgba(34,197,94,0.35)',
+          'data-heal="true"', currentGold >= healItem._shopPrice
+        ) : ''}
+        ${refreshItem ? buildServiceCard(
+          '🔄', refreshItem.name, refreshItem.desc, refreshItem._shopPrice,
+          'USE', '#fbbf24', 'rgba(251,191,36,0.08)', 'rgba(251,191,36,0.3)',
+          'data-refresh="true"', currentGold >= refreshItem._shopPrice
+        ) : ''}
+      </div>
+
+      <!-- Footer -->
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:11px;color:#334155;">Items lock per shop · refresh to reroll</div>
+        <button id="shop-leave-btn" style="padding:7px 22px;border-radius:8px;border:0.5px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;font-size:12px;cursor:pointer;">Leave Shop</button>
+      </div>
     `;
 
-    panel.innerHTML = buildShopHTML(shopName, inventory, gold, purchased);
+    const attachEvents = (currentGold) => {
+      panel.querySelector('#shop-close-btn')?.addEventListener('click', closeShop);
+      panel.querySelector('#shop-leave-btn')?.addEventListener('click', closeShop);
+
+      // 购买商品
+      panel.querySelectorAll('.shop-buy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.index);
+          const item = items[idx];
+          if (!item || purchased.has(idx)) return;
+          purchased.add(idx);
+          const newGold = onBuy(item, idx);
+          rebuildPanel(typeof newGold === 'number' ? newGold : currentGold - item._shopPrice);
+        });
+      });
+
+      // 服务按钮
+      panel.querySelectorAll('.shop-service-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.dataset.heal) {
+            if (!healItem || currentGold < healItem._shopPrice) return;
+            const newGold = onBuy(healItem, -1);
+            rebuildPanel(typeof newGold === 'number' ? newGold : currentGold - healItem._shopPrice);
+          }
+          if (btn.dataset.refresh) {
+            if (!refreshItem || currentGold < refreshItem._shopPrice) return;
+            const newGold = onBuy(refreshItem, -2);
+            // 关闭后重新打开（由 EventTable 的 openShop 处理）
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.15s';
+            setTimeout(() => { overlay.remove(); }, 150);
+          }
+        });
+      });
+    };
+
+    panel.innerHTML = buildHTML(gold);
     overlay.appendChild(panel);
     document.body.appendChild(overlay);
     attachEvents(gold);
+
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeShop(); });
   }
 }
