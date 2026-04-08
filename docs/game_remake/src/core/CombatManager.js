@@ -478,7 +478,15 @@ export class CombatManager {
       this.notifyUI();
       return;
     }
-
+    if (skill?.type === 'multi_buff' && skill.target === 'self') {
+      const effects = skill.statusEffects || [];
+      effects.forEach(eff => this._applyStatus(this.activeUnit, eff));
+      this.addLog(`✨ ${this.activeUnit.name} used [${skill.name}]! Empowered with all buffs!`);
+      this.diceInfo = { isHeal: false, damage: 0, type: 'buff', targetId: this.activeUnit.id };
+      this.phase = 'EXECUTING';
+      this.notifyUI();
+      return;
+    }
     // ── 攻击（single / aoe）或兜底普攻 ──────────────────────────────
     const target    = aliveHeroes.sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
     const skillName = skill?.name    || 'Attack';
@@ -503,7 +511,9 @@ export class CombatManager {
         const finalDmg = this._getIncomingDamage(hero, Math.max(1, baseDmg - (hero.defense || 0)));
         hero.hp  = Math.max(0, hero.hp - finalDmg);
         sampleDmg = finalDmg;
-        if (skill.statusEffect && Math.random() < (skill.statusChance || 0)) {
+        if (skill.multiStatusEffects?.length && Math.random() < (skill.statusChance || 0)) {
+          skill.multiStatusEffects.forEach(eff => this._applyStatus(hero, eff));
+        } else if (skill.statusEffect && Math.random() < (skill.statusChance || 0)) {
           this._applyStatus(hero, skill.statusEffect);
         }
       });
