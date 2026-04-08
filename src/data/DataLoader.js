@@ -89,17 +89,17 @@ export class DataLoader {
       'barrier_2': './resource/img/map/chapter1/barrier_2.png',
       'barrier_3': './resource/img/map/chapter1/barrier_3.png',
       'barrier_4': './resource/img/map/chapter1/barrier_4.png',
-      'bracelet':       './resource/img/items/daifu.png',
-      'ring_strength':  './resource/img/items/daifu.png',
-      'ring_intellect': './resource/img/items/daifu.png',
+      'bracelet':       './resource/img/items/swift_bracelet.png',
+      'ring_strength':  './resource/img/items/ring_of_strength.png',
+      'ring_intellect': './resource/img/items/ring_of_intellect.png',
       'weapon_blade':  './resource/img/items/daifu.png',
       'weapon_staff':  './resource/img/items/daifu.png',
       'weapon_tome':   './resource/img/items/daifu.png',
       'weapon_bow':    './resource/img/items/daifu.png',
       'weapon_fist':   './resource/img/items/daifu.png',
-      'traveler_set':      './resource/img/items/daifu.png',
-      'star_cloak':        './resource/img/items/daifu.png',
-      'bloodthirst_mask':  './resource/img/items/daifu.png',
+      'traveler_set':      './resource/img/items/traveler_set.png',
+      'star_cloak':        './resource/img/items/star_cloak.png',
+      'bloodthirst_mask':  './resource/img/items/bloodthirst_mask.png',
     };
 
     const animConfig = {
