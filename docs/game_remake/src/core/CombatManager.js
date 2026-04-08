@@ -297,6 +297,7 @@ export class CombatManager {
       targetId: this.currentAction.target?.id || null,
       isHeal: isHeal,
       skillType: skill.type,
+      skillPower: skill.power || 0,    // ★ NEW: for attack anim selection
     };
     this.phase = 'ROLLING';
     this.notifyUI();
