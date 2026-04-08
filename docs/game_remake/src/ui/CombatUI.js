@@ -310,6 +310,17 @@ if (heroId === 'wizard') {
 };
 
 const ENEMY_ANIM_CONFIG = {
+  dark_overlord: {
+    idle:   { frames: 8, cols: 2, interval: 110, mode: 'grid', scale: 1.95, ty: 34, faceLeftFlip: true },
+    hit:    { frames: 4, cols: 2, interval: 90, mode: 'grid', scale: 1.95, ty: 34, faceLeftFlip: true },
+    death:  { frames: 4, cols: 2, interval: 110, mode: 'grid', scale: 1.95, ty: 34, faceLeftFlip: true },
+    run:    { frames: 8, cols: 2, interval: 72, mode: 'grid', scale: 1.95, ty: 34, faceLeftFlip: true },
+    attack: { frames: 8, cols: 2, interval: 62, mode: 'grid', scale: 1.95, ty: 34, faceLeftFlip: true },
+    single: { frames: 8, cols: 2, interval: 62, mode: 'grid', scale: 1.95, ty: 34, faceLeftFlip: true },
+    group:  { frames: 8, cols: 2, interval: 62, mode: 'grid', scale: 1.95, ty: 34, faceLeftFlip: true },
+    heal:   { frames: 8, cols: 2, interval: 68, mode: 'grid', scale: 1.95, ty: 34, faceLeftFlip: true },
+    prey:   { frames: 12, cols: 4, interval: 68, mode: 'grid', scale: 1.95, ty: 34, faceLeftFlip: true },
+  },
   stone_golem: {
     idle:   { frames: 6, interval: 140, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
     hit:    { frames: 5, interval: 85, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
@@ -370,7 +381,7 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
       || ENEMY_ANIM_CONFIG[enemyKey]?.idle
       || { frames: 1, interval: 1000, mode: 'sheet', scale: 2.0, ty: 30 };
 
-    const isOneShot = action === 'hit' || action === 'death' || action === 'attack' || action === 'heal';
+    const isOneShot = ['hit', 'death', 'attack', 'heal', 'single', 'group', 'prey'].includes(action);
     setFrame(0);
 
     const timer = setInterval(() => {
@@ -400,7 +411,7 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
   const shouldFlip = actionConfig?.faceLeftFlip ?? flipX;
 
   if (!actionConfig || !asset) {
-    return enemyKey === 'boss' ? <BossFigure/> : <GoblinFigure/>;
+    return enemyKey === 'dark_overlord' || unit.monsterType === 'boss' ? <BossFigure/> : <GoblinFigure/>;
   }
 
   if (actionConfig.mode === 'sequence') {
@@ -424,8 +435,40 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
     );
   }
 
+  if (actionConfig.mode === 'grid') {
+    const sheet = Array.isArray(asset) ? asset[0] : asset;
+    if (!sheet) return enemyKey === 'dark_overlord' ? <BossFigure/> : <GoblinFigure/>;
+
+    const cols = actionConfig.cols || actionConfig.frames || 1;
+    const rows = Math.max(1, Math.ceil(actionConfig.frames / cols));
+    const frameW = sheet.width / cols;
+    const frameH = sheet.height / rows;
+    const col = frame % cols;
+    const row = Math.floor(frame / cols);
+
+    return (
+      <div className="sprite-container">
+        <div className="unit-shadow" />
+        <div
+          className="pixel-art"
+          style={{
+            width: `${frameW}px`,
+            height: `${frameH}px`,
+            backgroundImage: `url(${sheet.src})`,
+            backgroundPosition: `-${col * frameW}px -${row * frameH}px`,
+            backgroundSize: `${sheet.width}px ${sheet.height}px`,
+            backgroundRepeat: 'no-repeat',
+            transform: `translateY(${actionConfig.ty || 30}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
+            transformOrigin: 'bottom center',
+            imageRendering: 'pixelated',
+          }}
+        />
+      </div>
+    );
+  }
+
   const sheet = Array.isArray(asset) ? asset[0] : asset;
-  if (!sheet) return <GoblinFigure/>;
+  if (!sheet) return enemyKey === 'dark_overlord' || unit.monsterType === 'boss' ? <BossFigure/> : <GoblinFigure/>;
 
   const frameW = sheet.width / actionConfig.frames;
   return (
@@ -452,10 +495,10 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
 // ─── 重写：getFigure 函数 ──────────────────────────────────────────────
 const getFigure = (unit, action = 'idle', onComplete = null, flipX = false) => {
   if (unit.type === 'enemy') {
-    if (unit.monsterType === 'boss') return <BossFigure/>;
     if (unit.enemyKey || unit.monsterType) {
       return <EnemyAnimatedSprite key={`${unit.id}-${action}`} unit={unit} action={action} onComplete={onComplete} flipX={flipX} />;
     }
+    if (unit.monsterType === 'boss') return <BossFigure/>;
     return <GoblinFigure/>;
   }
 
@@ -731,13 +774,16 @@ const CombatApp = ({ state, callbacks }) => {
     const getUnitById = (unitId) =>
       heroes.find(h => h.id === unitId) || enemies.find(e => e.id === unitId) || null;
 
-    const isRangedAttack = (attackerId, skillType, skillPower = 0) => {
+    const isRangedAttack = (attackerId, skillType, skillTarget = 'single', skillPower = 0) => {
           const attacker = getUnitById(attackerId);
           const isHero = heroes.some(h => h.id === attackerId);
           if (!attacker) return false;
 
           if (!isHero) {
             const enemyKey = attacker.enemyKey || attacker.monsterType;
+            if (enemyKey === 'dark_overlord') {
+              return skillTarget === 'aoe' || skillType === 'multi_buff' || skillType === 'self_heal';
+            }
             if (enemyKey === 'mage') return true;
             if (enemyKey === 'healer' && ['ally_heal', 'ally_buff', 'self_restore'].includes(skillType)) {
               return true;
@@ -753,11 +799,17 @@ const CombatApp = ({ state, callbacks }) => {
           return attackerId === 'ranger' && skillPower >= 120;
         };
 
-    const pickAttackAnim = (attackerId, skillType, skillPower = 0) => {
+    const pickAttackAnim = (attackerId, skillType, skillTarget = 'single', skillPower = 0) => {
           const isHero = heroes.some(h => h.id === attackerId);
           if (!isHero) {
             const attacker = getUnitById(attackerId);
             const enemyKey = attacker?.enemyKey || attacker?.monsterType;
+            if (enemyKey === 'dark_overlord') {
+              if (skillType === 'multi_buff') return 'prey';
+              if (skillType === 'self_heal') return 'heal';
+              if (skillTarget === 'aoe') return 'group';
+              return 'single';
+            }
             if (enemyKey === 'healer' && ['ally_heal', 'ally_buff', 'self_restore'].includes(skillType)) {
               return 'heal';
             }
@@ -790,11 +842,11 @@ const CombatApp = ({ state, callbacks }) => {
     };
 
     // ── Start the charge→attack→return sequence ─────────────────────
-    const startAttackAnim = (attackerId, targetIdArg, skillType, isHeal, skillPower = 0) => {
+    const startAttackAnim = (attackerId, targetIdArg, skillType, isHeal, skillTarget = 'single', skillPower = 0) => {
       let targetId = targetIdArg;
       const isHero = heroes.some(h => h.id === attackerId);
-      const rangedAttack = isRangedAttack(attackerId, skillType, skillPower);
-      const enemySupportAnim = !isHero && ['ally_heal', 'ally_buff', 'self_restore'].includes(skillType);
+      const rangedAttack = isRangedAttack(attackerId, skillType, skillTarget, skillPower);
+      const enemySupportAnim = !isHero && ['ally_heal', 'ally_buff', 'self_restore', 'multi_buff', 'self_heal'].includes(skillType);
 
       if (isHeal && !enemySupportAnim) {
         onRollComplete();
@@ -802,7 +854,7 @@ const CombatApp = ({ state, callbacks }) => {
       }
 
       if (rangedAttack) {
-        setAnimState({ attackerId, targetId, phase: 'attack', skillType, skillPower });
+        setAnimState({ attackerId, targetId, phase: 'attack', skillType, skillTarget, skillPower });
         return;
       }
 
@@ -816,7 +868,7 @@ const CombatApp = ({ state, callbacks }) => {
 
       const offset = getChargeOffset(attackerId, targetId);
       setChargeOffset(offset);
-      setAnimState({ attackerId, targetId, phase: 'charge', skillType, skillPower });
+      setAnimState({ attackerId, targetId, phase: 'charge', skillType, skillTarget, skillPower });
     };
 
     // ── Called when charge CSS transition ends ──────────────────────
@@ -830,7 +882,7 @@ const CombatApp = ({ state, callbacks }) => {
     const onAttackAnimDone = () => {
           if (!animState) return;
           const attackerId = animState.attackerId;
-          const rangedAttack = isRangedAttack(attackerId, animState.skillType, animState.skillPower);
+          const rangedAttack = isRangedAttack(attackerId, animState.skillType, animState.skillTarget, animState.skillPower);
 
           onRollComplete();
 
@@ -856,7 +908,7 @@ const CombatApp = ({ state, callbacks }) => {
         if (diceInfo.skipDice) {
           setShowDice(false);
           const timer = setTimeout(() => {
-            startAttackAnim(diceInfo.attackerId, diceInfo.targetId, diceInfo.skillType, diceInfo.isHeal, diceInfo.skillPower || 0);
+            startAttackAnim(diceInfo.attackerId, diceInfo.targetId, diceInfo.skillType, diceInfo.isHeal, diceInfo.skillTarget || 'single', diceInfo.skillPower || 0);
           }, 180);
           return () => clearTimeout(timer);
         }
@@ -869,7 +921,7 @@ const CombatApp = ({ state, callbacks }) => {
             setDiceValue(diceInfo.finalRoll);
             console.log('[Dice done]', 'attackerId:', diceInfo.attackerId, 'targetId:', diceInfo.targetId, 'skillType:', diceInfo.skillType);
             setTimeout(() => {
-              startAttackAnim(diceInfo.attackerId, diceInfo.targetId, diceInfo.skillType, diceInfo.isHeal, diceInfo.skillPower || 0);
+              startAttackAnim(diceInfo.attackerId, diceInfo.targetId, diceInfo.skillType, diceInfo.isHeal, diceInfo.skillTarget || 'single', diceInfo.skillPower || 0);
             }, 500);
           }
         }, 55);
@@ -968,7 +1020,7 @@ const CombatApp = ({ state, callbacks }) => {
                                       heroTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
                                       heroTransitionClass = 'unit-charge';
                                     } else if (animState.phase === 'attack') {
-                                      heroAnimAction = pickAttackAnim(h.id, animState.skillType, animState.skillPower);
+                                      heroAnimAction = pickAttackAnim(h.id, animState.skillType, animState.skillTarget, animState.skillPower);
                                       heroTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
                                       heroOnAnimComplete = onAttackAnimDone;
                                     } else if (animState.phase === 'return') {
@@ -1062,7 +1114,7 @@ const CombatApp = ({ state, callbacks }) => {
                   enemyTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
                   enemyTransitionClass = 'unit-charge';
                 } else if (animState.phase === 'attack') {
-                  enemyAnimAction = pickAttackAnim(e.id, animState.skillType, animState.skillPower);
+                  enemyAnimAction = pickAttackAnim(e.id, animState.skillType, animState.skillTarget, animState.skillPower);
                   enemyTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
                   enemyOnAnimComplete = onAttackAnimDone;
                 } else if (animState.phase === 'return') {

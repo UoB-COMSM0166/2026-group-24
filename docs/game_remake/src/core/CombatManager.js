@@ -311,6 +311,7 @@ export class CombatManager {
       targetId: this.currentAction.target?.id || null,
       isHeal: isHeal,
       skillType: skill.type,
+      skillTarget: skill.target || 'single',
       skillPower: skill.power || 0,    // ★ NEW: for attack anim selection
     };
     this.phase = 'ROLLING';
@@ -364,6 +365,34 @@ export class CombatManager {
       const buffTarget = (target && target !== 'aoe') ? target : attacker;
       this.addLog(`${attacker.name} used [${skill.name}] on ${buffTarget.name}.`);
       this._applyStatus(buffTarget, skill.statusEffect);
+      this.diceInfo = { isHeal: false, damage: 'BUFF', type: 'buff', targetId: buffTarget.id };
+      this.phase = 'EXECUTING';
+      this.notifyUI();
+      return;
+    }
+
+    if (skill.type === 'self_heal') {
+      const healTarget = attacker;
+      const amount = Math.max(1, Math.floor(healTarget.maxHp * (skill.healPct || 0.15)));
+
+      if (healTarget.statusEffects?.anti_heal > 0) {
+        this.addLog(`${healTarget.name} is under anti-heal and cannot recover HP.`);
+        this.diceInfo = { isHeal: false, damage: 0, type: 'normal', targetId: healTarget.id };
+      } else {
+        healTarget.hp = Math.min(healTarget.maxHp, healTarget.hp + amount);
+        this.addLog(`${attacker.name} used [${skill.name}] and restored ${amount} HP.`);
+        this.diceInfo = { isHeal: true, damage: amount, targetId: healTarget.id };
+      }
+
+      this.phase = 'EXECUTING';
+      this.notifyUI();
+      return;
+    }
+
+    if (skill.type === 'multi_buff') {
+      const buffTarget = attacker;
+      (skill.statusEffects || []).forEach(effectId => this._applyStatus(buffTarget, effectId));
+      this.addLog(`${attacker.name} used [${skill.name}] and empowered itself.`);
       this.diceInfo = { isHeal: false, damage: 'BUFF', type: 'buff', targetId: buffTarget.id };
       this.phase = 'EXECUTING';
       this.notifyUI();
@@ -512,6 +541,7 @@ export class CombatManager {
         targetId: healTarget.id,
         isHeal: true,
         skillType: skill.type,
+        skillTarget: skill.target || 'ally',
         skillPower: 0,
         skipDice: true,
       };
@@ -560,6 +590,7 @@ export class CombatManager {
         targetId: buffTarget.id,
         isHeal: false,
         skillType: skill.type,
+        skillTarget: skill.target || 'ally',
         skillPower: 0,
         skipDice: true,
       };
@@ -578,6 +609,32 @@ export class CombatManager {
     }
 
     // ── self_restore：精英怪回血+护盾 ───────────────────────────────
+    if (skill?.type === 'self_heal') {
+      this.currentAction = {
+        skill,
+        attacker: this.activeUnit,
+        target: this.activeUnit,
+        multiplier: 1,
+        rollVal: 4,
+        textType: 'normal',
+        isHeal: true,
+      };
+      this.diceInfo = {
+        finalRoll: 4,
+        desc: 'Rolling',
+        attackerId: this.activeUnit.id,
+        targetId: this.activeUnit.id,
+        isHeal: true,
+        skillType: skill.type,
+        skillTarget: skill.target || 'self',
+        skillPower: 0,
+        skipDice: true,
+      };
+      this.phase = 'ROLLING';
+      this.notifyUI();
+      return;
+    }
+
     if (skill?.type === 'self_restore') {
       const healAmt = Math.floor(this.activeUnit.maxHp * (skill.healPct || 0.1));
       if (this.activeUnit.statusEffects?.anti_heal > 0) {
@@ -596,6 +653,32 @@ export class CombatManager {
       return;
     }
     if (skill?.type === 'multi_buff' && skill.target === 'self') {
+      this.currentAction = {
+        skill,
+        attacker: this.activeUnit,
+        target: this.activeUnit,
+        multiplier: 1,
+        rollVal: 4,
+        textType: 'normal',
+        isHeal: false,
+      };
+      this.diceInfo = {
+        finalRoll: 4,
+        desc: 'Rolling',
+        attackerId: this.activeUnit.id,
+        targetId: this.activeUnit.id,
+        isHeal: false,
+        skillType: skill.type,
+        skillTarget: skill.target || 'self',
+        skillPower: 0,
+        skipDice: true,
+      };
+      this.phase = 'ROLLING';
+      this.notifyUI();
+      return;
+    }
+
+    if (false && skill?.type === 'multi_buff' && skill.target === 'self') {
       const effects = skill.statusEffects || [];
       effects.forEach(eff => this._applyStatus(this.activeUnit, eff));
       this.addLog(`✨ ${this.activeUnit.name} used [${skill.name}]! Empowered with all buffs!`);
@@ -642,6 +725,7 @@ export class CombatManager {
       targetId: resolvedTarget === 'aoe' ? target?.id : resolvedTarget?.id,
       isHeal: false,
       skillType: resolvedSkill.type || 'attack',
+      skillTarget: resolvedSkill.target || 'single',
       skillPower: resolvedSkill.power || power || 0,
       skipDice: true,
     };
