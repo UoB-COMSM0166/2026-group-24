@@ -311,11 +311,11 @@ if (heroId === 'wizard') {
 
 const ENEMY_ANIM_CONFIG = {
   stone_golem: {
-    idle:   { frames: 6, interval: 140, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
-    hit:    { frames: 5, interval: 85, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
-    death:  { frames: 22, interval: 90, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
-    run:    { frames: 12, interval: 70, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
-    attack: { frames: 15, interval: 65, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
+    idle:   { frames: 6, interval: 140, mode: 'sequence', height: 72, scale: 2.55, ty: -5, faceLeftFlip: false },
+    hit:    { frames: 5, interval: 85, mode: 'sequence', height: 72, scale: 2.55, ty: -5, faceLeftFlip: false },
+    death:  { frames: 22, interval: 90, mode: 'sequence', height: 72, scale: 2.55, ty: -5, faceLeftFlip: false },
+    run:    { frames: 12, interval: 70, mode: 'sequence', height: 72, scale: 2.55, ty: -5, faceLeftFlip: false },
+    attack: { frames: 15, interval: 65, mode: 'sequence', height: 72, scale: 2.55, ty: -5, faceLeftFlip: false },
   },
   elite: {
     idle:   { frames: 8, interval: 120, mode: 'sequence', height: 70, scale: 2.5, ty: 16, faceLeftFlip: true },
@@ -333,18 +333,18 @@ const ENEMY_ANIM_CONFIG = {
     heal:   { frames: 12, interval: 68, mode: 'sequence', height: 70, scale: 2.45, ty: 16, faceLeftFlip: true },
   },
   warrior: {
-    idle:   { frames: 4, interval: 150, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
-    hit:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
-    death:  { frames: 4, interval: 120, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
-    run:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
-    attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
+    idle:   { frames: 4, interval: 150, mode: 'sheet', scale: 2.85, ty: 130, faceLeftFlip: true },
+    hit:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.85, ty: 130, faceLeftFlip: true },
+    death:  { frames: 4, interval: 120, mode: 'sheet', scale: 2.85, ty: 130, faceLeftFlip: true },
+    run:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.85, ty: 130, faceLeftFlip: true },
+    attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.85, ty: 130, faceLeftFlip: true },
   },
   mage: {
-    idle:   { frames: 4, interval: 150, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
-    hit:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
-    death:  { frames: 4, interval: 120, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
-    run:    { frames: 8, interval: 75, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
-    attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
+    idle:   { frames: 4, interval: 150, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    hit:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    death:  { frames: 4, interval: 120, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    run:    { frames: 8, interval: 75, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
   },
   swift_assassin: {
     idle:   { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 42, faceLeftFlip: true },
