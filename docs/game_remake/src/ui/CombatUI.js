@@ -825,6 +825,13 @@ const CombatApp = ({ state, callbacks }) => {
     // ── Main phase effect ──────────────────────────────────────────
     useEffect(() => {
       if (phase === 'ROLLING' && diceInfo) {
+        if (diceInfo.skipDice) {
+          setShowDice(false);
+          const timer = setTimeout(() => {
+            startAttackAnim(diceInfo.attackerId, diceInfo.targetId, diceInfo.skillType, diceInfo.isHeal, diceInfo.skillPower || 0);
+          }, 180);
+          return () => clearTimeout(timer);
+        }
         setShowDice(true);
         let n = 0;
         const iv = setInterval(() => {
@@ -951,7 +958,8 @@ const CombatApp = ({ state, callbacks }) => {
                                         zIndex: isCharging ? 50 : 1,
                                       }}
                                       className={`${shakingId === h.id ? 'unit-shake' : ''} ${heroTransitionClass}`}
-                                      onTransitionEnd={() => {
+                                      onTransitionEnd={(e) => {
+                                        if (e.target !== e.currentTarget || e.propertyName !== 'transform') return;
                                         if (animState?.attackerId === h.id) {
                                           if (animState.phase === 'charge') onChargeArrived();
                                           else if (animState.phase === 'return') onReturnArrived();
@@ -1043,7 +1051,8 @@ const CombatApp = ({ state, callbacks }) => {
                       zIndex: isCharging ? 50 : 1,
                     }}
                     className={`${shakingId === e.id ? 'unit-shake' : ''} ${enemyTransitionClass}`}
-                    onTransitionEnd={() => {
+                    onTransitionEnd={(event) => {
+                      if (event.target !== event.currentTarget || event.propertyName !== 'transform') return;
                       if (animState?.attackerId === e.id) {
                         if (animState.phase === 'charge') onChargeArrived();
                         else if (animState.phase === 'return') onReturnArrived();
