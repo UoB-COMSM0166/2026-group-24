@@ -1,6 +1,7 @@
 // src/ui/UIManager.js
 import { DataLoader } from '../data/DataLoader.js';
 import { ChestAnimation } from './ChestAnimation.js';
+import { CharacterSelectBackground } from './CharacterSelectBackground.js';
 import { InventoryUI } from './InventoryUI.js';
 
 export class UIManager {
@@ -28,6 +29,7 @@ export class UIManager {
     };
     this.onCombatEnd = callbacks.onCombatEnd ?? (() => { });
     this.inventoryUI = new InventoryUI();
+    this.characterSelectBackground = new CharacterSelectBackground(this.els.charSelectScreen);
     this.animFrameReq = null;
 
   }
@@ -40,18 +42,22 @@ export class UIManager {
 
     // --- 在这里定义每个英雄的微调参数 ---
     const configs = {
-        'wizard': { size: 220, offsetX: 20, offsetY: -10, frameCount: 6 },
-        'knight': { size: 280, offsetX: 12, offsetY: -95 },
-        'priest': { size: 280, offsetX: 12, offsetY: -90 },
-        'ranger': { size: 280, offsetX: 12, offsetY: -95 },
-        'default': { size: 150, offsetX: 0, offsetY: 0 }
+        'wizard': { width: 220, height: 220, offsetX: 20, offsetY: -10, frameCount: 6 },
+        'knight': { width: 316, height: 280, offsetX: 12, offsetY: -95 },
+        'priest': { width: 316, height: 280, offsetX: 12, offsetY: -90 },
+        'ranger': { width: 316, height: 280, offsetX: 12, offsetY: -95 },
+        'default': { width: 150, height: 150, offsetX: 0, offsetY: 0 }
     };
 
     const cfg = configs[heroId] || configs['default'];
-    const drawSize = cfg.size;
+    const drawWidth = cfg.width ?? cfg.size ?? 150;
+    const drawHeight = cfg.height ?? cfg.size ?? 150;
+    const renderWidth = heroId === 'wizard' ? drawWidth : Math.round(drawWidth * 1.08);
+    const renderHeight = drawHeight;
+    const drawSize = heroId === 'wizard' ? drawWidth : renderWidth;
     // 居中计算公式：(画布宽度 - 绘制宽度) / 2 + 偏移量
-    const dx = (width - drawSize) / 2 + cfg.offsetX;
-    const dy = (height - drawSize) / 2 + cfg.offsetY;
+    const dx = (width - renderWidth) / 2 + cfg.offsetX;
+    const dy = (height - renderHeight) / 2 + cfg.offsetY;
 
     if (heroId === 'wizard') {
         const img = anim.idle;
@@ -112,9 +118,13 @@ export class UIManager {
   showCharacterSelect(onConfirm) {
     const { charSelectScreen, heroSlots, charConfirmBtn, charSelectedInfo, difficultyButtons } = this.els;
     charSelectScreen.style.display = 'flex';
+    this.characterSelectBackground?.show();
     heroSlots.innerHTML = '';
+    if (this.animFrameReq) cancelAnimationFrame(this.animFrameReq);
     const selected = [];
     let selectedDifficulty = 'normal';
+    charConfirmBtn.disabled = true;
+    charSelectedInfo.innerText = 'Please select 2 heroes';
 
     // 设置难度按钮
     if (difficultyButtons) {
@@ -174,17 +184,15 @@ export class UIManager {
     this.animFrameReq = requestAnimationFrame(animate);
 
     charConfirmBtn.onclick = () => {
-      cancelAnimationFrame(this.animFrameReq);
+      if (this.animFrameReq) cancelAnimationFrame(this.animFrameReq);
       onConfirm([...selected], selectedDifficulty);
     };
-  
-
-    charConfirmBtn.onclick = () => onConfirm([...selected], selectedDifficulty);
   }
 
   hideCharacterSelect() { 
     this.els.charSelectScreen.style.display = 'none'; 
     if(this.animFrameReq) cancelAnimationFrame(this.animFrameReq);
+    this.characterSelectBackground?.hide();
   }
   showMapGeneration(_heroes, onReady) { this.els.mapGenScreen.style.display = 'flex'; setTimeout(onReady, 1000); }
   hideMapGeneration() { this.els.mapGenScreen.style.display = 'none'; }
