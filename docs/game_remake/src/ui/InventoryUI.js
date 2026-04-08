@@ -7,6 +7,33 @@ export class InventoryUI {
         this.activeIndex = 0;
         this.isOpen = false;
  this.gold = 0;
+        if (!document.getElementById("inventory-ui-style")) {
+            const style = document.createElement("style");
+            style.id = "inventory-ui-style";
+            style.textContent = `
+                #inventory-panel {
+                    scrollbar-width: thin;
+                    scrollbar-color: #d2b06b rgba(24, 18, 14, 0.9);
+                }
+                #inventory-panel::-webkit-scrollbar {
+                    width: 12px;
+                }
+                #inventory-panel::-webkit-scrollbar-track {
+                    background: linear-gradient(180deg, rgba(28, 20, 14, 0.96), rgba(12, 16, 20, 0.96));
+                    border-left: 1px solid rgba(232, 200, 134, 0.12);
+                }
+                #inventory-panel::-webkit-scrollbar-thumb {
+                    background: linear-gradient(180deg, #ddb86e, #94652d);
+                    border: 2px solid rgba(26, 18, 12, 0.95);
+                    border-radius: 2px;
+                    box-shadow: inset 0 1px 0 rgba(255, 244, 223, 0.18);
+                }
+                #inventory-panel::-webkit-scrollbar-thumb:hover {
+                    background: linear-gradient(180deg, #efcb84, #a67232);
+                }
+            `;
+            document.head.appendChild(style);
+        }
         this.btn = document.createElement("button");
         this.btn.textContent = "🎒";
         this.btn.title = "Inventory (B)";
@@ -16,13 +43,15 @@ export class InventoryUI {
             "top:20px",
             "width:46px",
             "height:46px",
-            "border-radius:12px",
-            "border:1px solid rgba(255,255,255,0.25)",
-            "background:rgba(20,20,40,0.85)",
-            "color:white",
+            "border-radius:14px",
+            "border:1px solid rgba(232,200,134,0.24)",
+            "background:linear-gradient(180deg, rgba(45,32,20,0.94), rgba(16,20,24,0.92))",
+            "color:#f6e7c9",
             "cursor:pointer",
             "z-index:150",
             "font-size:20px",
+            "box-shadow:0 14px 28px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,244,223,0.08)",
+            "backdrop-filter:blur(10px)",
         ].join(";");
         document.body.appendChild(this.btn);
 
@@ -36,19 +65,22 @@ this.goldTag.style.cssText = [
     'display:flex',
     'align-items:center',
     'padding:0 12px',
-    'border-radius:12px',
-    'border:1px solid rgba(251,191,36,0.4)',
-    'background:rgba(20,20,40,0.85)',
-    'color:#fbbf24',
+    'border-radius:14px',
+    'border:1px solid rgba(232,200,134,0.26)',
+    'background:linear-gradient(180deg, rgba(47,33,19,0.94), rgba(17,21,25,0.92))',
+    'color:#f0ca74',
     'font-weight:700',
     'font-size:14px',
     'z-index:150',
     'pointer-events:none',
+    'box-shadow:0 14px 28px rgba(0,0,0,0.28)',
+    'backdrop-filter:blur(10px)',
 ].join(';');
 this.goldTag.textContent = '💰 0';
 document.body.appendChild(this.goldTag);
 
         this.panel = document.createElement("div");
+        this.panel.id = "inventory-panel";
         this.panel.style.cssText = [
             "position:fixed",
             "right:20px",
@@ -58,15 +90,15 @@ document.body.appendChild(this.goldTag);
             "max-height:70vh",
             "overflow:auto",
             "padding:18px",
-            "border-radius:16px",
-            "border:1px solid rgba(243,156,18,0.4)",
-            "background:linear-gradient(145deg, rgba(15,15,30,0.95), rgba(5,5,15,0.98))",
+            "border-radius:18px",
+            "border:1px solid rgba(232,200,134,0.26)",
+            "background:linear-gradient(180deg, rgba(255,236,194,0.05), transparent 16%), linear-gradient(145deg, rgba(36,25,16,0.96), rgba(11,16,20,0.97))",
             "backdrop-filter:blur(12px)",
-            "color:white",
+            "color:#f5ead1",
             "z-index:150",
             "display:none",
-            "box-shadow:0 16px 40px rgba(0,0,0,0.6), inset 0 1px 10px rgba(255,255,255,0.05)",
-            "font-family:sans-serif",
+            "box-shadow:0 18px 42px rgba(0,0,0,0.56), inset 0 1px 10px rgba(255,244,223,0.05)",
+            "font-family:Georgia, 'Times New Roman', serif",
         ].join(";");
         document.body.appendChild(this.panel);
 
@@ -105,7 +137,7 @@ document.body.appendChild(this.goldTag);
         if (!heroes || heroes.length === 0) {
             this.panel.innerHTML = `
 
-                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(232,200,134,0.16);">
                    <div style="display:flex;align-items:center;gap:12px;">
                      <div style="font-weight:700;font-size:16px;">🎒 Inventory</div>
                      <div id="inv-gold-display" style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);border-radius:8px;padding:3px 10px;color:#fbbf24;font-size:13px;font-weight:700;">💰 Gold: ${this.gold}</div>
@@ -123,9 +155,9 @@ document.body.appendChild(this.goldTag);
             const active = i === this.activeIndex;
             return `
                 <button class="inv-tab" data-i="${i}"
-                    style="margin-right:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);
-                    background:${active ? "rgba(243,156,18,0.25)" : "rgba(255,255,255,0.06)"};
-                    color:white;cursor:pointer;">
+                    style="margin-right:6px;padding:8px 12px;border-radius:999px;border:1px solid ${active ? "rgba(232,200,134,0.36)" : "rgba(232,200,134,0.14)"};
+                    background:${active ? "linear-gradient(180deg, rgba(98,67,29,0.62), rgba(43,28,15,0.72))" : "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))"};
+                    color:${active ? "#fff2d3" : "#dbcdb2"};cursor:pointer;box-shadow:${active ? "0 10px 18px rgba(0,0,0,0.24)" : "none"};font-weight:700;">
                     ${h.name ?? `Hero${i + 1}`}
                 </button>
             `;
@@ -138,15 +170,15 @@ document.body.appendChild(this.goldTag);
 
 // 武器槽
         const weaponSlotsHTML = `
-    <div style="padding:10px;border:1px solid rgba(255,255,255,0.10);border-radius:12px;margin-bottom:10px;">
+    <div style="padding:12px;border:1px solid rgba(232,200,134,0.14);border-radius:14px;margin-bottom:12px;background:linear-gradient(180deg, rgba(255,236,194,0.05), rgba(255,255,255,0.01));box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);">
         <div style="font-weight:700;margin-bottom:8px;">⚔️ Weapon Slots</div>
         ${(hero.weaponSlots ?? [null, null]).map((w, i) => `
             <div class="weapon-slot" data-slot="${i}" data-accept="weapon"
-                style="padding:10px;border:1px dashed rgba(243,156,18,0.5);border-radius:10px;min-height:50px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+                style="padding:10px;border:1px dashed rgba(232,200,134,0.34);border-radius:12px;min-height:52px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);">
                 ${w
             ? `<div class="equipped-weapon" data-slot="${i}" draggable="true"
                         title="${w.name} (double-click to unequip)"
-                        style="flex:1;display:flex;align-items:center;gap:8px;cursor:grab;">
+                        style="flex:1;display:flex;align-items:center;gap:8px;cursor:grab;padding:6px 8px;border-radius:10px;background:linear-gradient(180deg, rgba(116,78,31,0.22), rgba(35,24,14,0.18));border:1px solid rgba(232,200,134,0.1);">
                         <canvas class="item-icon" data-icon="sword" width="32" height="32" style="pointer-events:none;"></canvas>
                         <div style="pointer-events:none;">
                             <div style="font-weight:700;font-size:13px;">${w.name}</div>
@@ -163,17 +195,17 @@ document.body.appendChild(this.goldTag);
 // 道具槽（无限）
         const equippedItems = (hero.equipSlots ?? []).filter(it => it != null);
         const itemSlotsHTML = `
-    <div style="padding:10px;border:1px solid rgba(255,255,255,0.10);border-radius:12px;margin-bottom:10px;">
+    <div style="padding:12px;border:1px solid rgba(232,200,134,0.14);border-radius:14px;margin-bottom:12px;background:linear-gradient(180deg, rgba(255,236,194,0.05), rgba(255,255,255,0.01));box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);">
         <div style="font-weight:700;margin-bottom:8px;">🧪  Item Slots</div>
         ${equippedItems.length === 0
             ? `<div class="item-slot" data-accept="item"
-                style="padding:10px;border:1px dashed rgba(52,211,153,0.4);border-radius:10px;min-height:50px;display:flex;align-items:center;justify-content:center;opacity:.4;">
+                style="padding:10px;border:1px dashed rgba(111,201,168,0.42);border-radius:12px;min-height:50px;display:flex;align-items:center;justify-content:center;opacity:.55;background:rgba(255,255,255,0.02);">
                 Drag item here to equip</div>`
             : `<div style="display:flex;flex-wrap:wrap;gap:8px;">
     ${equippedItems.filter(it => it != null).map((it, i) => `
        <div class="equipped-item" data-slot="${i}" draggable="true"
     title="${it.name}"
-    style="width:48px;height:48px;border:1px dashed rgba(52,211,153,0.5);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:grab;position:relative;font-size:10px;text-align:center;gap:2px;">
+    style="width:52px;height:52px;border:1px solid rgba(111,201,168,0.28);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:grab;position:relative;font-size:10px;text-align:center;gap:2px;background:linear-gradient(180deg, rgba(73,128,110,0.18), rgba(25,34,31,0.24));box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);">
     <span style="font-size:20px;pointer-events:none;">${_getItemEmoji(it.icon)}</span>
     <span style="opacity:.7;pointer-events:none;overflow:hidden;width:44px;white-space:nowrap;text-overflow:ellipsis;">${it.name}</span>
 </div>
@@ -182,14 +214,14 @@ document.body.appendChild(this.goldTag);
         }
        
         <div class="item-slot" data-accept="item"
-            style="padding:10px;border:1px dashed rgba(52,211,153,0.3);border-radius:10px;min-height:50px;display:flex;align-items:center;justify-content:center;opacity:.4;margin-top:6px;">
+            style="padding:10px;border:1px dashed rgba(111,201,168,0.34);border-radius:12px;min-height:50px;display:flex;align-items:center;justify-content:center;opacity:.55;margin-top:6px;background:rgba(255,255,255,0.02);">
             + Drag item here
         </div>
     </div>
 `;
 
       this.panel.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(232,200,134,0.16);">
               <div style="display:flex;align-items:center;gap:12px;">
                   <div style="font-weight:700;font-size:16px;">🎒 Inventory</div>
                   <div id="inv-gold-display" style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);border-radius:8px;padding:3px 10px;color:#fbbf24;font-size:13px;font-weight:700;">💰 Gold: ${this.gold}</div>
@@ -200,7 +232,7 @@ document.body.appendChild(this.goldTag);
     <div style="display:flex;gap:12px;">
 
         <!-- 左侧共用存放区 -->
-        <div id="shared-storage" style="width:220px;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:10px;overflow-y:auto;max-height:60vh;">
+        <div id="shared-storage" style="width:230px;flex-shrink:0;border:1px solid rgba(232,200,134,0.16);border-radius:16px;padding:12px;background:linear-gradient(180deg, rgba(90,61,28,0.18), rgba(255,255,255,0.01));overflow-y:auto;max-height:60vh;box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);">
             
             <div style="font-weight:700;margin-bottom:8px;">⚔️ Weapons</div>
             <div id="storage-weapons" style="min-height:40px;margin-bottom:12px;">
@@ -208,7 +240,7 @@ document.body.appendChild(this.goldTag);
             ? `<div style="opacity:.4;font-size:12px;">No weapons</div>`
             : this.sharedStorage.weapons.map((w, i) => `
                         <div class="storage-item" data-stype="weapon" data-sidx="${i}" draggable="true"
-                            style="padding:8px;border:1px solid rgba(243,156,18,0.4);border-radius:8px;margin-bottom:6px;cursor:grab;font-size:13px;">
+                            style="padding:10px;border:1px solid rgba(232,200,134,0.28);border-radius:10px;margin-bottom:8px;cursor:grab;font-size:13px;background:linear-gradient(180deg, rgba(114,77,31,0.24), rgba(39,28,18,0.22));box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);">
                             <div style="font-weight:700;">${w.name}</div>
                             <div style="opacity:.6;font-size:11px;">${w.rarity ?? ''}</div>
                         </div>
@@ -222,7 +254,7 @@ document.body.appendChild(this.goldTag);
             ? `<div style="opacity:.4;font-size:12px;">No items</div>`
             : this.sharedStorage.items.map((it, i) => `
                         <div class="storage-item" data-stype="item" data-sidx="${i}" draggable="true"
-                            style="padding:8px;border:1px solid rgba(52,211,153,0.4);border-radius:8px;margin-bottom:6px;cursor:grab;font-size:13px;">
+                            style="padding:10px;border:1px solid rgba(111,201,168,0.24);border-radius:10px;margin-bottom:8px;cursor:grab;font-size:13px;background:linear-gradient(180deg, rgba(63,113,97,0.2), rgba(28,35,33,0.24));box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);">
                             <div style="font-weight:700;">${it.name}</div>
                             <div style="opacity:.6;font-size:11px;">${it.rarity ?? ''}</div>
                         </div>
@@ -233,13 +265,13 @@ document.body.appendChild(this.goldTag);
 
         <!-- 右侧角色区 -->
         <div style="flex:1;">
-            <div style="margin-bottom:10px;">${tabs}</div>
+            <div style="margin-bottom:12px;padding:10px 12px;border:1px solid rgba(232,200,134,0.12);border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));">${tabs}</div>
 
-            <div style="padding:10px;border:1px solid rgba(255,255,255,0.10);border-radius:12px;margin-bottom:10px;">
-    <div style="font-weight:700;margin-bottom:6px;">Character Stats</div>
+            <div style="padding:12px;border:1px solid rgba(232,200,134,0.14);border-radius:14px;margin-bottom:12px;background:linear-gradient(180deg, rgba(255,236,194,0.05), rgba(255,255,255,0.01));box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);">
+    <div style="font-weight:700;margin-bottom:8px;color:#f0ca74;letter-spacing:0.04em;">Character Stats</div>
     <div style="opacity:.9;">HP ${hp} / ${maxHp}</div>
     <div style="opacity:.9;">ATK ${hero.attack ?? 0} | DEF ${hero.defense ?? 0} | SPD ${hero.speed ?? 0}</div>
-    <div style="opacity:.75;font-size:12px;margin-top:4px;">
+    <div style="opacity:.78;font-size:12px;margin-top:6px;color:#c9bea8;">
         STR ${hero.strength ?? 0} | TOU ${hero.toughness ?? 0} | AGI ${hero.agility ?? 0} | INT ${hero.intellect ?? 0}
     </div>
 </div>
