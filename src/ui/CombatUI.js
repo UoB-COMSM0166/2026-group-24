@@ -199,7 +199,11 @@ const getRogueFigure = () => (
 const AnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX = false }) => {
   const heroId = unit.id;
   const [frame, setFrame] = useState(0);
+  const onCompleteRef = React.useRef(onComplete);
 
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     const configs = {
@@ -234,7 +238,7 @@ const AnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX = fals
         }
         if (isOneShot && f >= config.f - 1) {
           clearInterval(timer);
-          if (onComplete) setTimeout(onComplete, 0);
+          if (onCompleteRef.current) setTimeout(() => onCompleteRef.current?.(), 0);
           return config.f - 1; // hold last frame
         }
         return (f + 1) % config.f;
@@ -305,13 +309,144 @@ if (heroId === 'wizard') {
   );
 };
 
+const ENEMY_ANIM_CONFIG = {
+  stone_golem: {
+    idle:   { frames: 6, interval: 140, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
+    hit:    { frames: 5, interval: 85, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
+    death:  { frames: 22, interval: 90, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
+    run:    { frames: 12, interval: 70, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
+    attack: { frames: 15, interval: 65, mode: 'sequence', height: 72, scale: 2.55, ty: 18, faceLeftFlip: false },
+  },
+  warrior: {
+    idle:   { frames: 4, interval: 150, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
+    hit:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
+    death:  { frames: 4, interval: 120, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
+    run:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
+    attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.85, ty: 48, faceLeftFlip: true },
+  },
+  mage: {
+    idle:   { frames: 4, interval: 150, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
+    hit:    { frames: 4, interval: 90, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
+    death:  { frames: 4, interval: 120, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
+    run:    { frames: 8, interval: 75, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
+    attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.75, ty: 48, faceLeftFlip: true },
+  },
+  swift_assassin: {
+    idle:   { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 42, faceLeftFlip: true },
+    hit:    { frames: 3, interval: 95, mode: 'sheet', scale: 1.8, ty: 42, faceLeftFlip: true },
+    death:  { frames: 7, interval: 110, mode: 'sheet', scale: 1.8, ty: 42, faceLeftFlip: true },
+    run:    { frames: 8, interval: 70, mode: 'sheet', scale: 1.8, ty: 42, faceLeftFlip: true },
+    attack: { frames: 8, interval: 60, mode: 'sheet', scale: 1.8, ty: 42, faceLeftFlip: true },
+  },
+};
+
+const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX = false }) => {
+  const enemyKey = unit.enemyKey || unit.monsterType;
+  const [frame, setFrame] = useState(0);
+  const onCompleteRef = React.useRef(onComplete);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  useEffect(() => {
+    const actionConfig =
+      ENEMY_ANIM_CONFIG[enemyKey]?.[action]
+      || ENEMY_ANIM_CONFIG[enemyKey]?.idle
+      || { frames: 1, interval: 1000, mode: 'sheet', scale: 2.0, ty: 30 };
+
+    const isOneShot = action === 'hit' || action === 'death' || action === 'attack';
+    setFrame(0);
+
+    const timer = setInterval(() => {
+      setFrame(f => {
+        if (action === 'death' && f >= actionConfig.frames - 1) {
+          clearInterval(timer);
+          return actionConfig.frames - 1;
+        }
+        if (isOneShot && f >= actionConfig.frames - 1) {
+          clearInterval(timer);
+          if (onCompleteRef.current) setTimeout(() => onCompleteRef.current?.(), 0);
+          return actionConfig.frames - 1;
+        }
+        return (f + 1) % Math.max(actionConfig.frames, 1);
+      });
+    }, actionConfig.interval);
+
+    return () => clearInterval(timer);
+  }, [enemyKey, action]);
+
+  const actionConfig =
+    ENEMY_ANIM_CONFIG[enemyKey]?.[action]
+    || ENEMY_ANIM_CONFIG[enemyKey]?.idle;
+  const asset =
+    DataLoader.getEnemyAnim(enemyKey, action)
+    || DataLoader.getEnemyAnim(enemyKey, 'idle');
+  const shouldFlip = actionConfig?.faceLeftFlip ?? flipX;
+
+  if (!actionConfig || !asset) {
+    return enemyKey === 'boss' ? <BossFigure/> : <GoblinFigure/>;
+  }
+
+  if (actionConfig.mode === 'sequence') {
+    const frames = Array.isArray(asset) ? asset : [];
+    const currentImg = frames[frame] || frames[0];
+    if (!currentImg) return <GoblinFigure/>;
+
+    return (
+      <div className="sprite-container">
+        <div className="unit-shadow" />
+        <img
+          src={currentImg.src}
+          className="pixel-art"
+          style={{
+            height: `${actionConfig.height}px`,
+            transform: `translateY(${actionConfig.ty || 0}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
+            transformOrigin: 'bottom center'
+          }}
+        />
+      </div>
+    );
+  }
+
+  const sheet = Array.isArray(asset) ? asset[0] : asset;
+  if (!sheet) return <GoblinFigure/>;
+
+  const frameW = sheet.width / actionConfig.frames;
+  return (
+    <div className="sprite-container">
+      <div className="unit-shadow" />
+      <div
+        className="pixel-art"
+        style={{
+          width: `${frameW}px`,
+          height: `${sheet.height}px`,
+          backgroundImage: `url(${sheet.src})`,
+          backgroundPosition: `-${frame * frameW}px 0px`,
+          backgroundSize: `${sheet.width}px ${sheet.height}px`,
+          backgroundRepeat: 'no-repeat',
+          transform: `translateY(${actionConfig.ty || 30}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
+          transformOrigin: 'bottom center',
+          imageRendering: 'pixelated',
+        }}
+      />
+    </div>
+  );
+};
+
 // ─── 重写：getFigure 函数 ──────────────────────────────────────────────
 const getFigure = (unit, action = 'idle', onComplete = null, flipX = false) => {
-  if (unit.type === 'enemy') return unit.monsterType === 'boss' ? <BossFigure/> : <GoblinFigure/>;
+  if (unit.type === 'enemy') {
+    if (unit.monsterType === 'boss') return <BossFigure/>;
+    if (unit.enemyKey || unit.monsterType) {
+      return <EnemyAnimatedSprite key={`${unit.id}-${action}`} unit={unit} action={action} onComplete={onComplete} flipX={flipX} />;
+    }
+    return <GoblinFigure/>;
+  }
 
   const supportedHeroes = ['knight', 'priest', 'ranger', 'wizard'];
   if (supportedHeroes.includes(unit.id)) {
-    return <AnimatedSprite unit={unit} action={action} onComplete={onComplete} flipX={flipX} />;
+    return <AnimatedSprite key={`${unit.id}-${action}`} unit={unit} action={action} onComplete={onComplete} flipX={flipX} />;
   }
 
   if (unit.id === 'mage')   return <MageFigure/>;
@@ -541,7 +676,7 @@ const UnitDisplay = ({ unit, isEnemy, isActive, canTarget, onTarget, shakingId, 
             background:`radial-gradient(ellipse, ${activeColor}55 0%, transparent 70%)`,
             filter:'blur(4px)' }}/>
         )}
-        {getFigure(unit, currentAction, onAnimComplete, flipX)}
+        {getFigure(unit, currentAction, onAnimComplete, isEnemy ? true : flipX)}
         {isDead && (
           <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center',
             justifyContent:'center', fontSize:'2.5rem' }}>💀</div>
@@ -578,9 +713,29 @@ const CombatApp = ({ state, callbacks }) => {
   };
 
   // ── Pick which attack anim to use based on skill type ───────────
+    const getUnitById = (unitId) =>
+      heroes.find(h => h.id === unitId) || enemies.find(e => e.id === unitId) || null;
+
+    const isRangedAttack = (attackerId, skillType, skillPower = 0) => {
+          const attacker = getUnitById(attackerId);
+          const isHero = heroes.some(h => h.id === attackerId);
+          if (!attacker) return false;
+
+          if (!isHero) {
+            return attacker.enemyKey === 'mage' || attacker.monsterType === 'mage';
+          }
+
+          // Wizard: only attack1 & attack2, split by power
+          if (attackerId === 'wizard') {
+            return true;
+          }
+
+          return attackerId === 'ranger' && skillPower >= 120;
+        };
+
     const pickAttackAnim = (attackerId, skillType, skillPower = 0) => {
           const isHero = heroes.some(h => h.id === attackerId);
-          if (!isHero) return 'attack1';
+          if (!isHero) return 'attack';
 
           // Wizard: only attack1 & attack2, split by power
           if (attackerId === 'wizard') {
@@ -611,33 +766,26 @@ const CombatApp = ({ state, callbacks }) => {
     const startAttackAnim = (attackerId, targetIdArg, skillType, isHeal, skillPower = 0) => {
       let targetId = targetIdArg;
       const isHero = heroes.some(h => h.id === attackerId);
-      const animName = pickAttackAnim(attackerId, skillType, skillPower);
-
-      const isRangedAttack = attackerId === 'wizard'
-        || (attackerId === 'ranger' && animName !== 'attack1');
-
-      if (!isHero) {
-        onRollComplete();
-        return;
-      }
+      const rangedAttack = isRangedAttack(attackerId, skillType, skillPower);
 
       if (isHeal) {
         onRollComplete();
         return;
       }
 
-      if (isRangedAttack) {
+      if (rangedAttack) {
         setAnimState({ attackerId, targetId, phase: 'attack', skillType, skillPower });
         return;
       }
 
-      // AOE: charge toward first alive enemy
+      // AOE: charge toward the first valid living target on the opposite side.
       if (!unitRefsMap.current[targetId]) {
-        const firstEnemy = enemies.find(e => e.hp > 0);
-        if (firstEnemy) targetId = firstEnemy.id;
+        const fallbackTarget = isHero
+          ? enemies.find(e => e.hp > 0)
+          : heroes.find(h => h.hp > 0);
+        if (fallbackTarget) targetId = fallbackTarget.id;
       }
 
-      // Melee: charge toward enemy
       const offset = getChargeOffset(attackerId, targetId);
       setChargeOffset(offset);
       setAnimState({ attackerId, targetId, phase: 'charge', skillType, skillPower });
@@ -654,13 +802,11 @@ const CombatApp = ({ state, callbacks }) => {
     const onAttackAnimDone = () => {
           if (!animState) return;
           const attackerId = animState.attackerId;
-          const animName = pickAttackAnim(attackerId, animState.skillType, animState.skillPower);
-          const isRangedAttack = attackerId === 'wizard'
-            || (attackerId === 'ranger' && animName !== 'attack1');
+          const rangedAttack = isRangedAttack(attackerId, animState.skillType, animState.skillPower);
 
           onRollComplete();
 
-          if (isRangedAttack) {
+          if (rangedAttack) {
             // Ranged: no return phase
             setTimeout(() => setAnimState(null), 200);
           } else {
@@ -866,11 +1012,43 @@ const CombatApp = ({ state, callbacks }) => {
             {enemies.map(e => {
               const isActive = activeUnit?.id === e.id && !['WIN','LOSE','START'].includes(phase);
               const canTarget = phase==='AWAIT_TARGET' && e.hp > 0;
+              const isCharging = animState?.attackerId === e.id;
+              let enemyAnimAction = null;
+              let enemyOnAnimComplete = null;
+              let enemyTransform = '';
+              let enemyTransitionClass = '';
+
+              if (isCharging) {
+                if (animState.phase === 'charge') {
+                  enemyAnimAction = 'run';
+                  enemyTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
+                  enemyTransitionClass = 'unit-charge';
+                } else if (animState.phase === 'attack') {
+                  enemyAnimAction = 'attack';
+                  enemyTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
+                  enemyOnAnimComplete = onAttackAnimDone;
+                } else if (animState.phase === 'return') {
+                  enemyAnimAction = 'run';
+                  enemyTransform = 'translate(0px, 0px)';
+                  enemyTransitionClass = 'unit-return';
+                }
+              }
+
               return (
                   <div key={e.id}
                     ref={el => { if (el) unitRefsMap.current[e.id] = el; }}
-                    style={{ position:'relative' }}
-                    className={shakingId === e.id ? 'unit-shake' : ''}>
+                    style={{
+                      position:'relative',
+                      transform: enemyTransform || undefined,
+                      zIndex: isCharging ? 50 : 1,
+                    }}
+                    className={`${shakingId === e.id ? 'unit-shake' : ''} ${enemyTransitionClass}`}
+                    onTransitionEnd={() => {
+                      if (animState?.attackerId === e.id) {
+                        if (animState.phase === 'charge') onChargeArrived();
+                        else if (animState.phase === 'return') onReturnArrived();
+                      }
+                    }}>
                   {floatingTexts.filter(f => f.unitId === e.id).map(f => (
                     <div key={f.id} className="float-text" style={{ top:'-10px',
                       color: f.type==='heal'?'#4ade80': f.type==='perfect'?'#fbbf24':
@@ -879,7 +1057,8 @@ const CombatApp = ({ state, callbacks }) => {
                     </div>
                   ))}
                   <UnitDisplay unit={e} isEnemy={true} isActive={isActive}
-                    canTarget={canTarget} onTarget={onTargetSelect} shakingId={shakingId}/>
+                    canTarget={canTarget} onTarget={onTargetSelect} shakingId={shakingId}
+                    animAction={enemyAnimAction} onAnimComplete={enemyOnAnimComplete}/>
                 </div>
               );
             })}

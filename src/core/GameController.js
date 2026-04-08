@@ -286,6 +286,9 @@ export class GameController {
         const def = ENEMY_TYPES[typeKey];
         const e = new Enemy(def.name, def.type, level, def.statMod);
         e.id = `e${i + 1}_` + Date.now() + i;
+        e.enemyKey = typeKey;
+        e.enemyCategory = def.type;
+        e.monsterType = typeKey;
         e.skills = def.skills || [];
         if (def.hpMulti && def.hpMulti !== 1) {
           e.maxHp = Math.floor(e.maxHp * def.hpMulti);
@@ -817,6 +820,32 @@ export class GameController {
     return hero;
   }
 
+  _restoreStoredObject(entry) {
+    if (!entry) return null;
+
+    if (typeof entry === 'string') {
+      const weapon = DataLoader.getWeapon?.(entry);
+      if (weapon) return { ...weapon };
+
+      const item = ItemDB.find(it => it.id === entry);
+      return item ? { ...item } : null;
+    }
+
+    const weaponById = entry.id ? DataLoader.getWeapon?.(entry.id) : null;
+    if (weaponById) return { ...weaponById, ...entry };
+
+    const itemById = entry.id ? ItemDB.find(it => it.id === entry.id) : null;
+    if (itemById) return { ...itemById, ...entry };
+
+    return { ...entry };
+  }
+
+  _restoreStoredList(list) {
+    return Array.isArray(list)
+      ? list.map(entry => this._restoreStoredObject(entry)).filter(Boolean)
+      : [];
+  }
+
   saveGame() {
     try {
         const serializeMap = (m) => {
@@ -832,6 +861,7 @@ export class GameController {
             });
             return { radius: m.radius, tileSize: m.tileSize, tiles };
         };
+        const sharedStorage = this.ui.inventoryUI?.getStorage?.() ?? { weapons: [], items: [] };
 
         const data = {
             player: {
@@ -857,6 +887,10 @@ export class GameController {
                 equipSlots: h.equipSlots,
                 inventory: h.inventory
             })),
+            sharedStorage: {
+                weapons: [...(sharedStorage.weapons || [])],
+                items: [...(sharedStorage.items || [])]
+            },
             map: serializeMap(this.map),
             noviceVillage: serializeMap(this.noviceVillage),
             currentMapName: this.currentMapName,
@@ -885,11 +919,21 @@ export class GameController {
         this.selectedHeroes = data.heroes.map(hd => {
             const h = this._createHeroFromData(hd);
             h.hp = hd.hp;
-            h.inventory = hd.inventory || [];
-            h.equipSlots = hd.equipSlots || [null, null];
+            h.weaponSlots = Array.isArray(hd.weaponSlots)
+              ? hd.weaponSlots.map(w => this._restoreStoredObject(w))
+              : (h.weaponSlots || [null, null]);
+            h.inventory = this._restoreStoredList(hd.inventory);
+            h.equipSlots = this._restoreStoredList(hd.equipSlots);
+            h.equippedWeaponIndex = hd.equippedWeaponIndex ?? 0;
             h.refreshDerivedStats();
             return h;
         });
+        if (this.ui.inventoryUI) {
+            this.ui.inventoryUI.sharedStorage = {
+                weapons: this._restoreStoredList(data.sharedStorage?.weapons),
+                items: this._restoreStoredList(data.sharedStorage?.items)
+            };
+        }
 
         // 2. 恢复地图与格子状态
         const restoreMap = (mapData) => {
@@ -931,6 +975,7 @@ export class GameController {
         this.ui.showMapUI();
         this.ui.updateMovementUI(this.player.movementPoints);
         this.ui.updatePartyStatus(this.selectedHeroes);
+        this.ui.inventoryUI?.update(this.selectedHeroes);
         this.ui.updateProgressBar(this.turnCount, this.currentMaxTurns);
         // 设置进度条标题
         if (this.currentMissionName) {
