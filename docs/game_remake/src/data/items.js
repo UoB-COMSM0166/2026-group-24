@@ -115,10 +115,10 @@ export function rollRandomLoot() {
 
 // ── 金币掉落 ──────────────────────────────────────────────────────
 const GOLD_DROP = {
-  legendary: [80, 150],
-  epic:      [40, 80],
-  rare:      [15, 35],
-  common:    [5, 15],
+  legendary: [120, 200],
+  epic:      [60,  110],
+  rare:      [25,  50],
+  common:    [8,   20],
 };
 export function rollGoldDrop(rarity = 'common') {
   const [min, max] = GOLD_DROP[rarity] ?? GOLD_DROP.common;
@@ -126,26 +126,44 @@ export function rollGoldDrop(rarity = 'common') {
 }
 
 // ── 商店定价 ──────────────────────────────────────────────────────
-const SHOP_PRICE = {
-  legendary: 400,
-  epic:      200,
-  rare:      100,
-  common:    40,
+const WEAPON_PRICE = {
+  legendary: 300,
+  epic:      150,
+  rare:      80,
 };
+
+const ITEM_PRICE = {
+  legendary: 180,
+  epic:      90,
+  rare:      45,
+};
+
 export function getShopPrice(item) {
-  return SHOP_PRICE[item?.rarity] ?? 40;
+  const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
+  const table = isWeapon ? WEAPON_PRICE : ITEM_PRICE;
+  return table[item?.rarity] ?? (isWeapon ? 80 : 45);
 }
 
 // ── 随机生成商店货架 ──────────────────────────────────────────────
-export function rollShopInventory(count = 3) {
+export function rollShopInventory() {
   const items = [];
-  for (let i = 0; i < count; i++) {
-    const isWeapon = Math.random() < 0.5;
-    const item = isWeapon ? (rollRandomWeapon() ?? rollRandomItem()) : rollRandomItem();
+
+  // 1把随机武器
+  const weapon = rollRandomWeapon();
+  if (weapon) {
+    weapon._shopPrice = getShopPrice(weapon);
+    weapon._isWeapon = true;
+    items.push(weapon);
+  }
+
+  // 3个随机道具
+  for (let i = 0; i < 3; i++) {
+    const item = rollRandomItem();
     if (item) {
       item._shopPrice = getShopPrice(item);
       items.push(item);
     }
   }
+
   return items;
 }
