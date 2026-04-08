@@ -296,6 +296,7 @@ export class GameController {
   }
 
   _enterCombat(contentData) {
+    console.log('contentData.type =', contentData.type);
     this.currentBossContent = contentData;
     const isBoss = contentData.type === TileContentType.BOSS || contentData.type === 'boss';
     const level = contentData.level ?? 1;
@@ -310,10 +311,12 @@ export class GameController {
         e.enemyCategory = def.type;
         e.monsterType = typeKey;
         e.skills = def.skills || [];
-        if (def.hpMulti && def.hpMulti !== 1) {
+        if (typeKey === 'dark_overlord') {
+          e.maxHp = Math.floor(e.maxHp * 10);
+        } else if (def.hpMulti && def.hpMulti !== 1) {
           e.maxHp = Math.floor(e.maxHp * def.hpMulti);
-          e.hp = e.maxHp;
         }
+        e.hp = e.maxHp;
         enemies.push(e);
       });
       return enemies;
