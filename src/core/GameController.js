@@ -476,7 +476,16 @@ export class GameController {
     const roller = this.selectedHeroes.length > 0
       ? this.selectedHeroes.reduce((a, b) => ((a.speed ?? 0) >= (b.speed ?? 0) ? a : b))
       : this.player;
-    const total = this.isDevMode ? 999 : rollSpeed(roller, 0.5, 20).gradeIndex + 1;
+
+    let total = this.isDevMode ? 999 : rollSpeed(roller, 0.5, 20).gradeIndex + 1;
+
+
+    const hasTravelerSet = this.selectedHeroes.some(hero =>
+        (hero.equipSlots ?? []).some(item => item?.effect === 'movement_plus_2')
+    );
+    if (hasTravelerSet) total += 2;
+
+
     this.player.movementPoints = total;
     this.ui.updateMovementUI(total);
     this.ui.updatePartyStatus(this.selectedHeroes);

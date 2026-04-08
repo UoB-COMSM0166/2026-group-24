@@ -37,6 +37,13 @@ export class CombatManager {
   init() {
     this.turnOrder = [...this.heroes, ...this.enemies]
         .sort((a, b) => (b.speed || 0) - (a.speed || 0));
+    for (const hero of this.heroes) {
+      const hasStarCloak = (hero.equipSlots ?? []).some(item => item?.effect === 'damage_immune_2');
+      if (hasStarCloak) {
+        hero.starCloakCharges = 2;
+        this.addLog(`✨ ${hero.name}'s Star Cloak activates! First 2 hits will be blocked.`);
+      }
+    }
     this.nextTurn();
   }
 
@@ -144,6 +151,11 @@ export class CombatManager {
   // ── Get effective damage received considering debuffs ────────────
   _getIncomingDamage(target, rawDamage) {
     let dmg = rawDamage;
+    if (target.starCloakCharges > 0) {
+      target.starCloakCharges--;
+      this.addLog(`✨ ${target.name}'s Star Cloak blocks the hit! (${target.starCloakCharges} charge${target.starCloakCharges !== 1 ? 's' : ''} remaining)`);
+      return 0;
+    }
     const fx = target.statusEffects || {};
 
     // Shock: +30% damage taken
@@ -373,6 +385,16 @@ export class CombatManager {
 
         this.diceInfo = { isHeal: false, damage: finalDamage, type: textType, targetId: target.id };
         this.addLog(`Rolled [${rollVal}] → [${skill.name}] dealt ${finalDamage} to ${target.name} ${this._rollLabel(textType)}`);
+
+        const hasLifesteal = (attacker.equipSlots ?? []).some(item => item?.effect === 'lifesteal_10');
+        if (hasLifesteal && finalDamage > 0 && attacker.hp > 0) {
+          const healAmt = Math.max(1, Math.floor(finalDamage * 0.1));
+          if (!(attacker.statusEffects?.anti_heal > 0)) {
+            attacker.hp = Math.min(attacker.maxHp, attacker.hp + healAmt);
+            this.addLog(`🩸 ${attacker.name}'s Bloodthirst Mask restores ${healAmt} HP!`);
+          }
+        }
+
       }
     }
     this.phase = 'EXECUTING';
