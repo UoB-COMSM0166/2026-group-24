@@ -9,11 +9,11 @@ export class DataLoader {
 
   // 存储角色序列帧动画 [heroId][action]
   static animations = {
-    knight: { idle: [], hit: [], death: [] },
-    priest: { idle: [], hit: [], death: [] },
-    ranger: { idle: [], hit: [], death: [] },
-    wizard: { idle: null, hit: null, death: null }
-  };
+      knight: { idle: [], hit: [], death: [], run: [], attack1: [], attack2: [], attack3: [] },
+      priest: { idle: [], hit: [], death: [], run: [], attack1: [], attack2: [], attack3: [] },
+      ranger: { idle: [], hit: [], death: [], run: [], attack1: [], attack2: [], attack3: [] },
+      wizard: { idle: null, hit: null, death: null, attack1: null, attack2: null }
+    };
 
   static async loadAll() {
     // 1. 加载 JSON 数据
@@ -89,31 +89,42 @@ export class DataLoader {
 
     // --- 动画加载任务 (英雄序列帧) ---
     const animConfig = {
-      knight: { idle: 8, hit: 6, death: 13 },
-      priest: { idle: 6, hit: 6, death: 18 },
-      ranger: { idle: 12, hit: 6, death: 19 }
-    };
+          knight: { idle: 8, hit: 6, death: 13, run: 8, attack1: 11, attack2: 19, attack3: 28 },
+          priest: { idle: 6, hit: 6, death: 18, run: 8, attack1: 6, attack2: 12, attack3: 23 },
+          ranger: { idle: 12, hit: 6, death: 19, run: 10, attack1: 10, attack2: 15, attack3: 12 }
+        };
 
     const animTasks = [];
 
     // 加载 Knight, Priest, Ranger
     Object.entries(animConfig).forEach(([hero, actions]) => {
       Object.entries(actions).forEach(([action, count]) => {
-        const folder = action === 'idle' ? 'Idle' : (action === 'hit' ? 'Hit' : 'Death');
-        const prefix = action === 'idle' ? 'idle_' : (action === 'hit' ? 'take_hit_' : 'death_');
-        const task = Promise.all(
-          Array.from({length:count}, (_,i) => loadImg(`./resource/model/${hero}/${folder}/${prefix}${i+1}.png`))
-        ).then(imgs => {
-          this.animations[hero][action] = imgs.filter(Boolean);
-        });
-        animTasks.push(task);
-      });
+              // Build folder path and file prefix based on action type
+              let folder, prefix;
+              if (action === 'idle')          { folder = 'Idle';              prefix = 'idle_'; }
+              else if (action === 'hit')      { folder = 'Hit';              prefix = 'take_hit_'; }
+              else if (action === 'death')    { folder = 'Death';            prefix = 'death_'; }
+              else if (action === 'run')      { folder = 'Run';              prefix = 'run_'; }
+              else if (action === 'attack1')  { folder = 'Attack/Attack_1';  prefix = '1_atk_'; }
+              else if (action === 'attack2')  { folder = 'Attack/Attack_2';  prefix = '2_atk_'; }
+              else if (action === 'attack3')  { folder = 'Attack/Attack_3';  prefix = '3_atk_'; }
+
+              const task = Promise.all(
+                Array.from({length:count}, (_,i) => loadImg(`./resource/model/${hero}/${folder}/${prefix}${i+1}.png`))
+              ).then(imgs => {
+                this.animations[hero][action] = imgs.filter(Boolean);
+              });
+              animTasks.push(task);
+            });
     });
 
     // 加载 Wizard (精灵图)
     animTasks.push(loadImg('./resource/model/wizard/Idle/Idle.png').then(img => { this.animations.wizard.idle = img; }));
     animTasks.push(loadImg('./resource/model/wizard/Hit/Hit.png').then(img => { this.animations.wizard.hit = img; }));
     animTasks.push(loadImg('./resource/model/wizard/Death/Death.png').then(img => { this.animations.wizard.death = img; }));
+    // Wizard attack sprite sheets (8 frames each, horizontal)
+        animTasks.push(loadImg('./resource/model/wizard/Attack/Attack1.png').then(img => { this.animations.wizard.attack1 = img; }));
+        animTasks.push(loadImg('./resource/model/wizard/Attack/Attack2.png').then(img => { this.animations.wizard.attack2 = img; }));
 
     // 基础图片加载
     const imagePromises = Object.entries(imagePaths).map(([name, path]) => {

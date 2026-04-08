@@ -282,7 +282,14 @@ export class CombatManager {
 
     const isHeal = skill.type === 'heal' || skill.type === 'buff';
     this.currentAction = { ...this.currentAction, multiplier, rollVal, textType, isHeal };
-    this.diceInfo = { finalRoll: rollVal, desc: 'Rolling' };
+    this.diceInfo = {
+          finalRoll: rollVal,
+          desc: 'Rolling',
+          attackerId: attacker.id,
+          targetId: this.currentAction.target?.id || null,
+          isHeal: isHeal,
+          skillType: skill.type,
+        };
     this.phase = 'ROLLING';
     this.notifyUI();
   }
@@ -367,29 +374,39 @@ export class CombatManager {
 
   // ── Enemy AI ──────────────────────────────────────────────────────
   handleAI() {
-    const aliveHeroes = this.heroes.filter(h => this._isAlive(h));
-    if (aliveHeroes.length === 0) return;
+      const aliveHeroes = this.heroes.filter(h => this._isAlive(h));
+      if (aliveHeroes.length === 0) return;
 
-    const target = aliveHeroes.sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
-    const usedSkillName = this.activeUnit.skillSlots?.[0]?.name || 'Attack';
+      const target = aliveHeroes.sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+      const skill = this.activeUnit.skillSlots?.[0] || { name: 'Attack', type: 'attack', power: 100, statKey: 'strength' };
 
-    let result = rollAttack(this.activeUnit, 0.5, 6);
-    let rollVal = Math.max(1, Math.min(6, Math.round(result.sampleRoll)));
-    const multiplier = rollVal <= 1 ? 0 : rollVal <= 2 ? 0.5 : rollVal <= 4 ? 1.0 : rollVal === 5 ? 1.5 : 2.0;
+      let result = rollAttack(this.activeUnit, 0.5, 6);
+      let rollVal = Math.max(1, Math.min(6, Math.round(result.sampleRoll)));
+      const multiplier = rollVal <= 1 ? 0 : rollVal <= 2 ? 0.5 : rollVal <= 4 ? 1.0 : rollVal === 5 ? 1.5 : 2.0;
+      const textType = rollVal <= 1 ? 'miss' : rollVal <= 2 ? 'weak' : rollVal <= 4 ? 'normal' : rollVal === 5 ? 'crit' : 'perfect';
 
-    if (multiplier === 0) {
-      this.addLog(`${this.activeUnit.name} missed!`);
-      this.diceInfo = { isHeal: false, damage: 0, type: 'miss', targetId: target.id };
-    } else {
-      const rawDmg = Math.max(1, Math.floor((this.activeUnit.attack || 12) * multiplier) - (target.defense || 0));
-      const actualDmg = this._getIncomingDamage(target, rawDmg);
-      target.hp = Math.max(0, target.hp - actualDmg);
-      this.addLog(`${this.activeUnit.name} used [${usedSkillName}]! Dealt ${actualDmg} damage ${this._rollLabel(rollVal >= 6 ? 'perfect' : rollVal >= 5 ? 'crit' : '')}`);
-      this.diceInfo = { isHeal: false, damage: actualDmg, type: rollVal >= 5 ? 'crit' : 'damage', targetId: target.id };
+      // Store action data for applyDamage to use later
+      this.currentAction = {
+        skill,
+        attacker: this.activeUnit,
+        target,
+        multiplier,
+        rollVal,
+        textType,
+        isHeal: false,
+      };
+
+      this.diceInfo = {
+        finalRoll: rollVal,
+        desc: 'Rolling',
+        attackerId: this.activeUnit.id,
+        targetId: target.id,
+        isHeal: false,
+        skillType: skill.type,
+      };
+      this.phase = 'ROLLING';
+      this.notifyUI();
     }
-    this.phase = 'EXECUTING';
-    this.notifyUI();
-  }
 
   evaluateTurn() {
     this.diceInfo = null;
