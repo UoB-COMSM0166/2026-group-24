@@ -15,6 +15,12 @@ if (!document.getElementById('combat-ui-style')) {
                                    50% { filter:drop-shadow(0 0 16px currentColor); } }
     @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
     .unit-shake { animation: shake 0.35s ease; }
+    .unit-charge {
+          transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .unit-return {
+          transition: transform 0.35s ease-in;
+        }
     .float-text { position:absolute; left:50%; pointer-events:none; font-weight:900; font-size:1.4rem;
                   animation: float-up 1s ease-out forwards; text-shadow:2px 2px 6px rgba(0,0,0,0.9); z-index:20; }
 
@@ -190,27 +196,46 @@ const getRogueFigure = () => (
 );
 
 // ─── 像素动画核心组件 ───────────────────────────────────────────────────
-const AnimatedSprite = ({ unit, action = 'idle' }) => {
-  const [frame, setFrame] = useState(0);
+const AnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX = false }) => {
   const heroId = unit.id;
+  const [frame, setFrame] = useState(0);
+
 
   useEffect(() => {
-    // 对应各角色的帧数和播放间隔
     const configs = {
-      knight: { idle: { f: 8, i: 120 }, hit: { f: 6, i: 70 },  death: { f: 13, i: 100 } },
-      priest: { idle: { f: 6, i: 150 }, hit: { f: 6, i: 70 },  death: { f: 18, i: 100 } },
-      ranger: { idle: { f: 12, i: 80 }, hit: { f: 6, i: 70 },  death: { f: 19, i: 100 } },
-      wizard: { idle: { f: 6, i: 180 }, hit: { f: 1, i: 400 }, death: { f: 1, i: 1000 } }
+      knight: {
+        idle: { f: 8, i: 120 }, hit: { f: 6, i: 70 }, death: { f: 13, i: 100 },
+        run: { f: 8, i: 70 }, attack1: { f: 11, i: 60 }, attack2: { f: 19, i: 50 }, attack3: { f: 28, i: 45 },
+      },
+      priest: {
+        idle: { f: 6, i: 150 }, hit: { f: 6, i: 70 }, death: { f: 18, i: 100 },
+        run: { f: 8, i: 70 }, attack1: { f: 6, i: 70 }, attack2: { f: 12, i: 55 }, attack3: { f: 23, i: 50 },
+      },
+      ranger: {
+        idle: { f: 12, i: 80 }, hit: { f: 6, i: 70 }, death: { f: 19, i: 100 },
+        run: { f: 10, i: 65 }, attack1: { f: 10, i: 65 }, attack2: { f: 15, i: 55 }, attack3: { f: 12, i: 60 },
+      },
+      wizard: {
+        idle: { f: 6, i: 180 }, hit: { f: 1, i: 400 }, death: { f: 1, i: 1000 },
+        attack1: { f: 8, i: 70 }, attack2: { f: 8, i: 70 },
+      },
     };
 
     const config = configs[heroId]?.[action] || { f: 1, i: 1000 };
     setFrame(0);
 
+    // One-shot actions: attack and run play once then call onComplete
+    const isOneShot = action.startsWith('attack') || action === 'run';
+
     const timer = setInterval(() => {
       setFrame(f => {
-        // 死亡动画逻辑：播放到最后一帧停止
         if (action === 'death') {
           return f >= config.f - 1 ? config.f - 1 : f + 1;
+        }
+        if (isOneShot && f >= config.f - 1) {
+          clearInterval(timer);
+          if (onComplete) setTimeout(onComplete, 0);
+          return config.f - 1; // hold last frame
         }
         return (f + 1) % config.f;
       });
@@ -219,14 +244,21 @@ const AnimatedSprite = ({ unit, action = 'idle' }) => {
     return () => clearInterval(timer);
   }, [heroId, action]);
 
-  // Wizard 特殊逻辑：单精灵图裁剪
+// Wizard: sprite sheet rendering
   if (heroId === 'wizard') {
     const sheet = DataLoader.getAnim('wizard', action);
-    if (!sheet) return <MageFigure />;
+    if (!sheet) return null;
 
-    // 假设横向排列的 6 帧精灵图
-    const totalFrames = 6;
-    const frameW = sheet.width / totalFrames;
+    const frameConfigs = {
+          idle:    { totalFrames: 6, scale: 2.2, ty: 47, tx: -40 },
+          hit:     { totalFrames: 1, scale: 2.2, ty: 47, tx: -40 },
+          death:   { totalFrames: 1, scale: 2.2, ty: 47, tx: -40 },
+          attack1: { totalFrames: 8, scale: 2.2, ty: 47, tx: -40 },
+          attack2: { totalFrames: 8, scale: 2.2, ty: 47, tx: -40 },
+        };
+    const fc = frameConfigs[action] || frameConfigs.idle;
+    const frameW = sheet.width / fc.totalFrames;
+
     return (
       <div className="sprite-container">
         <div className="unit-shadow" />
@@ -237,7 +269,7 @@ const AnimatedSprite = ({ unit, action = 'idle' }) => {
           backgroundPosition: `-${frame * frameW}px 0px`,
           backgroundSize: `${sheet.width}px ${sheet.height}px`,
           backgroundRepeat: 'no-repeat',
-          transform: 'scale(2.2) translateY(47px) translateX(-40px)',
+          transform: `scale(${fc.scale}) translateY(${fc.ty}px) translateX(${fc.tx}px)${flipX ? ' scaleX(-1)' : ''}`,
           transformOrigin: 'bottom center',
           imageRendering: 'pixelated',
           marginBottom: '-5px'
@@ -246,31 +278,41 @@ const AnimatedSprite = ({ unit, action = 'idle' }) => {
     );
   }
 
-  // 其他英雄逻辑：序列帧切换
+  // Other heroes: sequence frame rendering
   const animFrames = DataLoader.getAnim(heroId, action);
-  if (!animFrames || animFrames.length === 0) return null;
+  if (!animFrames || animFrames.length === 0) {
+    // Fallback: if run/attack frames not loaded, show idle
+    const fallback = DataLoader.getAnim(heroId, 'idle');
+    if (!fallback || fallback.length === 0) return null;
+    const img = fallback[0];
+    return (
+      <div className="sprite-container">
+        <div className="unit-shadow" />
+        <img src={img.src} className="pixel-art"
+             style={{ height: '42px', transform: `scale(12.0)${flipX ? ' scaleX(-1)' : ''}`, transformOrigin: 'bottom center' }} />
+      </div>
+    );
+  }
 
   const currentImg = animFrames[frame] || animFrames[0];
   return (
     <div className="sprite-container">
-      <div className="unit-shadow" /> 
-      <img src={currentImg.src} className="pixel-art" 
-           style={{ height: '42px', transform: 'scale(12.0)', transformOrigin: 'bottom center' }} />
+      <div className="unit-shadow" />
+      <img src={currentImg.src} className="pixel-art"
+           style={{ height: '42px', transform: `scale(12.0)${flipX ? ' scaleX(-1)' : ''}`, transformOrigin: 'bottom center' }} />
     </div>
   );
 };
 
 // ─── 重写：getFigure 函数 ──────────────────────────────────────────────
-const getFigure = (unit, action = 'idle') => {
+const getFigure = (unit, action = 'idle', onComplete = null, flipX = false) => {
   if (unit.type === 'enemy') return unit.monsterType === 'boss' ? <BossFigure/> : <GoblinFigure/>;
 
-  // 映射角色 ID 到像素动画
   const supportedHeroes = ['knight', 'priest', 'ranger', 'wizard'];
   if (supportedHeroes.includes(unit.id)) {
-    return <AnimatedSprite unit={unit} action={action} />; 
+    return <AnimatedSprite unit={unit} action={action} onComplete={onComplete} flipX={flipX} />;
   }
 
-  // 兜底逻辑
   if (unit.id === 'mage')   return <MageFigure/>;
   if (unit.id === 'rogue')  return getRogueFigure();
   return <div style={{ fontSize: '2rem' }}>👤</div>;
@@ -448,17 +490,17 @@ const ItemModal = ({ hero, onUse, onClose }) => {
 };
 
 // ─── Unit display ─────────────────────────────────────────────────────────────
-const UnitDisplay = ({ unit, isEnemy, isActive, canTarget, onTarget, shakingId }) => {
+const UnitDisplay = ({ unit, isEnemy, isActive, canTarget, onTarget, shakingId, animAction, onAnimComplete, flipX }) => {
   const isDead = unit.hp <= 0;
   const activeColor = isEnemy ? '#f87171' : '#fbbf24';
   const barW = isEnemy && unit.monsterType === 'boss' ? '130px' : '110px';
 
-  let currentAction = 'idle';
-  if (isDead) {
-    currentAction = 'death';
-  } else if (shakingId === unit.id) {
-    currentAction = 'hit';
-  }
+  let currentAction = animAction || 'idle';
+    if (isDead) {
+      currentAction = 'death';
+    } else if (shakingId === unit.id) {
+      currentAction = 'hit';
+    }
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center',
       opacity: isDead ? 0.3 : 1, filter: isDead ? 'grayscale(1)' : 'none',
@@ -498,7 +540,7 @@ const UnitDisplay = ({ unit, isEnemy, isActive, canTarget, onTarget, shakingId }
             background:`radial-gradient(ellipse, ${activeColor}55 0%, transparent 70%)`,
             filter:'blur(4px)' }}/>
         )}
-        {getFigure(unit, currentAction)}
+        {getFigure(unit, currentAction, onAnimComplete, flipX)}
         {isDead && (
           <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center',
             justifyContent:'center', fontSize:'2.5rem' }}>💀</div>
@@ -515,10 +557,18 @@ const CombatApp = ({ state, callbacks }) => {
           onExecuteComplete, onFinishCombat, onSwitchWeapon, onUseItem } = callbacks;
 
   const [showDice, setShowDice]           = useState(false);
-  const [diceValue, setDiceValue]         = useState(1);
-  const [floatingTexts, setFloatingTexts] = useState([]);
-  const [shakingId, setShakingId]         = useState(null);
-  const [modal, setModal]                 = useState(null);
+    const [diceValue, setDiceValue]         = useState(1);
+    const [floatingTexts, setFloatingTexts] = useState([]);
+    const [shakingId, setShakingId]         = useState(null);
+    const [modal, setModal]                 = useState(null);
+
+    // ── Attack animation state ──────────────────────────────────────
+    // animState tracks the current phase of the charge→attack→return sequence
+    // null = no animation playing
+    // { attackerId, targetId, phase: 'charge'|'attack'|'return', skillType }
+    const [animState, setAnimState]         = useState(null);
+    const unitRefsMap = React.useRef({});   // unitId → DOM element ref for position calc
+    const [chargeOffset, setChargeOffset]   = useState({ x: 0, y: 0 }); // translateX/Y for charging unit
 
   const addFloat = (value, type, unitId) => {
     const id = Date.now() + Math.random();
@@ -526,28 +576,121 @@ const CombatApp = ({ state, callbacks }) => {
     setTimeout(() => setFloatingTexts(p => p.filter(f => f.id !== id)), 1100);
   };
 
-  useEffect(() => {
-    if (phase === 'ROLLING' && diceInfo) {
-      setShowDice(true);
-      let n = 0;
-      const iv = setInterval(() => {
-        setDiceValue(Math.floor(Math.random() * 6) + 1);
-        if (++n > 15) { clearInterval(iv); setDiceValue(diceInfo.finalRoll); setTimeout(onRollComplete, 500); }
-      }, 55);
-      return () => clearInterval(iv);
-    }
-    if (phase === 'EXECUTING' && diceInfo) {
-      if (diceInfo.isHeal) {
-        addFloat(`+${diceInfo.damage}`, 'heal', diceInfo.targetId);
-      } else {
-        setShakingId(diceInfo.targetId);
-        addFloat(diceInfo.damage, diceInfo.type || 'dmg', diceInfo.targetId);
-        setTimeout(() => setShakingId(null), 400);
+  // ── Pick which attack anim to use based on skill type ───────────
+    const pickAttackAnim = (attackerId, skillType) => {
+      // Enemies don't have attack anims — skip
+      const isHero = heroes.some(h => h.id === attackerId);
+      if (!isHero) return 'attack1';
+      // Wizard: only has attack1 & attack2
+      if (attackerId === 'wizard') {
+        return skillType === 'magic' ? 'attack2' : 'attack1';
       }
-      setTimeout(onExecuteComplete, 1200);
-    }
-    if (['ENEMY_TURN','PLAYER_TURN','WIN','LOSE'].includes(phase)) setShowDice(false);
-  }, [phase, diceInfo]);
+      // Knight/Priest/Ranger: attack1=normal, attack2=heavy, attack3=magic
+      if (skillType === 'magic')  return 'attack3';
+      if (skillType === 'debuff') return 'attack1';
+      // For physical attacks, default attack1
+      return 'attack1';
+    };
+
+    // ── Compute pixel offset from attacker to target ────────────────
+    const getChargeOffset = (attackerId, targetId) => {
+      const atkEl = unitRefsMap.current[attackerId];
+      const tgtEl = unitRefsMap.current[targetId];
+      if (!atkEl || !tgtEl) return { x: 0, y: 0 };
+      const atkRect = atkEl.getBoundingClientRect();
+      const tgtRect = tgtEl.getBoundingClientRect();
+      // Move attacker to just beside the target (offset by ~60px so they don't overlap)
+      const direction = tgtRect.left > atkRect.left ? 1 : -1;
+      const dx = (tgtRect.left - atkRect.left) - direction * 140;
+      const dy = (tgtRect.top - atkRect.top);
+      return { x: dx, y: dy };
+    };
+
+    // ── Start the charge→attack→return sequence ─────────────────────
+    const startAttackAnim = (attackerId, targetId, skillType, isHeal) => {
+      const isHero = heroes.some(h => h.id === attackerId);
+      const isRanged = attackerId === 'wizard' || isHeal;
+
+      if (isRanged || !isHero) {
+        // Ranged / enemy / heal: skip charge, play attack in place, then proceed
+        if (isHero && !isHeal) {
+          // Wizard: play attack animation in place
+          setAnimState({ attackerId, targetId, phase: 'attack', skillType });
+        } else {
+          // Enemy or heal: skip animation entirely
+          onRollComplete();
+        }
+        return;
+      }
+
+      // Melee hero: charge toward enemy
+      const offset = getChargeOffset(attackerId, targetId);
+      setChargeOffset(offset);
+      setAnimState({ attackerId, targetId, phase: 'charge', skillType });
+    };
+
+    // ── Called when charge CSS transition ends ──────────────────────
+    const onChargeArrived = () => {
+      if (!animState || animState.phase !== 'charge') return;
+      // Switch to attack animation
+      setAnimState(prev => ({ ...prev, phase: 'attack' }));
+    };
+
+    // ── Called when attack AnimatedSprite finishes its one-shot ─────
+    const onAttackAnimDone = () => {
+      if (!animState) return;
+      const attackerId = animState.attackerId;
+      const isRanged = attackerId === 'wizard';
+      onRollComplete();
+      if (isRanged) {
+        // Wizard: no return phase, just clear anim state
+        setTimeout(() => setAnimState(null), 200);
+      } else {
+        setTimeout(() => {
+          setAnimState(prev => prev ? { ...prev, phase: 'return' } : null);
+          setChargeOffset({ x: 0, y: 0 });
+        }, 200);
+      }
+    };
+    // ── Called when return CSS transition ends ──────────────────────
+    const onReturnArrived = () => {
+      setAnimState(null);
+    };
+
+    // ── Main phase effect ──────────────────────────────────────────
+    useEffect(() => {
+      if (phase === 'ROLLING' && diceInfo) {
+        setShowDice(true);
+        let n = 0;
+        const iv = setInterval(() => {
+          setDiceValue(Math.floor(Math.random() * 6) + 1);
+          if (++n > 15) {
+            clearInterval(iv);
+            setDiceValue(diceInfo.finalRoll);
+            console.log('[Dice done]', 'attackerId:', diceInfo.attackerId, 'targetId:', diceInfo.targetId, 'skillType:', diceInfo.skillType);
+            setTimeout(() => {
+              startAttackAnim(diceInfo.attackerId, diceInfo.targetId, diceInfo.skillType, diceInfo.isHeal);
+            }, 500);
+          }
+        }, 55);
+        return () => clearInterval(iv);
+      }
+      if (phase === 'EXECUTING' && diceInfo) {
+        if (diceInfo.isHeal) {
+          addFloat(`+${diceInfo.damage}`, 'heal', diceInfo.targetId);
+        } else {
+          setShakingId(diceInfo.targetId);
+          addFloat(diceInfo.damage, diceInfo.type || 'dmg', diceInfo.targetId);
+          setTimeout(() => setShakingId(null), 400);
+        }
+        setTimeout(onExecuteComplete, 1200);
+      }
+      if (['ENEMY_TURN','PLAYER_TURN','WIN','LOSE'].includes(phase)) {
+        setShowDice(false);
+        setAnimState(null);
+        setChargeOffset({ x: 0, y: 0 });
+      }
+    }, [phase, diceInfo]);
 
   const isPlayerTurn = phase === 'PLAYER_TURN';
   const activeHero   = isPlayerTurn ? activeUnit : null;
@@ -600,25 +743,69 @@ const CombatApp = ({ state, callbacks }) => {
               isCaster(a) && !isCaster(b) ? -1 : !isCaster(a) && isCaster(b) ? 1 : 0
             );
             return (
-              <div style={{ display:'flex', gap:'80px', alignItems:'flex-end' }}>
+              <div style={{ display:'flex', gap:'80px', alignItems:'flex-end',
+                pointerEvents: phase === 'AWAIT_TARGET' ? 'none' : 'auto',
+                position: 'relative' }}>
                 {sorted.map(h => {
-                  const isActive = activeUnit?.id === h.id && !['WIN','LOSE','START'].includes(phase);
-                  const canTargetAlly = phase==='AWAIT_ALLY_TARGET' && h.hp > 0;
-                  return (
-                    <div key={h.id} style={{ position:'relative' }}
-                      className={shakingId === h.id ? 'unit-shake' : ''}>
-                      {floatingTexts.filter(f => f.unitId === h.id).map(f => (
-                        <div key={f.id} className="float-text" style={{ top:'-10px',
-                          color: f.type==='heal'?'#4ade80': f.type==='perfect'?'#fbbf24':
-                                 f.type==='crit'?'#f97316': f.type==='weak'?'#94a3b8':'#f87171' }}>
-                          {f.type==='heal' ? `+${f.value}` : f.value}
-                        </div>
-                      ))}
-                      <UnitDisplay unit={h} isEnemy={false} isActive={isActive}
-                        canTarget={canTargetAlly} onTarget={onTargetSelect} shakingId={shakingId}/>
-                    </div>
-                  );
-                })}
+                                  const isActive = activeUnit?.id === h.id && !['WIN','LOSE','START'].includes(phase);
+                                  const canTargetAlly = phase==='AWAIT_ALLY_TARGET' && h.hp > 0;
+
+                                  // Determine animation action & offset for this hero
+                                  const isCharging = animState?.attackerId === h.id;
+
+
+                                  let heroAnimAction = null;
+                                  let heroFlipX = false;
+                                  let heroOnAnimComplete = null;
+                                  let heroTransform = '';
+                                  let heroTransitionClass = '';
+
+                                  if (isCharging) {
+                                    if (animState.phase === 'charge') {
+                                      heroAnimAction = 'run';
+                                      heroTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
+                                      heroTransitionClass = 'unit-charge';
+                                    } else if (animState.phase === 'attack') {
+                                      heroAnimAction = pickAttackAnim(h.id, animState.skillType);
+                                      heroTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
+                                      heroOnAnimComplete = onAttackAnimDone;
+                                    } else if (animState.phase === 'return') {
+                                      heroAnimAction = 'run';
+                                      heroFlipX = true;
+                                      heroTransform = 'translate(0px, 0px)';
+                                      heroTransitionClass = 'unit-return';
+                                    }
+                                  }
+
+                                  return (
+                                    <div key={h.id}
+                                      ref={el => { if (el) unitRefsMap.current[h.id] = el; }}
+                                      style={{
+                                        position: 'relative',
+                                        transform: heroTransform || undefined,
+                                        zIndex: isCharging ? 50 : 1,
+                                      }}
+                                      className={`${shakingId === h.id ? 'unit-shake' : ''} ${heroTransitionClass}`}
+                                      onTransitionEnd={() => {
+                                        if (animState?.attackerId === h.id) {
+                                          if (animState.phase === 'charge') onChargeArrived();
+                                          else if (animState.phase === 'return') onReturnArrived();
+                                        }
+                                      }}
+                                    >
+                                      {floatingTexts.filter(f => f.unitId === h.id).map(f => (
+                                        <div key={f.id} className="float-text" style={{ top:'-10px',
+                                          color: f.type==='heal'?'#4ade80': f.type==='perfect'?'#fbbf24':
+                                                 f.type==='crit'?'#f97316': f.type==='weak'?'#94a3b8':'#f87171' }}>
+                                          {f.type==='heal' ? `+${f.value}` : f.value}
+                                        </div>
+                                      ))}
+                                      <UnitDisplay unit={h} isEnemy={false} isActive={isActive}
+                                        canTarget={canTargetAlly} onTarget={onTargetSelect} shakingId={shakingId}
+                                        animAction={heroAnimAction} onAnimComplete={heroOnAnimComplete} flipX={heroFlipX}/>
+                                    </div>
+                                  );
+                                })}
               </div>
             );
           })()}
@@ -661,8 +848,10 @@ const CombatApp = ({ state, callbacks }) => {
               const isActive = activeUnit?.id === e.id && !['WIN','LOSE','START'].includes(phase);
               const canTarget = phase==='AWAIT_TARGET' && e.hp > 0;
               return (
-                <div key={e.id} style={{ position:'relative' }}
-                  className={shakingId === e.id ? 'unit-shake' : ''}>
+                  <div key={e.id}
+                    ref={el => { if (el) unitRefsMap.current[e.id] = el; }}
+                    style={{ position:'relative' }}
+                    className={shakingId === e.id ? 'unit-shake' : ''}>
                   {floatingTexts.filter(f => f.unitId === e.id).map(f => (
                     <div key={f.id} className="float-text" style={{ top:'-10px',
                       color: f.type==='heal'?'#4ade80': f.type==='perfect'?'#fbbf24':
