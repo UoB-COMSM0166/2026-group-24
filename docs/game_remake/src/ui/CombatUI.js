@@ -358,11 +358,11 @@ const ENEMY_ANIM_CONFIG = {
     attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
   },
   swift_assassin: {
-    idle: { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 18, faceLeftFlip: true },
-    hit: { frames: 3, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 18, faceLeftFlip: true },
-    death: { frames: 7, interval: 110, mode: 'sheet', scale: 1.8, ty: 130, tx: 18, faceLeftFlip: true },
-    run: { frames: 8, interval: 70, mode: 'sheet', scale: 1.8, ty: 130, tx: 18, faceLeftFlip: true },
-    attack: { frames: 8, interval: 60, mode: 'sheet', scale: 1.8, ty: 130, tx: 18, faceLeftFlip: true },
+    idle: { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 100, faceLeftFlip: true },
+    hit: { frames: 3, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 100, faceLeftFlip: true },
+    death: { frames: 7, interval: 110, mode: 'sheet', scale: 1.8, ty: 130, tx: 100, faceLeftFlip: true },
+    run: { frames: 8, interval: 70, mode: 'sheet', scale: 1.8, ty: 130, tx: 100, faceLeftFlip: true },
+    attack: { frames: 8, interval: 60, mode: 'sheet', scale: 1.8, ty: 130, tx: 100, faceLeftFlip: true },
   },
 };
 
