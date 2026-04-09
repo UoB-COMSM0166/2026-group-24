@@ -358,11 +358,11 @@ const ENEMY_ANIM_CONFIG = {
     attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
   },
   swift_assassin: {
-    idle: { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, faceLeftFlip: true },
-    hit: { frames: 3, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, faceLeftFlip: true },
-    death: { frames: 7, interval: 110, mode: 'sheet', scale: 1.8, ty: 130, faceLeftFlip: true },
-    run: { frames: 8, interval: 70, mode: 'sheet', scale: 1.8, ty: 130, faceLeftFlip: true },
-    attack: { frames: 8, interval: 60, mode: 'sheet', scale: 1.8, ty: 130, faceLeftFlip: true },
+    idle: { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 18, faceLeftFlip: true },
+    hit: { frames: 3, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 18, faceLeftFlip: true },
+    death: { frames: 7, interval: 110, mode: 'sheet', scale: 1.8, ty: 130, tx: 18, faceLeftFlip: true },
+    run: { frames: 8, interval: 70, mode: 'sheet', scale: 1.8, ty: 130, tx: 18, faceLeftFlip: true },
+    attack: { frames: 8, interval: 60, mode: 'sheet', scale: 1.8, ty: 130, tx: 18, faceLeftFlip: true },
   },
 };
 
@@ -409,6 +409,8 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
     DataLoader.getEnemyAnim(enemyKey, action)
     || DataLoader.getEnemyAnim(enemyKey, 'idle');
   const shouldFlip = actionConfig?.faceLeftFlip ?? flipX;
+  const offsetX = actionConfig?.tx || 0;
+  const shadowStyle = offsetX ? { marginLeft: `${offsetX}px` } : undefined;
 
   if (!actionConfig || !asset) {
     return enemyKey === 'dark_overlord' || unit.monsterType === 'boss' ? <BossFigure /> : <GoblinFigure />;
@@ -421,13 +423,13 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
 
     return (
       <div className="sprite-container">
-        <div className="unit-shadow" />
+        <div className="unit-shadow" style={shadowStyle} />
         <img
           src={currentImg.src}
           className="pixel-art"
           style={{
             height: `${actionConfig.height}px`,
-            transform: `translateY(${actionConfig.ty || 0}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
+            transform: `translate(${offsetX}px, ${actionConfig.ty || 0}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
             transformOrigin: 'bottom center'
           }}
         />
@@ -448,7 +450,7 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
 
     return (
       <div className="sprite-container">
-        <div className="unit-shadow" />
+        <div className="unit-shadow" style={shadowStyle} />
         <div
           className="pixel-art"
           style={{
@@ -458,7 +460,7 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
             backgroundPosition: `-${col * frameW}px -${row * frameH}px`,
             backgroundSize: `${sheet.width}px ${sheet.height}px`,
             backgroundRepeat: 'no-repeat',
-            transform: `translateY(${actionConfig.ty || 30}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
+            transform: `translate(${offsetX}px, ${actionConfig.ty || 30}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
             transformOrigin: 'bottom center',
             imageRendering: 'pixelated',
           }}
@@ -473,7 +475,7 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
   const frameW = sheet.width / actionConfig.frames;
   return (
     <div className="sprite-container">
-      <div className="unit-shadow" />
+      <div className="unit-shadow" style={shadowStyle} />
       <div
         className="pixel-art"
         style={{
@@ -483,7 +485,7 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
           backgroundPosition: `-${frame * frameW}px 0px`,
           backgroundSize: `${sheet.width}px ${sheet.height}px`,
           backgroundRepeat: 'no-repeat',
-          transform: `translateY(${actionConfig.ty || 30}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
+          transform: `translate(${offsetX}px, ${actionConfig.ty || 30}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
           transformOrigin: 'bottom center',
           imageRendering: 'pixelated',
         }}
