@@ -534,23 +534,6 @@ function drawItemIcon(s, iconType, alpha, accentColor) {
       break;
     }
       // ★ 修改：各武器类型用独立 key 读图，以后换图只改 DataLoader 路径即可 ★
-    case 'blade':
-    case 'staff':
-    case 'tome':
-    case 'bow':
-    case 'fist': {
-      const imgKey = `weapon_${iconType}`;
-      const img = window.DataLoader?.getImage(imgKey);
-      if (img) {
-        s.drawingContext.save();
-        s.drawingContext.globalAlpha = a;
-        s.drawingContext.drawImage(img, -28, -28, 56, 56);
-        s.drawingContext.restore();
-      } else {
-        drawSwordIcon(s, a, accentColor); // PNG 未加载时降级
-      }
-      break;
-    }
     case 'traveler_set':
     case 'star_cloak':
     case 'bloodthirst_mask': {
@@ -565,10 +548,19 @@ function drawItemIcon(s, iconType, alpha, accentColor) {
       }
       break;
     }
-    default:
-      s.fill(200, 200, 200, alpha);
-      s.noStroke();
-      s.ellipse(0, 0, 40, 40);
+    default: {
+          const imgKey = `weapon_${iconType}`;
+          const img = window.DataLoader?.getImage(imgKey);
+          if (img) {
+            s.drawingContext.save();
+            s.drawingContext.globalAlpha = a;
+            s.drawingContext.drawImage(img, -28, -28, 56, 56);
+            s.drawingContext.restore();
+          } else {
+            drawSwordIcon(s, a, accentColor);
+          }
+          break;
+        }
   }
   s.pop();
 }
