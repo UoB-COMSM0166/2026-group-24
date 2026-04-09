@@ -622,6 +622,7 @@ export class EventTable {
     step1();
   }
 
+
 static handleShop(gameController, tile, content) {
   if (!tile._shopInventory) {
     tile._shopInventory = rollShopInventory();
@@ -645,24 +646,6 @@ static handleShop(gameController, tile, content) {
     _shopPrice: 80,
     _isRefresh: true,
   };
-
-// Show shop tutorial on first visit
-const tutorial = window._gameController?.tutorial;
-if (tutorial && !tutorial._introducedEvents?.has('shop')) {
-  tutorial._introducedEvents?.add('shop');
-  tutorial._dialogue?.show(
-    { name: 'Elder Guide', avatar: '🧙', lines: [
-      'Oh! A shop! The most important supply stop on any adventure.',
-      'Every shop stocks one random weapon and three items!',
-      'Shops also offer Divine Blessing, which restores HP to your whole party for a small fee. Don\'t forget this option when things get dire!',
-      'Each shop\'s inventory is fixed once you visit — but you can spend gold to refresh the stock. Different shops are stocked independently, so it\'s worth checking multiple ones!',
-      'Gold is precious, so prioritize wisely — weapons directly boost combat power, while items can save your life at a critical moment.',
-    ]},
-    () => openShop()
-  );
-} else {
-  openShop();
-}
 
   const openShop = () => {
     const fullInventory = [...tile._shopInventory, healOption, refreshOption];
@@ -693,8 +676,24 @@ if (tutorial && !tutorial._introducedEvents?.has('shop')) {
     );
   };
 
-  openShop();
+  const tutorial = window._gameController?.tutorial;
+  if (tutorial && !tutorial._introducedEvents?.has('shop')) {
+    tutorial._introducedEvents?.add('shop');
+    tutorial._dialogue?.show(
+      { name: 'Elder Guide', avatar: '🧙', lines: [
+        'Oh! A shop! The most important supply stop on any adventure.',
+        'Every shop stocks one random weapon and three items!',
+        'Shops also offer Divine Blessing, which restores HP to your whole party for a small fee. Don\'t forget this option when things get dire!',
+        'Each shop\'s inventory is fixed once you visit — but you can spend gold to refresh the stock. Different shops are stocked independently, so it\'s worth checking multiple ones!',
+        'Gold is precious, so prioritize wisely — weapons directly boost combat power, while items can save your life at a critical moment.',
+      ]},
+      () => openShop()
+    );
+  } else {
+    openShop();
+  }
 }
+
 
   // ── 事件处理：遗迹 ───────────────────────────────────────────────
 
