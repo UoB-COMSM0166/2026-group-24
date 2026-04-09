@@ -17,10 +17,10 @@ const MISSION_TASKS = {
     showDebugBtn: true,
     autoCleanupOnComplete: true,
     tasks: {
-      fought_enemy:     { done: false, label: '⚔️  击败一只怪物' },
-      opened_chest:     { done: false, label: '🎁  打开宝箱' },
-      visited_altar:    { done: false, label: '🔮  使用祭坛' },
-      opened_inventory: { done: false, label: '🎒  查看背包' },
+      fought_enemy:     { done: false, label: '⚔️  Defeat a monster' },
+      opened_chest:     { done: false, label: '🎁  Open a chest' },
+      visited_altar:    { done: false, label: '🔮  Pray at an altar' },
+      opened_inventory: { done: false, label: '🎒  Open your inventory' },
     }
   },
   // 主地图 - 救援村民任务

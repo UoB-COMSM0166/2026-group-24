@@ -303,13 +303,14 @@ export class UIManager {
     const card = document.createElement("div");
     card.style.cssText = "width:460px; max-width:92vw; background:rgba(10,10,25,0.95); border:1px solid rgba(255,255,255,0.18); border-radius:14px; padding:14px; color:white;";
     const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
-    const lootTitle = isWeapon ? '⚔️ 获得武器！' : '💍 获得饰品！';
-    const lootTypeLabel = isWeapon
-        ? `类型：${item?.type ?? '武器'} | 适用：${item?.owner ?? '未知'} | 品质：${item?.rarity ?? ''}`
-        : `品质：${item?.rarity ?? ''} | 类型：饰品`;
-    const lootHint = isWeapon
-        ? '"立即装备" 会放入武器槽并刷新属性，"存入背包" 放入武器存放区。'
-        : '"立即装备" 会放入道具槽并刷新属性，"存入背包" 放入道具存放区。';
+ const lootTitle = isWeapon ? '⚔️ Weapon obtained!' : '💍 Item obtained!';
+
+      const lootTypeLabel = isWeapon
+          ? `Type: ${item?.type ?? 'Weapon'} | For: ${item?.owner ?? 'Unknown'} | Rarity: ${item?.rarity ?? ''}`
+          : `Rarity: ${item?.rarity ?? ''} | Type: Item`;
+  const lootHint = isWeapon
+      ? '"Equip Now" places it in a weapon slot and refreshes stats. "Store in Bag" sends it to storage.'
+      : '"Equip Now" places it in an item slot and refreshes stats. "Store in Bag" sends it to storage.';
     const heroBtns = (heroes ?? []).map((h, i) => {
       return `
       <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
@@ -407,7 +408,7 @@ export class UIManager {
 
       // 更新按钮文字
       const isLast = currentSegment === segments.length - 1;
-      btnEl.textContent = isLast ? '开始游戏 ▶' : '继续 ▶';
+   btnEl.textContent = isLast ? 'Start Adventure ▶' : 'Continue ▶';
 
       // 更新页码
       pageEl.textContent = `${currentSegment + 1} / ${segments.length}`;
