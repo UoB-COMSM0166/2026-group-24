@@ -139,7 +139,7 @@ export class Renderer {
         const stepNum = String(i); // i=1 → "1", i=2 → "2" ...
         const fontSize = Math.max(10, size * 0.45);
         ctx.shadowBlur = 0;
-        ctx.font = `bold ${fontSize}px "Arial Black", Arial, sans-serif`;
+        ctx.font = `bold ${fontSize}px 'Press Start 2P', monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 

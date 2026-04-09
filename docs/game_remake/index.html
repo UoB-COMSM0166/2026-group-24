@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <style>
-  /* 选角屏幕整体美化 */
+  /* Character select screen overall beautification */
 #char-select-screen {
     position: fixed !important;
     inset: 0;
     z-index: 50;
-    display: none; /* 由JS控制显示 */
+    display: none; /* Controlled by JavaScript */
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
@@ -20,7 +20,7 @@
       linear-gradient(180deg, #071019 0%, #101f2f 48%, #241c12 100%);
     background-size: cover;
     color: white;
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: 'Press Start 2P', monospace;
 }
 
 #char-select-screen::before {
@@ -101,8 +101,8 @@
 }
 .save-btn {
       position: fixed; 
-      bottom: 20px;    /* 保持在屏幕底部 */
-      right: 20px;     /* ⬅️ 修改这里：改为 right，留一点边距防遮挡 */
+      bottom: 20px;    /* Keep at bottom of screen */
+      right: 20px;     /* Change to right and add margin to prevent blocking */
       z-index: 50; 
       background: linear-gradient(135deg, rgba(39, 174, 96, 0.85), rgba(30, 130, 76, 0.95)); 
       backdrop-filter: blur(4px); 
@@ -112,7 +112,7 @@
       border-radius: 12px; 
       cursor: pointer; 
       font-weight: bold; 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Press Start 2P', monospace;
       box-shadow: 0 4px 15px rgba(0,0,0,0.4); 
       transition: all 0.2s ease; 
       display: flex; 
@@ -120,7 +120,7 @@
       gap: 8px; 
       letter-spacing: 0.5px;
     }
-    /* 悬停和点击动画保持不变 */
+    /* Hover and click animation remains unchanged */
     .save-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(39, 174, 96, 0.6);
@@ -130,7 +130,7 @@
       transform: translateY(1px);
     }
 
-/* 英雄卡片基础样式 */
+/* Hero card base style */
 .vivid-card {
     position: relative;
     width: min(420px, 44vw);
@@ -149,7 +149,7 @@
     box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
 }
 
-/* 预览容器与背景发光 */
+/* Preview container and background glow */
 .hero-preview-container {
     width: 140px;
     position: relative;
@@ -203,7 +203,7 @@
     border: 1px solid rgba(255, 226, 178, 0.08);
 }
 
-/* 选中与悬停效果 */
+/* Selected and hover effects */
 .vivid-card:hover {
     background: linear-gradient(180deg, rgba(18, 28, 36, 0.84), rgba(20, 14, 10, 0.95));
     transform: translateY(-7px);
@@ -243,6 +243,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>For the Treasure - Unified Edition</title>
 
+  <!-- Retro Pixel Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -255,15 +258,17 @@
       box-sizing: border-box; 
       -webkit-text-size-adjust: 100%; 
       text-size-adjust: 100%; 
+      -webkit-font-smoothing: none;
+      -moz-osx-font-smoothing: grayscale;
     }
     body { 
       background: #1a1a2e; 
       overflow: hidden; 
-      font-family: sans-serif; 
+      font-family: 'Press Start 2P', monospace; 
       color: white; 
-      /* 【新增】禁用浏览器的双击放大、手势缩放等原生行为 */
+      /* [New] Disable browser double-tap zoom, gesture zoom and other native behavior */
       touch-action: none; 
-      /* 【新增】防止浏览器边缘的回弹和刷新动画 */
+      /* [New] Prevent browser edge bounce and refresh animation */
       overscroll-behavior: none; 
     }
 
@@ -277,7 +282,12 @@
       --ui-shadow: rgba(0, 0, 0, 0.42);
     }
 
-    #game-canvas { display: block; cursor: grab; }
+    #game-canvas { 
+      display: block; 
+      cursor: grab; 
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
     .fullscreen { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; flex-direction: column; background: rgba(10, 10, 30, 0.95); z-index: 50; }
     #hero-slots { display: flex; gap: 22px; margin-bottom: 14px; flex-wrap: wrap; justify-content: center; width: min(980px, 92vw); }
     .hero-card { width: 120px; background: #2c2c54; padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; border: 2px solid transparent; }
@@ -306,7 +316,7 @@
       border: 1px solid rgba(255,255,255,0.08);
       border-left: 4px solid #f39c12;
       padding: 12px 18px;
-      min-width: 260px; /* 稍微加宽 */
+      min-width: 260px; /* Slightly wider */
       box-shadow: 0 8px 24px rgba(0,0,0,0.6);
       border-radius: 10px;
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -321,7 +331,7 @@
 }
 .hp-bar-bg { width: 100%; height: 10px; background: rgba(0,0,0,0.6); border-radius: 5px; margin-top: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
 .hp-bar-fill { height: 100%; background: linear-gradient(90deg, #2ecc71, #27ae60); transition: width 0.4s ease; box-shadow: 0 0 10px rgba(46,204,113,0.5); }
-.hp-text { font-size: 11px; text-align: right; color: #cbd5e1; margin-top: 4px; font-family: monospace; font-weight: bold; }
+.hp-text { font-size: 11px; text-align: right; color: #cbd5e1; margin-top: 4px; font-family: 'Press Start 2P', monospace; font-weight: bold; }
 
 .stat-detail { 
     font-size: 12px; 
@@ -375,7 +385,7 @@
     .map-ui-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(0,0,0,0.32), 0 0 0 1px rgba(242, 215, 154, 0.1); border-color: rgba(242, 215, 154, 0.42); filter: brightness(1.06); }
     .map-ui-btn:active { transform: translateY(1px); }
     #end-turn-btn { padding: 10px 18px; border-radius: 12px; }
-    #save-game-btn { position: fixed !important; right: 22px !important; left: auto !important; bottom: 82px !important; top: auto !important; z-index: 50 !important; background: linear-gradient(180deg, #325d47 0%, #1d3a2f 100%); border: 1px solid rgba(191, 223, 183, 0.2); color: #eef8e7; padding: 12px 20px; border-radius: 14px; box-shadow: 0 14px 30px rgba(0,0,0,0.34); font-family: Georgia, 'Times New Roman', serif; letter-spacing: 0.06em; text-transform: uppercase; }
+    #save-game-btn { position: fixed !important; right: 22px !important; left: auto !important; bottom: 82px !important; top: auto !important; z-index: 50 !important; background: linear-gradient(180deg, #325d47 0%, #1d3a2f 100%); border: 1px solid rgba(191, 223, 183, 0.2); color: #eef8e7; padding: 12px 20px; border-radius: 14px; box-shadow: 0 14px 30px rgba(0,0,0,0.34); font-family: 'Press Start 2P', monospace; letter-spacing: 0.06em; text-transform: uppercase; }
     #save-game-btn:hover { box-shadow: 0 18px 36px rgba(0,0,0,0.42); border-color: rgba(191, 223, 183, 0.34); }
     #debug-toggle-btn { position: fixed !important; bottom: 22px !important; left: 22px !important; z-index: 15 !important; background: linear-gradient(180deg, #2b3340 0%, #171d26 100%) !important; border: 1px solid rgba(159, 186, 214, 0.24) !important; color: #e5edf7 !important; padding: 10px 16px !important; border-radius: 14px !important; cursor: pointer !important; font-weight: bold !important; font-size: 12px !important; letter-spacing: 0.06em !important; box-shadow: 0 14px 30px rgba(0,0,0,0.32) !important; }
     #debug-toggle-btn:hover { transform: translateY(-2px); box-shadow: 0 18px 34px rgba(0,0,0,0.4) !important; border-color: rgba(159, 186, 214, 0.38) !important; }
@@ -426,11 +436,14 @@
 
 <div id="map-gen-screen" class="fullscreen"><h2>Building World...</h2></div>
 
-<div id="story-screen" class="fullscreen" style="background: rgba(0,0,0,0.9); justify-content: center; align-items: center; text-align: center;">
-  <div style="max-width: 600px; color: white;">
-    <h2 id="story-title" style="color: #f39c12; margin-bottom: 20px;">第一章节：黑暗古树</h2>
-    <p id="story-text" style="font-size: 18px; line-height: 1.6; margin-bottom: 30px;"></p>
-    <button id="story-next-btn" style="background: #e67e22; border: none; color: white; padding: 10px 30px; border-radius: 5px; cursor: pointer;">继续</button>
+<div id="story-screen" class="fullscreen" style="background: rgba(0,0,0,0.9); justify-content: center; align-items: center; text-align: center; padding: 10px;">
+  <div style="max-width: 90vw; color: white; font-family: 'Press Start 2P', monospace; display: flex; flex-direction: column; max-height: 95vh;">
+    <h2 id="story-title" style="color: #f39c12; margin-bottom: 10px; font-family: 'Press Start 2P', monospace; font-size: 16px;">Chapter I: Dark Ancient Tree</h2>
+    <div id="story-text" style="font-size: 11px; line-height: 1.5; margin-bottom: 10px; font-family: 'Press Start 2P', monospace; padding: 10px; background: rgba(0,0,0,0.6); border: 1px solid rgba(243,166,58,0.4); border-radius: 6px; text-align: left; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; flex: 1; min-height: 80px;"></div>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <span id="story-page" style="font-family: 'Press Start 2P', monospace; font-size: 10px; color: #cbd5e1;"></span>
+      <button id="story-next-btn" style="background: #e67e22; border: 1px solid #d67416; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-family: 'Press Start 2P', monospace; font-size: 10px; font-weight: bold;">Continue ></button>
+    </div>
   </div>
 </div>
 
@@ -445,20 +458,20 @@
 
 <div id="event-ui" style="position: fixed; inset: 0; display: none; align-items: flex-end; justify-content: center; padding-bottom: 36px; z-index: 200; pointer-events: none; background: rgba(0, 0, 0, 0.5);">
   <div style="position: relative; width: 90%; max-width: 860px; pointer-events: all;">
-    <!-- 头像区域 -->
+    <!-- Avatar area -->
     <div style="position: absolute; top: -88px; left: 40px; display: flex; flex-direction: column; align-items: center; gap: 5px;">
       <div id="event-avatar" style="width: 80px; height: 80px; border-radius: 50%; background: #2d3748; border: 3px solid rgba(251,191,36,0.85); display: flex; align-items: center; justify-content: center; font-size: 36px; box-shadow: 0 4px 20px rgba(0,0,0,0.6); overflow: hidden;">📋</div>
-      <div id="event-name" style="background: rgba(10,8,6,0.9); border: 1px solid rgba(251,191,36,0.5); border-radius: 6px; padding: 2px 12px; font-family: sans-serif; font-size: 12px; font-weight: 600; color: #fbbf24; white-space: nowrap; letter-spacing: 0.05em;"></div>
+      <div id="event-name" style="background: rgba(10,8,6,0.9); border: 1px solid rgba(251,191,36,0.5); border-radius: 6px; padding: 2px 12px; font-family: 'Press Start 2P', monospace; font-size: 12px; font-weight: 600; color: #fbbf24; white-space: nowrap; letter-spacing: 0.05em;"></div>
     </div>
     
-    <!-- 对话框 -->
+    <!-- Dialog box -->
     <div style="background: rgba(10,8,6,0.93); border: 1px solid rgba(251,191,36,0.3); border-radius: 12px; padding: 26px 36px 20px 168px; min-height: 110px; cursor: pointer;">
       <h3 id="event-title" style="color: #fbbf24; font-size: 16px; font-weight: 600; margin: 0 0 12px 0; letter-spacing: 0.05em;"></h3>
       
-      <p id="event-desc" style="font-family: sans-serif; font-size: 15px; color: #f3f4f6; line-height: 1.85; margin: 0 0 14px 0; min-height: 56px; white-space: pre-wrap;"></p>
+      <p id="event-desc" style="font-family: 'Press Start 2P', monospace; font-size: 15px; color: #f3f4f6; line-height: 1.85; margin: 0 0 14px 0; min-height: 56px; white-space: pre-wrap;"></p>
       
       <div style="display: flex; align-items: center; justify-content: space-between;">
-        <span id="event-page" style="font-family: sans-serif; font-size: 12px; color: #6b7280;"></span>
+        <span id="event-page" style="font-family: 'Press Start 2P', monospace; font-size: 12px; color: #6b7280;"></span>
         <div id="event-buttons" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;"></div>
       </div>
     </div>

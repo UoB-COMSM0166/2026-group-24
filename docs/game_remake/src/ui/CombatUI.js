@@ -558,7 +558,7 @@ const HpBar = ({ current, max, isEnemy, name, statusEffects }) => {
           background: 'linear-gradient(to bottom, rgba(255,255,255,0.2), transparent)', borderRadius: '4px 4px 0 0'
         }} />
       </div>
-      <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)', marginTop: '2px', fontFamily: 'monospace' }}>
+      <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)', marginTop: '2px', fontFamily: "'Press Start 2P', monospace" }}>
         {current} / {max}
       </div>
       {/* Status icons */}
@@ -577,7 +577,7 @@ const HpBar = ({ current, max, isEnemy, name, statusEffects }) => {
               }}
                 title={`${s.label}: ${turns} turn${turns > 1 ? 's' : ''} left`}>
                 <span style={{ fontSize: '11px' }}>{s.icon}</span>
-                <span style={{ fontFamily: 'monospace', fontSize: '9px' }}>{turns}</span>
+                <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '9px' }}>{turns}</span>
               </div>
             );
           })}
@@ -996,7 +996,7 @@ const CombatApp = ({ state, callbacks }) => {
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', height: '100%',
-      background: '#0c0a09', color: 'white', fontFamily: 'sans-serif',
+      background: '#0c0a09', color: 'white', fontFamily: "'Press Start 2P', monospace",
       userSelect: 'none', position: 'relative', overflow: 'hidden'
     }}>
 
@@ -1126,7 +1126,7 @@ const CombatApp = ({ state, callbacks }) => {
                       : diceValue === 5 ? '💥 HEAVY ×1.2'
                         : '⚡ CRIT! ×1.5'}
               </div>
-              <div style={{ color: '#57534e', fontSize: '9px', fontFamily: 'monospace', marginTop: '2px' }}>[ {diceValue} ]</div>
+              <div style={{ color: '#57534e', fontSize: '9px', fontFamily: "'Press Start 2P', monospace", marginTop: '2px' }}>[ {diceValue} ]</div>
             </div>
           )}
 
@@ -1349,7 +1349,7 @@ const CombatApp = ({ state, callbacks }) => {
                         </div>
                         <div style={{
                           fontSize: '11px', fontWeight: 'bold', color: sc.border, lineHeight: '1.1',
-                          fontFamily: 'monospace', flexShrink: 0, opacity: 0.75, textAlign: 'right'
+                          fontFamily: "'Press Start 2P', monospace", flexShrink: 0, opacity: 0.75, textAlign: 'right'
                         }}>
                           {sc.label}<br />{skill.power}
                         </div>
@@ -1360,7 +1360,7 @@ const CombatApp = ({ state, callbacks }) => {
                   <div style={{
                     gridColumn: '1/-1', display: 'flex', alignItems: 'center',
                     justifyContent: 'center', color: '#44403c', fontSize: '11px',
-                    fontFamily: 'monospace', letterSpacing: '0.08em'
+                    fontFamily: "'Press Start 2P', monospace", letterSpacing: '0.08em'
                   }}>
                     {phase === 'ROLLING' ? '🎲 ROLLING…' : 'WAITING…'}
                   </div>

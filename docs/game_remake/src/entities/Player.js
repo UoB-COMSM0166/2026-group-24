@@ -208,7 +208,7 @@ export class Player extends Character {
 
           const textY = this.y + 25; // 坐标进一步下移
 
-          ctx.font = 'bold 13px "Arial Black", Gadget, sans-serif';
+          ctx.font = 'bold 13px "Press Start 2P", monospace';
           ctx.textAlign = 'center';
 
           // 绘制加粗描边，增加对比度
