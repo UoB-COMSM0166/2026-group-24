@@ -536,7 +536,11 @@ function drawItemIcon(s, iconType, alpha, accentColor) {
       // ★ 修改：各武器类型用独立 key 读图，以后换图只改 DataLoader 路径即可 ★
     case 'traveler_set':
     case 'star_cloak':
-    case 'bloodthirst_mask': {
+    case 'bloodthirst_mask':
+    case 'lion_heart':
+    case 'cursed_codex':
+    case 'eagle_eye':
+    case 'holy_spirit_heart':{
       const img = window.DataLoader?.getImage(iconType);
       if (img) {
         s.drawingContext.save();

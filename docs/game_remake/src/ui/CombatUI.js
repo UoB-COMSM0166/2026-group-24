@@ -358,11 +358,11 @@ const ENEMY_ANIM_CONFIG = {
     attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
   },
   swift_assassin: {
-    idle: { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, faceLeftFlip: true },
-    hit: { frames: 3, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, faceLeftFlip: true },
-    death: { frames: 7, interval: 110, mode: 'sheet', scale: 1.8, ty: 130, faceLeftFlip: true },
-    run: { frames: 8, interval: 70, mode: 'sheet', scale: 1.8, ty: 130, faceLeftFlip: true },
-    attack: { frames: 8, interval: 60, mode: 'sheet', scale: 1.8, ty: 130, faceLeftFlip: true },
+    idle: { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+    hit: { frames: 3, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+    death: { frames: 7, interval: 110, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+    run: { frames: 8, interval: 70, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+    attack: { frames: 8, interval: 60, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
   },
 };
 
@@ -409,6 +409,9 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
     DataLoader.getEnemyAnim(enemyKey, action)
     || DataLoader.getEnemyAnim(enemyKey, 'idle');
   const shouldFlip = actionConfig?.faceLeftFlip ?? flipX;
+  const offsetX = actionConfig?.tx || 0;
+
+  // --- 关键点 1：删除了 shadowStyle 的定义，阴影不再接收 offsetX ---
 
   if (!actionConfig || !asset) {
     return enemyKey === 'dark_overlord' || unit.monsterType === 'boss' ? <BossFigure /> : <GoblinFigure />;
@@ -421,13 +424,15 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
 
     return (
       <div className="sprite-container">
+        {/* --- 关键点 2：去掉这里的 style={shadowStyle} --- */}
         <div className="unit-shadow" />
         <img
           src={currentImg.src}
           className="pixel-art"
           style={{
             height: `${actionConfig.height}px`,
-            transform: `translateY(${actionConfig.ty || 0}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
+            // offsetX 只作用于 img 标签
+            transform: `translate(${offsetX}px, ${actionConfig.ty || 0}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
             transformOrigin: 'bottom center'
           }}
         />
@@ -448,6 +453,7 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
 
     return (
       <div className="sprite-container">
+        {/* --- 关键点 3：去掉这里的 style={shadowStyle} --- */}
         <div className="unit-shadow" />
         <div
           className="pixel-art"
@@ -458,7 +464,7 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
             backgroundPosition: `-${col * frameW}px -${row * frameH}px`,
             backgroundSize: `${sheet.width}px ${sheet.height}px`,
             backgroundRepeat: 'no-repeat',
-            transform: `translateY(${actionConfig.ty || 30}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
+            transform: `translate(${offsetX}px, ${actionConfig.ty || 30}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
             transformOrigin: 'bottom center',
             imageRendering: 'pixelated',
           }}
@@ -473,6 +479,7 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
   const frameW = sheet.width / actionConfig.frames;
   return (
     <div className="sprite-container">
+      {/* --- 关键点 4：去掉这里的 style={shadowStyle} --- */}
       <div className="unit-shadow" />
       <div
         className="pixel-art"
@@ -483,7 +490,7 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
           backgroundPosition: `-${frame * frameW}px 0px`,
           backgroundSize: `${sheet.width}px ${sheet.height}px`,
           backgroundRepeat: 'no-repeat',
-          transform: `translateY(${actionConfig.ty || 30}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
+          transform: `translate(${offsetX}px, ${actionConfig.ty || 30}px) scale(${actionConfig.scale})${shouldFlip ? ' scaleX(-1)' : ''}`,
           transformOrigin: 'bottom center',
           imageRendering: 'pixelated',
         }}
@@ -491,6 +498,9 @@ const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX =
     </div>
   );
 };
+
+
+
 
 // ─── 重写：getFigure 函数 ──────────────────────────────────────────────
 const getFigure = (unit, action = 'idle', onComplete = null, flipX = false) => {

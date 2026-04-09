@@ -573,6 +573,14 @@ function _getItemEmoji(iconType) {
             return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🌟')">`;
         case 'bloodthirst_mask':
             return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🩸')">`;
+        case 'lion_heart':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🦁')">`;
+        case 'cursed_codex':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('📕')">`;
+        case 'eagle_eye':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🦅')">`;
+        case 'holy_spirit_heart':
+            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('✨')">`;
         default: return '📦';
     }
 }
@@ -596,7 +604,8 @@ function drawItemIconMini(canvas, iconType) {
             ctx.closePath(); ctx.fill();
             break;
         case 'bracelet': case 'ring_strength': case 'ring_intellect':
-        case 'traveler_set': case 'star_cloak': case 'bloodthirst_mask': {
+        case 'traveler_set': case 'star_cloak': case 'bloodthirst_mask':
+        case 'lion_heart': case 'cursed_codex': case 'eagle_eye': case 'holy_spirit_heart':{
             const img = window.DataLoader?.getImage(iconType);
             if (img) { ctx.drawImage(img, -16, -16, 32, 32); }
             else {

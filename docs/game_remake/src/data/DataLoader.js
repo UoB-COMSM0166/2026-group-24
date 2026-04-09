@@ -117,6 +117,10 @@ export class DataLoader {
       'traveler_set':      './resource/img/items/traveler_set.png',
       'star_cloak':        './resource/img/items/star_cloak.png',
       'bloodthirst_mask':  './resource/img/items/bloodthirst_mask.png',
+      'lion_heart':        './resource/img/items/lion_heart.png',
+      'cursed_codex':      './resource/img/items/cursed_codex.png',
+      'eagle_eye':         './resource/img/items/eagle_eye.png',
+      'holy_spirit_heart': './resource/img/items/holy_spirit_heart.png',
     };
 
     const animConfig = {
