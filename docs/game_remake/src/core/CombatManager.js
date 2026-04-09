@@ -145,6 +145,8 @@ export class CombatManager {
   _getEffectiveAtk(unit, statKey) {
     let base = unit[statKey] || unit.attack || 10;
     if (unit.statusEffects?.warcry > 0) base = Math.floor(base * 1.25);
+    const hasCursedCodex = (unit.equipSlots ?? []).some(item => item?.effect === 'damage_amp_35_vulnerability_15');
+    if (hasCursedCodex) base = Math.floor(base * 1.35);
     return base;
   }
 
@@ -170,6 +172,8 @@ export class CombatManager {
       delete fx.rock_shield;
       this.addLog(`🛡️ ${target.name}'s Rock Shield absorbed the hit!`);
     }
+    const hasCursedCodex = (target.equipSlots ?? []).some(item => item?.effect === 'damage_amp_35_vulnerability_15');
+    if (hasCursedCodex) dmg = Math.floor(dmg * 1.15);
 
     return Math.max(1, dmg);
   }
@@ -432,9 +436,22 @@ export class CombatManager {
           this.addLog(`🚫 ${healTarget.name} is under anti-heal! Cannot recover HP!`);
           this.diceInfo = { isHeal: false, damage: 0, type: 'normal', targetId: healTarget.id };
         } else {
-          healTarget.hp = Math.min(healTarget.maxHp || 100, healTarget.hp + healAmount);
-          this.diceInfo = { isHeal: true, damage: healAmount, targetId: healTarget.id };
-          this.addLog(`Rolled [${rollVal}] → Restored ${healAmount} HP`);
+          // 圣灵之心：治疗技能改为全体回复
+          const hasHolySpiritHeart = (attacker.equipSlots ?? []).some(item => item?.effect === 'heal_to_aoe');
+          if (hasHolySpiritHeart) {
+            const aliveAllies = this.heroes.filter(h => this._isAlive(h));
+            aliveAllies.forEach(ally => {
+              if (!(ally.statusEffects?.anti_heal > 0)) {
+                ally.hp = Math.min(ally.maxHp || 100, ally.hp + healAmount);
+              }
+            });
+            this.addLog(`✨ ${attacker.name}'s Holy Spirit Heart heals the whole party for ${healAmount}!`);
+            this.diceInfo = { isHeal: true, damage: healAmount, targetId: attacker.id };
+          } else {
+            healTarget.hp = Math.min(healTarget.maxHp || 100, healTarget.hp + healAmount);
+            this.diceInfo = { isHeal: true, damage: healAmount, targetId: healTarget.id };
+            this.addLog(`Rolled [${rollVal}] → Restored ${healAmount} HP`);
+          }
         }
       } else {
         const healTarget = (target && target !== 'aoe') ? target : attacker;
@@ -481,9 +498,25 @@ export class CombatManager {
           if (!(attacker.statusEffects?.anti_heal > 0)) {
             attacker.hp = Math.min(attacker.maxHp, attacker.hp + healAmt);
             this.addLog(`🩸 ${attacker.name}'s Bloodthirst Mask restores ${healAmt} HP!`);
+
           }
         }
+        const hasEagleEye = (attacker.equipSlots ?? []).some(item => item?.effect === 'double_strike_60');
+        if (hasEagleEye && finalDamage > 0 && this._isAlive(target) && Math.random() < 0.6) {
+          const bonusDmg = this._getIncomingDamage(target, finalDamage);
+          target.hp = Math.max(0, target.hp - bonusDmg);
+          this.addLog(`🦅 ${attacker.name}'s Eagle Eye triggers! Strikes again for ${bonusDmg}!`);
+        }
 
+
+        const hasLionHeart = (target.equipSlots ?? []).some(item => item?.effect === 'regen_on_hit_30');
+        if (hasLionHeart && finalDamage > 0 && this._isAlive(target)) {
+          const regenAmt = Math.max(1, Math.floor(finalDamage * 0.3));
+          if (!(target.statusEffects?.anti_heal > 0)) {
+            target.hp = Math.min(target.maxHp, target.hp + regenAmt);
+            this.addLog(`🦁 ${target.name}'s Lion Heart recovers ${regenAmt} HP!`);
+          }
+        }
       }
     }
     this.phase = 'EXECUTING';

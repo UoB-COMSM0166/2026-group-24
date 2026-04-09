@@ -18,6 +18,10 @@ function getItemIcon(item) {
     clover: '🍀', bracelet: '📿', ring_strength: '💍',
     ring_intellect: '🔮', traveler_set: '🧭', star_cloak: '🌟',
     bloodthirst_mask: '😈',
+    lion_heart: '🦁',
+    cursed_codex: '📕',
+    eagle_eye: '🦅',
+    holy_spirit_heart: '✨',
   };
   if (item?.icon && icons[item.icon]) return icons[item.icon];
   const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
