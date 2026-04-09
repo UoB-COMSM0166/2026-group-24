@@ -89,7 +89,7 @@ export function makeInjuredVillager(name = 'INJURED VILLAGER', dialogue = '') {
 }
 
 export function makeShop(name = 'Shop') {
-  return { type: TileContentType.SHOP, name, iconType: 'purpleCircle' };
+  return { type: TileContentType.SHOP, name };
 }
 // ── Tile 类 ──────────────────────────────────────────────────────
 export class Tile {
