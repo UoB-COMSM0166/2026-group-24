@@ -1,18 +1,18 @@
 // src/core/TaskList.js
 // ══════════════════════════════════════════════════════════════════════
-// 任务栏管理器 - 负责所有任务相关的逻辑
+// Task Manager - Responsible for all task-related logic
 //
-// 功能：
-//   1. 管理不同的任务集（新手村、主地图任务等）
-//   2. 管理任务清单和完成状态
-//   3. 渲染任务栏 HUD
-//   4. 处理任务完成事件
-//   5. 提供任务完成的回调机制
+// Features:
+//   1. Manage different mission sets (Novice Village, main map tasks, etc.)
+//   2. Manage task list and completion status
+//   3. Render task HUD
+//   4. Handle task completion events
+//   5. Provide callback mechanism for task completion
 // ══════════════════════════════════════════════════════════════════════
 
-// ── 任务集合定义 ──────────────────────────────────────────────────
+// ── Mission Task Definitions ──────────────────────────────────────────────────
 const MISSION_TASKS = {
-  // 新手村任务
+  // Novice Village Tasks
   'Novice Village': {
     showDebugBtn: true,
     autoCleanupOnComplete: true,
@@ -23,7 +23,7 @@ const MISSION_TASKS = {
       opened_inventory: { done: false, label: '🎒  Open your inventory' },
     }
   },
-  // 主地图 - 救援村民任务
+  // Main Map - Rescue Villagers Tasks
   'Main Map - Rescue Villagers': {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
@@ -31,9 +31,9 @@ const MISSION_TASKS = {
       rescue_villagers: { 
         done: false, 
         label: '🚨 Rescue villager',
-        completeWhen: 'reachCoord',  // 完成条件类型
-        targetQ: -8,                  // 目标坐标 Q
-        targetR: 7,                   // 目标坐标 R
+        completeWhen: 'reachCoord',  // Completion condition type
+        targetQ: -8,                  // Target coordinate Q
+        targetR: 7,                   // Target coordinate R
       },
       find_village: { 
         done: false, 
@@ -44,11 +44,11 @@ const MISSION_TASKS = {
       },
     }
   },
-  // 救援车队任务
+  // Rescue the Caravan Tasks
   'Rescue the Caravan': {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
-    nextMission: 'Search Ruins',  // 完成后自动切换到下一个任务
+    nextMission: 'Search Ruins',  // Auto-switch to next mission on completion
     tasks: {
       rescue_caravan: {
         done: false,
@@ -59,7 +59,7 @@ const MISSION_TASKS = {
       },
     }
   },
-  // 搜索遗迹任务
+  // Search Ruins Tasks
   'Search Ruins': {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
@@ -74,7 +74,7 @@ const MISSION_TASKS = {
       },
     }
   },
-  // 寻求真正的宝藏任务
+  // Seek the True Treasure Tasks
   'Head south to seek the true treasure': {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
@@ -94,10 +94,10 @@ export class TaskList {
     this._onAllTasksComplete = onAllTasksComplete;
     this._currentMission = 'Novice Village';
     this._showDebugBtn = true;
-    this._autoCleanupOnComplete = true;  // 当前任务集是否完成后自动清理
+    this._autoCleanupOnComplete = true;  // Auto-cleanup current mission set on completion
     this.tasks = {};
     
-    // 初始化新手村任务
+    // Initialize Novice Village tasks
     this._initializeTasks('Novice Village');
   }
 
@@ -219,7 +219,7 @@ export class TaskList {
       border-radius: 12px;
       padding: 14px 16px;
       color: white;
-      font-family: sans-serif;
+      font-family: 'Press Start 2P', monospace;
       font-size: 12px; /* 字体稍微调大一点点更清晰 */
       min-width: 180px;
       z-index: 50;
@@ -240,7 +240,7 @@ export class TaskList {
         border-radius: 8px;
         padding: 8px 16px;
         color: white;
-        font-family: sans-serif;
+        font-family: 'Press Start 2P', monospace;
         font-size: 13px;
         cursor: pointer;
         z-index: 999;

@@ -3,17 +3,17 @@ import { GameController } from './src/core/GameController.js';
 import { GameState, MapConfig } from './src/core/Constants.js';
 import { GameLoop } from './src/core/GameLoop.js';
 import { HexMap, createMapByPreset } from './src/world/HexMap.js';
-import { makePortal, hexToPixel, DebugConfig } from './src/world/Tile.js';  // ← hexToPixel 从 Tile.js 统一导入
+import { makePortal, hexToPixel, DebugConfig } from './src/world/Tile.js';  // ← hexToPixel imported from Tile.js
 import { Camera } from './src/world/Camera.js';
 import { Player } from './src/entities/Player.js';
 import { DataLoader } from './src/data/DataLoader.js';
 import { Renderer } from './src/rendering/Renderer.js';
-// ⚠️ 保持你的容错修复：严格匹配你本地的小写文件名 Inputhandler.js
+// ⚠️ Keep your fault tolerance fix: strictly match local lowercase filename Inputhandler.js
 import { InputHandler } from './src/core/Inputhandler.js';
 import { UIManager } from './src/ui/UIManager.js';
 import { TitleScreen } from './src/ui/TitleScreen.js';
 
-// ── 画布自适应 ───────────────────────────────────────────────
+// ── Canvas responsive ───────────────────────────────────────────────
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
 
@@ -24,10 +24,10 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-// ── 启动游戏 ─────────────────────────────────────────────────
+// ── Start game ─────────────────────────────────────────────────
 async function init() {
 
-    // 1. 加载数据
+    // 1. Load data
     try {
         await DataLoader.loadAll();
     } catch (error) {
@@ -36,7 +36,7 @@ async function init() {
         return;
     }
 
-    // 2. 初始化音乐播放器
+    // 2. Initialize music player
     window.BGMPlayer = {
         current: null,
         play(src, loop = true) {
@@ -58,11 +58,11 @@ async function init() {
         }
     };
 
-    // 3. 显示标题页面，点击 START 后进入游戏
+    // 3. Show title screen, enter game after clicking START
     const titleScreen = new TitleScreen(
-      () => startGame(false), // 新游戏
-      () => startGame(true) ,  // 读取存档
-      () => startGame(false, true)  // 开发者模式
+      () => startGame(false), // New game
+      () => startGame(true) ,  // Load save
+      () => startGame(false, true)  // Developer mode
     );
     titleScreen.show();
 }
@@ -71,20 +71,20 @@ function startGame(isLoad = false, isDevMode = false) {
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
 
-    // ── 初始化核心组件 ────────────────────────────────────────
+    // ── Initialize core components ────────────────────────────────────────
     const map = new HexMap(MapConfig.RADIUS, MapConfig.TILE_SIZE);
     const camera = new Camera(canvas.width, canvas.height);
     const player = new Player('Leader');
 
-    // 播放地图背景音乐
+    // Play map background music
     window.BGMPlayer.play('resource/music/map.mp3');
 
-    // 初始相机对准左下起始位（使用从 Tile.js 导入的 hexToPixel）
+    // Initialize camera targeting lower-left starting position (using hexToPixel imported from Tile.js)
     const bottomLeft = hexToPixel(-MapConfig.RADIUS, MapConfig.RADIUS, MapConfig.TILE_SIZE);
     camera.x = MapConfig.PADDING - bottomLeft.x;
     camera.y = canvas.height - MapConfig.PADDING - bottomLeft.y;
 
-    // UIManager 深度缝合：对齐所有 DOM 节点
+    // UIManager deep integration: align all DOM nodes
     const reactRoot = document.getElementById('react-combat-root');
 
     const ui = new UIManager(
@@ -114,11 +114,11 @@ function startGame(isLoad = false, isDevMode = false) {
         }
     );
 
-    // 初始化控制器
+    // Initialize controller
     const gameController = new GameController(map, player, ui, camera);
     window._gameController = gameController;
     if (isDevMode) gameController.isDevMode = true;
-    // 监听状态切换，切换音乐
+    // Listen for state changes and switch music
     const origTransition = gameController.fsm.transition.bind(gameController.fsm);
     gameController.fsm.transition = function (state, ...args) {
         if (state === 'COMBAT') {

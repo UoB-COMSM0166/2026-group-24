@@ -88,7 +88,7 @@ export class Enemy extends Character {
 
     // Draw level tag
     ctx.fillStyle = 'white';
-    ctx.font = 'bold 10px Arial';
+    ctx.font = 'bold 10px "Press Start 2P", monospace';
     ctx.textAlign = 'center';
 
     // Add fire emoji for hell mode

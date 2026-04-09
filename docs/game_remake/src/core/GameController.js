@@ -171,47 +171,51 @@ export class GameController {
         this.player.setGridPos(noviceQ, noviceR, this.noviceVillage);
         this.noviceVillage.revealAround(noviceQ, noviceR, 5);
 
-        // ── 放置新手村怪物 ──────────────────────────────────────
+        // ── Place Novice Village Dungeons ──────────────────────────────────
         for (const ev of NOVICE_DUNGEON_LIST) {
           const tile = this.noviceVillage.getTile(ev.q, ev.r);
           if (tile) {
             tile.type = TileType.GRASS;
+            tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war until explored
             this.noviceVillage.placeContent(ev.q, ev.r, makeDungeon(ev.name, ev.level, ev.difficulty), 0);
           }
         }
-        // ── 放置新手村宝箱 ──────────────────────────────────────
+        // ── Place Novice Village Treasures ──────────────────────────────────
         for (const ev of NOVICE_TREASURE_LIST) {
           const tile = this.noviceVillage.getTile(ev.q, ev.r);
           if (tile) {
             tile.type = TileType.GRASS;
+            tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war until explored
             this.noviceVillage.placeContent(ev.q, ev.r, makeTreasure(ev.lootTier), 0);
           }
         }
-        // ── 放置新手村祭坛 ──────────────────────────────────────
+        // ── Place Novice Village Altars ──────────────────────────────────
         for (const ev of NOVICE_ALTAR_LIST) {
           const tile = this.noviceVillage.getTile(ev.q, ev.r);
           if (tile) {
             tile.type = TileType.GRASS;
+            tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war until explored
             this.noviceVillage.placeContent(ev.q, ev.r, makeAltar(), 0);
           }
-
         }
-        // ── 放置新手村商店 ──────────────────────────────────────
-                for (const ev of NOVICE_SHOP_LIST) {
-                  const tile = this.noviceVillage.getTile(ev.q, ev.r);
-                  if (tile) {
-                    tile.type = TileType.GRASS;
-                    this.noviceVillage.placeContent(ev.q, ev.r, makeShop(), 0);
-                  }
-                }
-                // ── 放置主地图商店 ──────────────────────────────────────
-                for (const ev of MAIN_SHOP_LIST) {
-                  const tile = this.map.getTile(ev.q, ev.r);
-                  if (tile) {
-                    tile.type = TileType.GRASS;
-                    this.map.placeContent(ev.q, ev.r, makeShop(), 0);
-                  }
-                }
+        // ── Place Novice Village Shops ──────────────────────────────────
+        for (const ev of NOVICE_SHOP_LIST) {
+          const tile = this.noviceVillage.getTile(ev.q, ev.r);
+          if (tile) {
+            tile.type = TileType.GRASS;
+            tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war until explored
+            this.noviceVillage.placeContent(ev.q, ev.r, makeShop(), 0);
+          }
+        }
+        // ── Place Main Map Shops ──────────────────────────────────
+        for (const ev of MAIN_SHOP_LIST) {
+          const tile = this.map.getTile(ev.q, ev.r);
+          if (tile) {
+            tile.type = TileType.GRASS;
+            tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war (only works when approaching the shop)
+            this.map.placeContent(ev.q, ev.r, makeShop(), 0);
+          }
+        }
         // ── 启动教程系统 ────────────────────────────────────────
         if (!this.isDevMode) {
           this.tutorial = new TutorialManager(this);
@@ -368,7 +372,7 @@ export class GameController {
       overlay.style.cssText = `
     position: fixed; inset: 0; background: rgba(0,0,0,0.75);
     z-index: 300; display: flex; align-items: center; justify-content: center;
-    font-family: sans-serif;
+    font-family: 'Press Start 2P', monospace;
   `;
 
       const panel = document.createElement('div');

@@ -1,12 +1,12 @@
 // src/world/Tile.js
 import { DataLoader } from '../data/DataLoader.js';
 
-// ── Debug配置：全局调试标记 ────────────────────────────────────
+// ── Debug config: Global debug flag ────────────────────────────────────
 export const DebugConfig = {
-  showHiddenFixedEvents: false  // 是否显示隐藏的固定特殊事件
+  showHiddenFixedEvents: false  // Whether to show hidden fixed special events
 };
 
-// ── 地形类型 ──────────────────────────────────────────────────────
+// ── Terrain types ──────────────────────────────────────────────────────
 export const TileType = {
   GRASS: { id: 0, color: '#7cfc00', name: 'Plains', moveCost: 1 },
   FOREST: { id: 1, color: '#228b22', name: 'Forest', moveCost: Infinity },
@@ -15,7 +15,7 @@ export const TileType = {
   BOUNDARY: { id: 4, color: '#8b4513', name: 'Boundary', moveCost: Infinity },
 };
 
-// ── 内容类型枚举 ──────────────────────────────────────────────────
+// ── Content type enum ──────────────────────────────────────────────────
 export const TileContentType = {
   DUNGEON: 'dungeon',
   BOSS: 'boss',
@@ -32,9 +32,9 @@ export const TileContentType = {
     SHOP: 'shop',
 };
 
-// ── 共享坐标工具 ──────────────────────────────────────────────────
+// ── Shared coordinate utilities ──────────────────────────────────────────
 /**
- * 轴坐标 (q, r) → 画布像素中心（flat-top 布局）
+ * Axial coordinates (q, r) → Canvas pixel center (flat-top layout)
  * x = size * 3/2 * q
  * y = size * (√3/2 * q + √3 * r)
  */
@@ -45,11 +45,11 @@ export function hexToPixel(q, r, size) {
   };
 }
 
-// 常用数学常量，避免每帧重复求值
+// Reusable math constants to avoid repeated calculations every frame
 Math.SQRT3 = Math.sqrt(3);
 Math.SQRT3_HALF = Math.SQRT3 / 2;
 
-// ── 内容生成器 ────────────────────────────────────────────────────
+// ── Content generators ────────────────────────────────────────────────────
 export function makeNPC(name, dialogue = 'Hello, traveler!', options = {}) {
   return { type: TileContentType.NPC, name, dialogue, ...options };
 }
@@ -91,10 +91,10 @@ export function makeInjuredVillager(name = 'INJURED VILLAGER', dialogue = '') {
 export function makeShop(name = 'Shop') {
   return { type: TileContentType.SHOP, name };
 }
-// ── Tile 类 ──────────────────────────────────────────────────────
+// ── Tile class ──────────────────────────────────────────────────────
 export class Tile {
 
-  // ── 静态常量：顶点偏移预计算，避免每帧 cos/sin ──────────────────
+  // ── Static constants: precomputed vertex offsets to avoid cos/sin every frame ──────────────────
   static HEX_VERTS = Object.freeze(
     Array.from({ length: 6 }, (_, i) => {
       const a = (Math.PI / 3) * i;
@@ -102,8 +102,8 @@ export class Tile {
     })
   );
 
-  // ── Path2D 缓存：每个 tileSize 只建一次，后续 ctx.fill/stroke 复用 ──
-  // 存储的是以原点为中心的相对路径，绘制前用 ctx.translate 移到格心。
+  // ── Path2D cache: each tileSize built once, reused by subsequent ctx.fill/stroke ──
+  // Stores relative paths centered at origin, translated to tile center before drawing.
   static _hexPathCache = new Map();
 
   static getHexPath(size) {
@@ -119,10 +119,10 @@ export class Tile {
     return p;
   }
 
-  // 地形图片 key 前缀，提升为静态属性避免每次 draw() 重建
+  // Terrain image key prefix, promoted to static property to avoid rebuilding in every draw()
   static TERRAIN_KEYS = Object.freeze(['grass', 'forest', 'mountain', 'barrier', 'boundary']);
 
-  // 圆圈图标颜色映射
+  // Circle icon color mapping
   static CIRCLE_COLOR_MAP = Object.freeze({
     redCircle: 'red',
     greenCircle: 'green',
@@ -136,7 +136,7 @@ export class Tile {
    * @param {number} r
    * @param {TileType} type
    * @param {SeededRandom} [rng]  传入种子随机器以保证地图可复现；
-   *                              省略时退回 Math.random（不可复现，仅兼容老代码）。
+   *                              Omit to fall back to Math.random (not reproducible, backward compatible only).
    */
   constructor(q, r, type = TileType.GRASS, rng = null) {
     this.q = q;
@@ -265,7 +265,7 @@ export class Tile {
     // 7. Debug 坐标
     if (debugMode && visState !== 'hidden') {
       ctx.save();
-      ctx.font = `${Math.floor(size * 0.45)}px monospace`;
+      ctx.font = `${Math.floor(size * 0.45)}px 'Press Start 2P', monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#fff';

@@ -26,6 +26,7 @@ export class UIManager {
       storyTitle: document.getElementById('story-title'),
       storyText: document.getElementById('story-text'),
       storyNextBtn: document.getElementById('story-next-btn'),
+      storyPage: document.getElementById('story-page'),
     };
     this.onCombatEnd = callbacks.onCombatEnd ?? (() => { });
     this.inventoryUI = new InventoryUI();
@@ -278,7 +279,7 @@ export class UIManager {
     buttons.forEach(btn => {
       const button = document.createElement('button');
       button.textContent = btn.text;
-      button.style.cssText = "background: transparent; border: 1px solid rgba(251,191,36,0.5); border-radius: 6px; padding: 5px 18px; color: #fbbf24; font-family: sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s ease;";
+      button.style.cssText = "background: transparent; border: 1px solid rgba(251,191,36,0.5); border-radius: 6px; padding: 5px 18px; color: #fbbf24; font-family: 'Press Start 2P', monospace; font-size: 13px; cursor: pointer; transition: all 0.2s ease;";
       button.onmouseover = () => { button.style.background = 'rgba(251,191,36,0.1)'; };
       button.onmouseout = () => { button.style.background = 'transparent'; };
       button.onclick = () => {
@@ -299,18 +300,17 @@ export class UIManager {
 
   showLootAssign(item, heroes, onPick) {
     const overlay = document.createElement("div");
-    overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:220; display:flex; align-items:center; justify-content:center; font-family:sans-serif;";
+    overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:220; display:flex; align-items:center; justify-content:center; font-family:'Press Start 2P', monospace;";
     const card = document.createElement("div");
     card.style.cssText = "width:460px; max-width:92vw; background:rgba(10,10,25,0.95); border:1px solid rgba(255,255,255,0.18); border-radius:14px; padding:14px; color:white;";
     const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
- const lootTitle = isWeapon ? '⚔️ Weapon obtained!' : '💍 Item obtained!';
-
-      const lootTypeLabel = isWeapon
-          ? `Type: ${item?.type ?? 'Weapon'} | For: ${item?.owner ?? 'Unknown'} | Rarity: ${item?.rarity ?? ''}`
-          : `Rarity: ${item?.rarity ?? ''} | Type: Item`;
-  const lootHint = isWeapon
-      ? '"Equip Now" places it in a weapon slot and refreshes stats. "Store in Bag" sends it to storage.'
-      : '"Equip Now" places it in an item slot and refreshes stats. "Store in Bag" sends it to storage.';
+    const lootTitle = isWeapon ? '⚔️ 获得武器！' : '💍 获得饰品！';
+    const lootTypeLabel = isWeapon
+        ? `类型：${item?.type ?? '武器'} | 适用：${item?.owner ?? '未知'} | 品质：${item?.rarity ?? ''}`
+        : `品质：${item?.rarity ?? ''} | 类型：饰品`;
+    const lootHint = isWeapon
+        ? '"立即装备" 会放入武器槽并刷新属性，"存入背包" 放入武器存放区。'
+        : '"立即装备" 会放入道具槽并刷新属性，"存入背包" 放入道具存放区。';
     const heroBtns = (heroes ?? []).map((h, i) => {
       return `
       <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
@@ -339,12 +339,43 @@ export class UIManager {
 
   showStoryScreen(title, text, onNext) {
     this.els.storyTitle.textContent = title;
-    this.els.storyText.textContent = text;
     this.els.storyScreen.style.display = 'flex';
-    this.els.storyNextBtn.onclick = () => {
-      this.els.storyScreen.style.display = 'none';
-      onNext?.();
+
+    // 分割文本成页面（按行分割，每页最多显示约3-4行）
+    const lines = text.split('\n').filter(line => line.trim());
+    const linesPerPage = 3; // 每页显示3行
+    let currentPage = 0;
+    let totalPages = Math.ceil(lines.length / linesPerPage);
+
+    const showPage = () => {
+      const startIdx = currentPage * linesPerPage;
+      const endIdx = Math.min(startIdx + linesPerPage, lines.length);
+      const pageLines = lines.slice(startIdx, endIdx);
+      
+      this.els.storyText.textContent = pageLines.join('\n');
+      this.els.storyPage.textContent = `${currentPage + 1} / ${totalPages}`;
+      
+      // 更新按钮文字
+      if (currentPage === totalPages - 1) {
+        this.els.storyNextBtn.textContent = 'Start >';
+      } else {
+        this.els.storyNextBtn.textContent = 'Continue >';
+      }
     };
+
+    // 处理按钮点击
+    this.els.storyNextBtn.onclick = () => {
+      currentPage++;
+      if (currentPage >= totalPages) {
+        this.els.storyScreen.style.display = 'none';
+        onNext?.();
+      } else {
+        showPage();
+      }
+    };
+
+    // 显示第一页
+    showPage();
   }
 
   hideStoryScreen() {
@@ -370,7 +401,8 @@ export class UIManager {
     }
 
     let currentSegment = 0;
-    let textAnimationId = null;
+    let currentPageInSegment = 0;
+    let segmentPages = [];
 
     const showSegment = () => {
       if (currentSegment >= segments.length) {
@@ -379,41 +411,36 @@ export class UIManager {
         return;
       }
 
-      const segment = segments[currentSegment];
-      const bgImg = DataLoader.getImage(segment.backgroundImage);
-
-      // 更新背景
-      bgImageEl.style.backgroundImage = bgImg ? `url('${bgImg.src}')` : 'none';
-
-      // 清空之前的动画
-      if (textAnimationId) clearTimeout(textAnimationId);
-      textEl.textContent = '';
-
-      // 一行行显示文本
-      const lines = segment.text.split('\n');
-      let lineIndex = 0;
-
-      const showNextLine = () => {
-        if (lineIndex < lines.length) {
-          if (lineIndex > 0) {
-            textEl.textContent += '\n';
-          }
-          textEl.textContent += lines[lineIndex];
-          lineIndex++;
-          textAnimationId = setTimeout(showNextLine, 500); // 每行间隔 500ms
+      // 初始化当前段落的页面
+      if (currentPageInSegment === 0) {
+        const segment = segments[currentSegment];
+        const bgImg = DataLoader.getImage(segment.backgroundImage);
+        
+        // 更新背景
+        bgImageEl.style.backgroundImage = bgImg ? `url('${bgImg.src}')` : 'none';
+        
+        // 分页：每页3-4行
+        const lines = segment.text.split('\n').filter(line => line.trim() || true);
+        const linesPerPage = 4;
+        segmentPages = [];
+        for (let i = 0; i < lines.length; i += linesPerPage) {
+          segmentPages.push(lines.slice(i, i + linesPerPage).join('\n'));
         }
-      };
+        currentPageInSegment = 0;
+      }
 
-      showNextLine();
-
-      // 更新按钮文字
-      const isLast = currentSegment === segments.length - 1;
-   btnEl.textContent = isLast ? 'Start Adventure ▶' : 'Continue ▶';
-
+      // 显示当前页
+      textEl.textContent = segmentPages[currentPageInSegment] || '';
+      
       // 更新页码
-      pageEl.textContent = `${currentSegment + 1} / ${segments.length}`;
-
-      currentSegment++;
+      const totalPagesInSegment = segmentPages.length;
+      const isLastPageInSegment = currentPageInSegment === totalPagesInSegment - 1;
+      const isLastSegment = currentSegment === segments.length - 1;
+      
+      pageEl.textContent = `${currentSegment + 1}-${currentPageInSegment + 1} / ${segments.length}-${totalPagesInSegment}`;
+      
+      // 更新按钮文字（注：btnEl 在这之后才被定义，所以这里不能直接使用）
+      // 将在 btnEl 创建时进行处理
     };
 
     // 创建分段故事UI
@@ -506,7 +533,7 @@ export class UIManager {
       border: 1px solid rgba(251,191,36,0.5);
       border-radius: 6px;
       padding: 2px 12px;
-      font-family: sans-serif;
+      font-family: 'Press Start 2P', monospace;
       font-size: 12px;
       font-weight: 600;
       color: #fbbf24;
@@ -526,7 +553,8 @@ export class UIManager {
       border: 1px solid rgba(251,191,36,0.3);
       border-radius: 12px;
       padding: 26px 36px 20px 168px;
-      height: 210px;
+      min-height: 210px;
+      max-height: 350px;
       cursor: pointer;
       display: flex;
       flex-direction: column;
@@ -534,14 +562,15 @@ export class UIManager {
 
     const textEl = document.createElement('p');
     textEl.style.cssText = `
-      font-family: sans-serif;
-      font-size: 15px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 13px;
       color: #f3f4f6;
-      line-height: 1.85;
+      line-height: 1.6;
       margin: 0 0 14px 0;
       flex: 1;
-      overflow: hidden;
+      overflow-y: auto;
       white-space: pre-wrap;
+      word-break: break-word;
     `;
 
     // 底部：页码 + 按钮
@@ -554,7 +583,7 @@ export class UIManager {
 
     const pageEl = document.createElement('span');
     pageEl.style.cssText = `
-      font-family: sans-serif;
+      font-family: 'Press Start 2P', monospace;
       font-size: 12px;
       color: #6b7280;
     `;
@@ -566,7 +595,7 @@ export class UIManager {
       border-radius: 6px;
       padding: 5px 18px;
       color: #fbbf24;
-      font-family: sans-serif;
+      font-family: 'Press Start 2P', monospace;
       font-size: 13px;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -579,7 +608,44 @@ export class UIManager {
       btnEl.style.background = 'transparent';
       btnEl.style.borderColor = 'rgba(251,191,36,0.5)';
     };
-    btnEl.onclick = showSegment;
+    
+    // 设置初始按钮文字
+    btnEl.textContent = '继续 >';
+    
+    // 添加 onclick 处理器
+    btnEl.onclick = () => {
+      if (currentPageInSegment < segmentPages.length - 1) {
+        // 段落内翻页
+        currentPageInSegment++;
+        showSegment();
+        
+        // 更新按钮文字
+        const isLastPageInSegmentNow = currentPageInSegment === segmentPages.length - 1;
+        const isLastSegment = currentSegment === segments.length - 1;
+        if (isLastPageInSegmentNow && isLastSegment) {
+          btnEl.textContent = '开始游戏 >';
+        } else if (isLastPageInSegmentNow) {
+          btnEl.textContent = '下一段 >';
+        } else {
+          btnEl.textContent = '继续 >';
+        }
+      } else {
+        // 移到下一段
+        currentSegment++;
+        currentPageInSegment = 0;
+        showSegment();
+        
+        // 检查是否是最后一段
+        const isLastSegment = currentSegment === segments.length - 1;
+        if (isLastSegment && segmentPages.length === 1) {
+          btnEl.textContent = '开始游戏 >';
+        } else if (isLastSegment) {
+          btnEl.textContent = '继续 >';
+        } else {
+          btnEl.textContent = '继续 >';
+        }
+      }
+    };
 
     footerEl.appendChild(pageEl);
     footerEl.appendChild(btnEl);
