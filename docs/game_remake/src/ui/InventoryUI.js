@@ -555,34 +555,17 @@ export class InventoryUI {
 }
 
 function _getItemEmoji(iconType) {
-    switch(iconType) {
-        case 'sword':   return '⚔️';
-        case 'shield':  return '🛡️';
-        case 'potion':  return '🧪';
-        case 'boots':   return '👟';
-        case 'clover':  return '🍀';
-        case 'bracelet':
-            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🔮')">`;
-        case 'ring_strength':
-            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('💪')">`;
-        case 'ring_intellect':
-            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🔵')">`;
-        case 'traveler_set':
-            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🧭')">`;
-        case 'star_cloak':
-            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🌟')">`;
-        case 'bloodthirst_mask':
-            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🩸')">`;
-        case 'lion_heart':
-            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🦁')">`;
-        case 'cursed_codex':
-            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('📕')">`;
-        case 'eagle_eye':
-            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('🦅')">`;
-        case 'holy_spirit_heart':
-            return `<img src="./resource/img/items/daifu.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" onerror="this.replaceWith('✨')">`;
-        default: return '📦';
+    const img = window.DataLoader?.getImage(iconType);
+    if (img) {
+        return `<img src="${img.src}" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;">`;
     }
+    const fallback = {
+        sword: '⚔️', shield: '🛡️', potion: '🧪', boots: '👟', clover: '🍀',
+        bracelet: '📿', ring_strength: '💍', ring_intellect: '🔮',
+        traveler_set: '🧭', star_cloak: '🌟', bloodthirst_mask: '😈',
+        lion_heart: '🦁', cursed_codex: '📕', eagle_eye: '🦅', holy_spirit_heart: '💛',
+    };
+    return fallback[iconType] ?? '📦';
 }
 
 function drawItemIconMini(canvas, iconType) {
