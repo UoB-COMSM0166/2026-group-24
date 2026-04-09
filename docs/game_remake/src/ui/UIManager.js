@@ -3,6 +3,7 @@ import { DataLoader } from '../data/DataLoader.js';
 import { ChestAnimation } from './ChestAnimation.js';
 import { CharacterSelectBackground } from './CharacterSelectBackground.js';
 import { InventoryUI } from './InventoryUI.js';
+import { StoryDialogueBox } from './StoryDialogueBox.js';
 
 export class UIManager {
   constructor(elements, callbacks = {}) {
@@ -31,6 +32,7 @@ export class UIManager {
     this.onCombatEnd = callbacks.onCombatEnd ?? (() => { });
     this.inventoryUI = new InventoryUI();
     this.characterSelectBackground = new CharacterSelectBackground(this.els.charSelectScreen);
+    this.storyDialogueBox = new StoryDialogueBox();
     this.animFrameReq = null;
 
   }
