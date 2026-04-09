@@ -178,12 +178,12 @@ export class TutorialManager {
       if (t.includes('⚔️') || t.includes('Enemy') || t.includes('Boss'))  eventType = 'dungeon';
       if (t.includes('🎁') || t.includes('Treasure'))                      eventType = 'treasure';
       if (t.includes('🔮') || t.includes('Altar'))                         eventType = 'altar';
-      if (t.includes('训练营商人'))                                         eventType = 'merchant';
+
       if (t.includes('🛒') || t.includes('Shop'))                          eventType = 'shop';
       if (t.includes('Elder Guide'))                                        eventType = 'npc';
 
       // Mark tasks complete
-      if (t.includes('训练营商人'))  self.complete('visited_merchant');
+
       if (t.includes('🎁') || t.includes('Treasure')) self.complete('opened_chest');
 
       // After first loot assignment, remind player to open inventory
@@ -319,7 +319,7 @@ export class TutorialManager {
 
     const mainQ = -MapPresets.main.radius + 1;
     const mainR =  MapPresets.main.radius - 1;
-    const portal = makePortal('主地图', mainQ, mainR);
+    const portal = makePortal('Main World', mainQ, mainR);
     portal.name = '✨ Enter the Lost Forest';
     map.placeContent(targetQ, targetR, portal, 3);
 

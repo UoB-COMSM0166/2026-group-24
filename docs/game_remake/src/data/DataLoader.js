@@ -56,6 +56,7 @@ export class DataLoader {
     const imagePaths = {
       'village': 'resource/img/map/chapter1/village.png',
       'merchant': 'resource/img/map/chapter1/merchant.png',
+      'shop': 'resource/img/map/chapter1/merchant.png',
       'ruin': 'resource/img/map/chapter1/ruins.png',
       'portal': 'resource/img/map/chapter1/portal.png',
       'hero': './resource/img/normal/hero.png',
