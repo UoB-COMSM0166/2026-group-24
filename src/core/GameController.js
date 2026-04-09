@@ -216,6 +216,40 @@ export class GameController {
             this.map.placeContent(ev.q, ev.r, makeShop(), 0);
           }
         }
+
+        // ── Place Final Boss at (6, 1) ──────────────────────────────────
+        const bossTile = this.map.getTile(6, 1);
+        if (bossTile) {
+          bossTile.type = TileType.GRASS;
+          bossTile.isFixedEvent = true;
+          const bossContent = makeBoss('Dark Tree', 5);
+          bossContent.postCombatMessage = {
+            type: 'storyDialogue',
+            scenes: [
+              {
+                image: './resource/img/map/chapter1/end1.png',
+                lines: [
+                  'As the massive creature collapses to the ground,',
+                  'the core of the Dark Tree begins to shatter.',
+                  'Fragments of dark energy scatter into the air,',
+                  'and the corrupted land slowly begins to recover its life.'
+                ]
+              },
+              {
+                image: './resource/img/map/chapter1/end2.png',
+                lines: [
+                  'After the Dark Tree finally falls,',
+                  'beneath its withered roots,',
+                  'you discover a long-buried treasure.',
+                  'Shimmering gold coins and precious relics',
+                  'await the one who has claimed victory.'
+                ]
+              }
+            ]
+          };
+          this.map.placeContent(6, 1, bossContent, 0);
+        }
+
         // ── 启动教程系统 ────────────────────────────────────────
         if (!this.isDevMode) {
           this.tutorial = new TutorialManager(this);
@@ -234,7 +268,7 @@ export class GameController {
         if (this.currentMapName === 'Novice Village') {
           this.ui.updateProgressBarTitle('🏘️ Novice Village');
         } else {
-          this.ui.updateProgressBarTitle('🌍 Main World');
+          this.ui.updateProgressBarTitle('Find Ruins');
         }
         this._startTurn();
       },
@@ -254,25 +288,46 @@ export class GameController {
 
           // 先显示战斗后的故事对话（如果存在）
           if (this.currentBossContent?.postCombatMessage) {
-            this.ui.showEvent(
-              '📖 Story',
-              this.currentBossContent.postCombatMessage,
-              [{
-                text: 'Continue', onClick: () => {
-                  setTimeout(() => {
-                    this.ui.showChestReward(loot, () => {
-                      this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
-                        const hero = this.selectedHeroes?.[heroIndex];
-                        if (!hero) return;
-                        if (action === 'put') hero.inventory.push(loot);
-                        else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
-                        this.ui.updatePartyStatus(this.selectedHeroes);
-                      });
+            const msg = this.currentBossContent.postCombatMessage;
+            
+            // 处理新的故事对话框格式（带图片）
+            if (msg.type === 'storyDialogue' && msg.scenes) {
+              this.ui.storyDialogueBox.show({ scenes: msg.scenes }, () => {
+                setTimeout(() => {
+                  this.ui.showChestReward(loot, () => {
+                    this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
+                      const hero = this.selectedHeroes?.[heroIndex];
+                      if (!hero) return;
+                      if (action === 'put') hero.inventory.push(loot);
+                      else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                      this.ui.updatePartyStatus(this.selectedHeroes);
                     });
-                  }, 300);
-                }
-              }]
-            );
+                  });
+                }, 300);
+              });
+            } 
+            // 处理传统的文字对话框格式
+            else {
+              this.ui.showEvent(
+                '📖 Story',
+                typeof msg === 'string' ? msg : msg,
+                [{
+                  text: 'Continue', onClick: () => {
+                    setTimeout(() => {
+                      this.ui.showChestReward(loot, () => {
+                        this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
+                          const hero = this.selectedHeroes?.[heroIndex];
+                          if (!hero) return;
+                          if (action === 'put') hero.inventory.push(loot);
+                          else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                          this.ui.updatePartyStatus(this.selectedHeroes);
+                        });
+                      });
+                    }, 300);
+                  }
+                }]
+              );
+            }
             this.currentBossContent = null;
           } else {
             setTimeout(() => {
@@ -719,6 +774,11 @@ export class GameController {
   // ── Tile 事件处理 ────────────────────────────────────────────────
 
   _handleTileContent(tile) {
+    // 特殊坐标：主世界(-8, 7)自动切换为寻找村庄
+    if (this.currentMapName !== 'Novice Village' && tile.q === -8 && tile.r === 7) {
+      this.ui.updateProgressBarTitle('Find Village');
+    }
+
     if (!tile.content) {
       if (this.trapCooldown === 0 && Math.random() <= EventTable.getTrapSpawnChance()) {
         this.trapCooldown = 2;
@@ -792,7 +852,7 @@ export class GameController {
     } else if (this.currentMapName === 'Novice Village') {
       title = '🏘️ Novice Village';
     } else {
-      title = '🌍 Main World';
+      title = 'Find Ruins';
     }
     this._progressBarTitle = title;
     this.ui.updateProgressBarTitle(title);
@@ -1033,7 +1093,7 @@ export class GameController {
         } else if (this.currentMapName === 'Novice Village') {
           this.ui.updateProgressBarTitle('🏘️ Novice Village');
         } else {
-          this.ui.updateProgressBarTitle('🌍 Main World');
+          this.ui.updateProgressBarTitle('Find Ruins');
         }
         if (this.bossMode) this.ui.updateBossMode();
 
