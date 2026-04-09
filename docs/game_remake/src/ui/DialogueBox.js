@@ -136,7 +136,7 @@ export class DialogueBox {
       font-size: 13px;
       cursor: pointer;
     `;
-    this._btnEl.textContent = '继续 ▶';
+    this._btnEl.textContent = ' Continue▶';
     // 点击整个对话框也可以推进
     this._btnEl.addEventListener('click', (e) => { e.stopPropagation(); this._next(); });
 
@@ -190,7 +190,7 @@ export class DialogueBox {
     const idx = this._current;
     this._textEl.textContent = this._lines[idx] ?? '';
     this._pageEl.textContent = `${idx + 1} / ${total}`;
-    this._btnEl.textContent = idx === total - 1 ? '开始 ▶' : '继续 ▶';
+    this._btnEl.textContent = idx === total - 1 ? 'Start ▶' : 'Continue ▶';
   }
 
   // ── 内部：推进到下一句 ──────────────────────────────────────────────
