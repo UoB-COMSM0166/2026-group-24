@@ -269,7 +269,7 @@ export class UIManager {
     const pageEl = document.getElementById('event-page');
 
     // 设置头像和名字（可选配置）
-    if (nameEl) nameEl.textContent = config.name || '事件';
+   if (nameEl) nameEl.textContent = config.name || 'Event';
     if (avatarEl) avatarEl.textContent = config.avatar || '📋';
 
     eventUI.style.display = 'flex';
@@ -306,13 +306,13 @@ export class UIManager {
     const card = document.createElement("div");
     card.style.cssText = "width:460px; max-width:92vw; background:rgba(10,10,25,0.95); border:1px solid rgba(255,255,255,0.18); border-radius:14px; padding:14px; color:white;";
     const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
-    const lootTitle = isWeapon ? '⚔️ 获得武器！' : '💍 获得饰品！';
+    const lootTitle = isWeapon ? '⚔️ Weapon obtained!' : '💍 Item obtained!';
     const lootTypeLabel = isWeapon
-        ? `类型：${item?.type ?? '武器'} | 适用：${item?.owner ?? '未知'} | 品质：${item?.rarity ?? ''}`
-        : `品质：${item?.rarity ?? ''} | 类型：饰品`;
+        ? `Type: ${item?.type ?? 'Weapon'} | For: ${item?.owner ?? 'Unknown'} | Rarity: ${item?.rarity ?? ''}`
+        : `Rarity: ${item?.rarity ?? ''} | Type: Item`;
     const lootHint = isWeapon
-        ? '"立即装备" 会放入武器槽并刷新属性，"存入背包" 放入武器存放区。'
-        : '"立即装备" 会放入道具槽并刷新属性，"存入背包" 放入道具存放区。';
+        ? '"Equip Now" places it in a weapon slot and refreshes stats. "Store in Bag" sends it to storage.'
+        : '"Equip Now" places it in an item slot and refreshes stats. "Store in Bag" sends it to storage.';
     const heroBtns = (heroes ?? []).map((h, i) => {
       return `
       <div style="display:flex;gap:8px;align-items:center;margin-top:10px;">
@@ -612,7 +612,7 @@ export class UIManager {
     };
     
     // 设置初始按钮文字
-    btnEl.textContent = '继续 >';
+   btnEl.textContent = 'Continue >';
     
     // 添加 onclick 处理器
     btnEl.onclick = () => {
@@ -624,13 +624,13 @@ export class UIManager {
         // 更新按钮文字
         const isLastPageInSegmentNow = currentPageInSegment === segmentPages.length - 1;
         const isLastSegment = currentSegment === segments.length - 1;
-        if (isLastPageInSegmentNow && isLastSegment) {
-          btnEl.textContent = '开始游戏 >';
-        } else if (isLastPageInSegmentNow) {
-          btnEl.textContent = '下一段 >';
-        } else {
-          btnEl.textContent = '继续 >';
-        }
+   if (isLastPageInSegmentNow && isLastSegment) {
+     btnEl.textContent = 'Start Adventure >';
+   } else if (isLastPageInSegmentNow) {
+     btnEl.textContent = 'Next >';
+   } else {
+     btnEl.textContent = 'Continue >';
+   }
       } else {
         // 移到下一段
         currentSegment++;
@@ -639,13 +639,11 @@ export class UIManager {
         
         // 检查是否是最后一段
         const isLastSegment = currentSegment === segments.length - 1;
-        if (isLastSegment && segmentPages.length === 1) {
-          btnEl.textContent = '开始游戏 >';
-        } else if (isLastSegment) {
-          btnEl.textContent = '继续 >';
-        } else {
-          btnEl.textContent = '继续 >';
-        }
+      if (isLastSegment && segmentPages.length === 1) {
+        btnEl.textContent = 'Start Adventure >';
+      } else {
+        btnEl.textContent = 'Continue >';
+      }
       }
     };
 

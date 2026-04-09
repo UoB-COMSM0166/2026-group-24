@@ -230,7 +230,7 @@ export class TaskList {
     // 调试按钮：一键完成所有任务（仅在新手村显示）
     if (this._showDebugBtn) {
       const debugBtn = document.createElement('button');
-      debugBtn.textContent = '🔧 完成所有任务';
+     debugBtn.textContent = '🔧 Complete all tasks';
       debugBtn.style.cssText = `
         position: fixed;
         bottom: 70px;
@@ -282,7 +282,7 @@ export class TaskList {
 
     this._hudEl.innerHTML = `
       <div style="font-weight:700;font-size:13px;margin-bottom:10px;color:#fbbf24;letter-spacing:0.04em;">
-        📋 任务栏
+       📋 Tasks
       </div>
       ${rows}
       <div style="margin-top:10px;background:rgba(255,255,255,0.08);border-radius:6px;height:5px;overflow:hidden;">
