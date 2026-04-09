@@ -129,7 +129,7 @@ export class ShopUI {
       position:fixed;inset:0;z-index:300;
       display:flex;align-items:center;justify-content:center;
       background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);
-      font-family:'Segoe UI',system-ui,sans-serif;
+      font-family:'Press Start 2P',monospace;
     `;
 
     const panel = document.createElement('div');

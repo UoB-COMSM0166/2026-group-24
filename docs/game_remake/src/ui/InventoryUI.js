@@ -71,7 +71,7 @@ export class InventoryUI {
             "background:linear-gradient(180deg, rgba(255,236,194,0.05), transparent 16%), linear-gradient(145deg, rgba(36,25,16,0.96), rgba(11,16,20,0.97))",
             "backdrop-filter:blur(12px)","color:#f5ead1","z-index:150","display:none",
             "box-shadow:0 18px 42px rgba(0,0,0,0.56), inset 0 1px 10px rgba(255,244,223,0.05)",
-            "font-family:Georgia, 'Times New Roman', serif",
+            "font-family:'Press Start 2P', monospace",
         ].join(";");
         document.body.appendChild(this.panel);
 
@@ -498,7 +498,7 @@ export class InventoryUI {
     _showSlotError(msg) {
         const err = document.createElement('div');
         err.textContent = msg;
-        err.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(231,76,60,0.92);color:white;padding:8px 20px;border-radius:10px;font-weight:bold;z-index:9999;pointer-events:none;font-family:sans-serif;';
+        err.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(231,76,60,0.92);color:white;padding:8px 20px;border-radius:10px;font-weight:bold;z-index:9999;pointer-events:none;font-family:\'Press Start 2P\',monospace;';
         document.body.appendChild(err);
         setTimeout(() => err.remove(), 1500);
     }
@@ -506,7 +506,7 @@ export class InventoryUI {
     _initTooltip() {
         const tooltip = document.createElement('div');
         tooltip.id = 'inv-tooltip';
-        tooltip.style.cssText = 'position:fixed;background:rgba(10,10,25,0.95);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:10px 14px;color:white;font-size:12px;z-index:9999;pointer-events:none;display:none;max-width:200px;font-family:sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.4);';
+        tooltip.style.cssText = 'position:fixed;background:rgba(10,10,25,0.95);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:10px 14px;color:white;font-size:12px;z-index:9999;pointer-events:none;display:none;max-width:200px;font-family:\'Press Start 2P\',monospace;box-shadow:0 4px 12px rgba(0,0,0,0.4);';
         document.body.appendChild(tooltip);
         this._tooltip = tooltip;
     }
