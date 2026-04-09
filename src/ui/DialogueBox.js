@@ -77,7 +77,7 @@ export class DialogueBox {
       border: 1px solid rgba(251,191,36,0.5);
       border-radius: 6px;
       padding: 2px 12px;
-      font-family: sans-serif;
+      font-family: 'Press Start 2P', monospace;
       font-size: 12px;
       font-weight: 600;
       color: #fbbf24;
@@ -102,7 +102,7 @@ export class DialogueBox {
     // 对话文字
     this._textEl = document.createElement('p');
     this._textEl.style.cssText = `
-      font-family: sans-serif;
+      font-family: 'Press Start 2P', monospace;
       font-size: 15px;
       color: #f3f4f6;
       line-height: 1.85;
@@ -120,7 +120,7 @@ export class DialogueBox {
 
     this._pageEl = document.createElement('span');
     this._pageEl.style.cssText = `
-      font-family: sans-serif;
+      font-family: 'Press Start 2P', monospace;
       font-size: 12px;
       color: #6b7280;
     `;
@@ -132,11 +132,11 @@ export class DialogueBox {
       border-radius: 6px;
       padding: 5px 18px;
       color: #fbbf24;
-      font-family: sans-serif;
+      font-family: 'Press Start 2P', monospace;
       font-size: 13px;
       cursor: pointer;
     `;
-    this._btnEl.textContent = ' Continue▶';
+    this._btnEl.textContent = ' Continue >>';
     // 点击整个对话框也可以推进
     this._btnEl.addEventListener('click', (e) => { e.stopPropagation(); this._next(); });
 
@@ -190,7 +190,7 @@ export class DialogueBox {
     const idx = this._current;
     this._textEl.textContent = this._lines[idx] ?? '';
     this._pageEl.textContent = `${idx + 1} / ${total}`;
-    this._btnEl.textContent = idx === total - 1 ? 'Start ▶' : 'Continue ▶';
+    this._btnEl.textContent = idx === total - 1 ? 'Start >' : 'Continue >';
   }
 
   // ── 内部：推进到下一句 ──────────────────────────────────────────────

@@ -5,7 +5,7 @@ export class GameStory {
   // 故事内容定义
   static STORIES = {
     INTRO: {
-      title: '老向导',
+      title: 'Elder Guide',
       type: 'segmented',
       avatar: 'elder',
       segments: [
