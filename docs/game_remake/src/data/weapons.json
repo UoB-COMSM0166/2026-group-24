@@ -3,6 +3,7 @@
     {
       "id": "iron_sword",
       "name": "Iron Sword",
+      "icon": "iron_sword",
       "owner": "knight",
       "type": "blade",
       "rarity": "rare",
@@ -35,6 +36,7 @@
     {
       "id": "knight_sword",
       "name": "Knight Longsword",
+      "icon": "knight_sword",
       "owner": "knight",
       "type": "blade",
       "rarity": "rare",
@@ -78,6 +80,7 @@
     {
       "id": "lava_sword",
       "name": "Lava Sword",
+      "icon": "lava_sword",
       "owner": "knight",
       "type": "blade",
       "rarity": "rare",
@@ -132,6 +135,7 @@
     {
       "id": "dragon_sword",
       "name": "Flame Dragon Sword",
+      "icon": "dragon_sword",
       "owner": "knight",
       "type": "blade",
       "rarity": "epic",
@@ -192,6 +196,7 @@
     {
       "id": "old_staff",
       "name": "Old Staff",
+      "icon": "old_staff",
       "owner": "wizard",
       "type": "staff",
       "rarity": "rare",
@@ -230,6 +235,7 @@
     {
       "id": "element_staff",
       "name": "Element Staff",
+      "icon": "element_staff",
       "owner": "wizard",
       "type": "staff",
       "rarity": "rare",
@@ -285,6 +291,7 @@
     {
       "id": "thunder_staff",
       "name": "Thunder Staff",
+      "icon": "thunder_staff",
       "owner": "wizard",
       "type": "staff",
       "rarity": "rare",
@@ -345,6 +352,7 @@
     {
       "id": "abyss_tome",
       "name": "Abyss Tome",
+      "icon": "abyss_tome",
       "owner": "wizard",
       "type": "tome",
       "rarity": "epic",
@@ -400,6 +408,7 @@
     {
       "id": "bare_fist",
       "name": "Bare Fist",
+      "icon": "bare_fist",
       "owner": "priest",
       "type": "fist",
       "rarity": "rare",
@@ -421,17 +430,18 @@
           "id": "heal_prayer",
           "name": "Heal Prayer",
           "type": "heal",
-          "target": "ally",
+          "target": "self",
           "power": 80,
           "statKey": "talent",
           "statusEffect": null,
-          "desc": "Heal self or ally for 80% TAL"
+          "desc": "Restore 80% TAL as HP"
         }
       ]
     },
     {
       "id": "iron_gauntlet",
       "name": "Iron Gauntlet",
+      "icon": "iron_gauntlet",
       "owner": "priest",
       "type": "fist",
       "rarity": "rare",
@@ -475,6 +485,7 @@
     {
       "id": "earth_gauntlet",
       "name": "Earth Gauntlet",
+      "icon": "earth_gauntlet",
       "owner": "priest",
       "type": "fist",
       "rarity": "rare",
@@ -518,6 +529,7 @@
     {
       "id": "mountain_fist",
       "name": "Mountain Sacred Fist",
+      "icon": "mountain_fist",
       "owner": "priest",
       "type": "fist",
       "rarity": "epic",
@@ -550,17 +562,18 @@
           "id": "earth_heal",
           "name": "Earth Heal",
           "type": "heal",
-          "target": "ally",
+          "target": "self",
           "power": 120,
           "statKey": "talent",
           "statusEffect": "heal_aura",
-          "desc": "Heal self or ally 120% TAL + Regen 3 turns"
+          "desc": "120% TAL heal + Regen 3 turns"
         }
       ]
     },
     {
       "id": "hunter_bow",
       "name": "Hunter Bow",
+      "icon": "hunter_bow",
       "owner": "ranger",
       "type": "bow",
       "rarity": "rare",
@@ -593,6 +606,7 @@
     {
       "id": "elf_bow",
       "name": "Elf Longbow",
+      "icon": "elf_bow",
       "owner": "ranger",
       "type": "bow",
       "rarity": "rare",
@@ -636,6 +650,7 @@
     {
       "id": "vine_bow",
       "name": "Vine Bow",
+      "icon": "vine_bow",
       "owner": "ranger",
       "type": "bow",
       "rarity": "rare",
@@ -664,11 +679,11 @@
           "id": "nature_heal",
           "name": "Nature Heal",
           "type": "heal",
-          "target": "aoe",
+          "target": "self",
           "power": 70,
           "statKey": "awareness",
           "statusEffect": "heal_aura",
-          "desc": "Heal all allies + Regen for 2 turns"
+          "desc": "Heal + Regen for 2 turns"
         },
         {
           "id": "poison_arrow",
@@ -691,6 +706,7 @@
     {
       "id": "world_tree_bow",
       "name": "World Tree Bow",
+      "icon": "world_tree_bow",
       "owner": "ranger",
       "type": "bow",
       "rarity": "epic",
