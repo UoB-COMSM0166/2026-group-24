@@ -10,11 +10,11 @@ export class GameStory {
       avatar: 'elder',
       segments: [
         {
-          text: 'In the farthest reaches of the western frontier lies a forgotten woodland known as the Lost\n Forest. Once, it was the busiest trade route in the region, where merchant caravans traveled\n safely along sunlit paths. Villages flourished along its borders, thriving on trade and\n prosperity.',
+          text: 'In the farthest reaches of the western frontier lies a forgotten woodland known as the Lost\n Forest. Once, it was the busiest trade route in the region, where merchant caravans traveled safely along sunlit paths. Villages flourished along its borders, thriving on trade and prosperity.',
           backgroundImage: 'outset1'
         },
         {
-          text: 'But everything changed several months ago. Villagers were the first to notice the signs—deep\n within the forest, a massive tree appeared where none had ever stood before. Twisted, black,\n and ancient, it seemed to rise from the very depths of the earth itself. Soon, it came to be\n known as the Dark Tree...',
+          text: 'But everything changed several months ago. Villagers were the first to notice the signs—deep within the forest, a massive tree appeared where none had ever stood before. Twisted, black, and ancient, it seemed to rise from the very depths of the earth itself. Soon, it came to be known as the Dark Tree...',
           backgroundImage: 'outset2'
         }
       ]
