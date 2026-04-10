@@ -4,6 +4,7 @@ import { ChestAnimation } from './ChestAnimation.js';
 import { CharacterSelectBackground } from './CharacterSelectBackground.js';
 import { InventoryUI } from './InventoryUI.js';
 import { StoryDialogueBox } from './StoryDialogueBox.js';
+import { PROGRESS_BAR_TEXTS } from '../core/TurnManager.js';
 
 export class UIManager {
   constructor(elements, callbacks = {}) {
@@ -223,8 +224,8 @@ export class UIManager {
   updateBossMode() {
     const title = document.querySelector('#top-progress-header span:first-child');
     const desc = document.querySelector('#top-progress-header span:last-child');
-    if (title) title.textContent = '⚔️ Boss Battle';
-    if (desc) desc.textContent = 'Defeat the boss within 10 turns or the game ends';
+    if (title) title.textContent = PROGRESS_BAR_TEXTS.BOSS_MODE_TITLE;
+    if (desc) desc.textContent = PROGRESS_BAR_TEXTS.BOSS_MODE_DESC;
   }
 
   setProgressBarCritical() {
