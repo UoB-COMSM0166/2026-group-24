@@ -3,15 +3,28 @@
 // 注意：地块生成相关逻辑（概率表、createContent、getDedupeKey）已迁移至 MapGenerator
 
 import {
-  TileContentType,
+  TileType, TileContentType,
   makeDungeon, makeBoss, makeTreasure,
   makeAltar, makeLighthouse, makeNPC,
   makeVillage, makeMerchant, makeRuin, makeCorruptedDeer, makeInjuredVillager
 } from '../world/Tile.js';
+import { PROGRESS_BAR_TEXTS } from '../core/TurnManager.js';
 import { GameState } from '../core/Constants.js';
 import { rollSpeed } from '../core/Dice.js';
 import { rollRandomItem, rollRandomLoot, rollGoldDrop, rollShopInventory } from './items.js';// ★ 新增 rollRandomLoot ★
 import { ShopUI } from '../ui/ShopUI.js';
+
+// ── 解锁链配置 ────────────────────────────────────────────────────
+// 🎮 定义事件解锁的线性链
+export const UNLOCK_CHAIN = [
+  { q: -8, r: 7, name: 'INJURED VILLAGER', type: 'npc', unlocksNext: true },
+  { q: -6, r: 2, name: 'FOREST VILLAGE', type: 'village', unlocksNext: true },
+  { q: -2, r: -5, name: 'TRAVELING MERCHANT', type: 'merchant', unlocksNext: true },
+  { q: 5, r: -6, name: 'ABYSSAL RUINS', type: 'ruin', unlocksNext: true },
+  { q: 6, r: 0, name: 'ANCIENT PLAZA', type: 'ruin', unlocksNext: true },
+  { q: 6, r: 1, name: 'ANCIENT RUINS ENTRANCE', type: 'ruin', unlocksNext: false },
+];
+
 // ── 静态配置列表 ────────────────────────────────────────────────────
 
 // 集中管理所有 NPC 配置
@@ -62,18 +75,55 @@ export const RUIN_LIST = [
     q: 6,
     r: 1,
     name: 'ANCIENT RUINS ENTRANCE',
-    enemyName: 'CORRUPTED GUARD',
-    description: 'A massive stone gate stands in the forest.\n\nAncient runes are carved into the door.\n\nSuddenly, a corrupted figure emerges from the shadows...',
-    postCombatMessage: 'You catch your breath, the old ruins return to silence.\n\nPerhaps heading east will lead to new discoveries.'
+    monsterType: 'dark_overlord',  // 🎮 Boss: Dark Overlord
+    enemyName: 'CORFUS',
+    contentImageType: 'boss',  // 🎮 使用 boss 贴图显示
+    isEndGame: true,  // 🎮 故事对话后需要返回主界面
+    description: 'A massive stone gate stands in the forest.\n\nAncient runes carved into the door pulse with dark energy.\n\nSuddenly, a legendary knight emerges from the shadows, his armor gleaming menacingly...',
+    postCombatMessage: {
+      type: 'storyDialogue',
+      scenes: [
+        {
+          image: './resource/img/map/chapter1/end1.png',
+          lines: [
+            'As the massive creature collapses to the ground,',
+            'the core of the Dark Tree begins to shatter.',
+            'Fragments of dark energy scatter into the air,',
+            'and the corrupted land slowly begins to recover its life.'
+          ]
+        },
+        {
+          image: './resource/img/map/chapter1/end2.png',
+          lines: [
+            'After the Dark Tree finally falls,',
+            'beneath its withered roots,',
+            'you discover a long-buried treasure.',
+            'Shimmering gold coins and precious relics',
+            'await the one who has claimed victory.'
+          ]
+        }
+      ]
+    }
   },
   {
     map: 'main',
     q: 5,
     r: -6,
     name: 'ABYSSAL RUINS',
-    enemyName: 'ABYSSAL GUARDIAN',
-    description: 'Moss-covered stone steps descend into the depths.\n\nThe damp air carries a musty scent, as if this place has been dormant for centuries.\n\nRunes on the walls faintly glow, responding to your approach.\n\nIn the darkness, a pair of eyes slowly opens...',
-    postCombatMessage: 'The enemy\'s body slowly collapses, and the ruins return to silence.\n\nYou search the surroundings briefly but find no additional entrances.\n\nAs you prepare to leave, you notice——\nA trail of fresh footprints seems to lead south.\n\nPerhaps the true treasure awaits you in the south.'
+    monsterType: 'stone_golem',  // 🎮 Elite: Stone Golem
+    enemyName: 'STONE GOLEM',
+    description: 'Moss-covered stone steps descend into the depths.\n\nThe damp air carries a musty scent, as if this place has been dormant for centuries.\n\nRunes on the walls faintly glow, responding to your approach.\n\nA massive stone figure slowly rises from the ground, ancient magic crackling around it...',
+    postCombatMessage: 'The stone golem crumbles to dust, its ancient magic finally exhausted.\n\nYou search the surroundings briefly but find no additional entrances.\n\nAs you prepare to leave, you notice——\nA trail of fresh footprints seems to lead south.\n\nPerhaps the true treasure awaits you in the south.'
+  },
+  {
+    map: 'main',
+    q: 6,
+    r: 0,
+    name: 'ANCIENT PLAZA',
+    monsterType: 'swift_assassin',  // 🎮 Elite: Swift Assassin
+    enemyName: 'SWIFT ASSASSIN',
+    description: 'An ancient plaza lies before the ruined relic.\n\nCracked stone tiles and broken pillars surround the silent square.\n\nSuddenly, a shadow flickers, and a swift figure appears—ready to strike...',
+    postCombatMessage: 'The assassin falls, their swift form finally stilled.\n\nThe plaza falls silent once more, the ancient stones beginning to glow with a faint blue light.'
   }
   // 后续可继续添加更多遗迹
 ];
@@ -207,6 +257,108 @@ export class EventTable {
    */
   static getTrapSpawnChance() {
     return this.EVENTS.TRAP.spawnChance;
+  }
+
+  // ── 解锁机制 ─────────────────────────────────────────────────────
+  /**
+   * 处理链式解锁 - 当玩家进入某个事件时，解锁下一个被锁定的事件
+   * @param {Object} gameController
+   * @param {number} currentQ
+   * @param {number} currentR
+   */
+  static handleUnlockChain(gameController, currentQ, currentR) {
+    // 找到当前事件在解锁链中的位置
+    const currentIndex = UNLOCK_CHAIN.findIndex(e => e.q === currentQ && e.r === currentR);
+    
+    console.log(`🎮 handleUnlockChain 调用: (${currentQ}, ${currentR}), 索引: ${currentIndex}`);
+    
+    if (currentIndex === -1 || !UNLOCK_CHAIN[currentIndex].unlocksNext) {
+      console.log(`❌ 当前事件不在解锁链中或不会解锁下一个`);
+      return;  // 当前事件不在解锁链中，或者不会解锁下一个
+    }
+    
+    // 获取下一个要解锁的事件
+    const nextEvent = UNLOCK_CHAIN[currentIndex + 1];
+    if (!nextEvent) {
+      console.log(`❌ 已经到达链的末尾`);
+      return;  // 已经到达链的末尾
+    }
+    
+    console.log(`🎮 解锁事件：(${nextEvent.q}, ${nextEvent.r}) - ${nextEvent.name} (${nextEvent.type})`);
+    
+    // 在地图上解锁该事件
+    const targetMap = gameController.map;
+    const tile = targetMap.getTile(nextEvent.q, nextEvent.r);
+    
+    console.log(`🎮 获取 Tile: ${tile ? '成功' : '失败'}`);
+    
+    if (tile) {
+      // 🎮 恢复为草地（使其可通行）
+      console.log(`🎮 改变 tile 类型为 GRASS (之前: ${tile.type?.id})`);
+      tile.type = TileType.GRASS;
+      tile.isFixedEvent = true;  // 🎮 标记为固定事件
+      
+      // 🎮 恢复事件内容
+      let content = null;
+      switch (nextEvent.type) {
+        case 'npc':
+          const npc = NPC_LIST.find(n => n.q === nextEvent.q && n.r === nextEvent.r);
+          console.log(`🎮 寻找 NPC，结果: ${npc ? '找到' : '未找到'}`);
+          if (npc) {
+            // 🎮 使用 makeInjuredVillager 或 makeNPC 创建内容对象
+            if (npc.name === 'INJURED VILLAGER') {
+              content = makeInjuredVillager(npc.name, npc.dialogue);
+            } else {
+              content = makeNPC(npc.name, npc.dialogue, npc.options || {});
+            }
+            console.log(`🎮 创建 NPC 内容: ${JSON.stringify(content)}`);
+          }
+          break;
+        case 'village':
+          const village = VILLAGE_LIST.find(v => v.q === nextEvent.q && v.r === nextEvent.r);
+          console.log(`🎮 寻找 Village，结果: ${village ? '找到' : '未找到'}`);
+          if (village) {
+            content = makeVillage(village.name);
+            console.log(`🎮 创建 Village 内容: ${JSON.stringify(content)}`);
+          }
+          break;
+        case 'merchant':
+          const merchant = MERCHANT_LIST.find(m => m.q === nextEvent.q && m.r === nextEvent.r);
+          console.log(`🎮 寻找 Merchant，结果: ${merchant ? '找到' : '未找到'}`);
+          if (merchant) {
+            content = makeMerchant(merchant.name);
+            console.log(`🎮 创建 Merchant 内容: ${JSON.stringify(content)}`);
+          }
+          break;
+        case 'ruin':
+          const ruin = RUIN_LIST.find(r => r.q === nextEvent.q && r.r === nextEvent.r);
+          console.log(`🎮 寻找 Ruin，结果: ${ruin ? '找到' : '未找到'}`);
+          if (ruin) {
+            content = makeRuin(ruin.name, ruin.enemyName);
+            content.description = ruin.description;
+            content.postCombatMessage = ruin.postCombatMessage;
+            content.monsterType = ruin.monsterType;
+            if (ruin.contentImageType) content.contentImageType = ruin.contentImageType;
+            if (ruin.isEndGame) content.isEndGame = ruin.isEndGame;
+            console.log(`🎮 创建 Ruin 内容: ${JSON.stringify(content)}`);
+          }
+          break;
+      }
+      
+      if (content) {
+        console.log(`🎮 设置 tile 内容: ${JSON.stringify(content)}`);
+        tile.content = content;
+      } else {
+        console.log(`❌ 内容为空，未能恢复事件`);
+      }
+      
+      // 🎮 消除迷雾使其可见
+      console.log(`🎮 设置 isRevealed = true, 调用 revealAround`);
+      tile.isRevealed = true;
+      targetMap.revealAround(nextEvent.q, nextEvent.r, 1);
+      
+      console.log(`✅ 解锁完成`);
+    }
   }
 
   // ── 事件处理：陷阱 ───────────────────────────────────────────────
@@ -458,7 +610,13 @@ export class EventTable {
     gameController.ui.showEvent(
       `👤 ${content.name}`,
       content.dialogue || 'Hello traveler!',
-      [{ text: 'Continue', onClick: () => { } }]
+      [{ 
+        text: 'Continue', 
+        onClick: () => {
+          // 🎮 触发解锁链
+          EventTable.handleUnlockChain(gameController, tile.q, tile.r);
+        } 
+      }]
     );
   }
 
@@ -476,16 +634,6 @@ export class EventTable {
       'Welcome to the village.',
       [
         {
-          text: 'Trade',
-          onClick: () => {
-            gameController.ui.showEvent(
-              'Trade',
-              '(Trading interface can be implemented here)',
-              [{ text: 'Back', onClick: () => EventTable.handleVillage(gameController, tile, content) }]
-            );
-          }
-        },
-        {
           text: 'Quests',
           onClick: () => {
             gameController.ui.showEvent(
@@ -495,9 +643,13 @@ export class EventTable {
                 {
                   text: 'Accept',
                   onClick: () => {
-                    // 切换到救援车队任务集
-                    gameController.tutorial.taskList.switchToMission('Rescue the Caravan');
-                    gameController._startMission('Rescue the Caravan', 5);
+                    // 切换到救援车队任务集（仅在非 Dev 模式下）
+                    if (gameController.tutorial) {
+                      gameController.tutorial.taskList.switchToMission('Rescue the Caravan');
+                      gameController._startMission('Rescue the Caravan', 10);
+                    }
+                    // 🎮 点击 Accept 后解锁下一个事件
+                    EventTable.handleUnlockChain(gameController, tile.q, tile.r);
                     gameController.ui.showEvent(
                       '✓ Quest Accepted',
                       'You have accepted the quest [Rescue the Caravan]\nPlease head to the northeast direction of the village to rescue the caravan guards.\n\nTurn limit: 5',
@@ -529,7 +681,9 @@ export class EventTable {
         },
         {
           text: 'Leave',
-          onClick: () => { }
+          onClick: () => {
+            // 村庄只有接受 Quests 才能解锁下一个事件
+          }
         }
       ]
     );
@@ -564,7 +718,10 @@ export class EventTable {
           },
           {
             text: 'Leave',
-            onClick: () => { }
+            onClick: () => {
+              // 🎮 触发解锁链
+              EventTable.handleUnlockChain(gameController, tile.q, tile.r);
+            }
           }
         ]
       );
@@ -609,7 +766,7 @@ export class EventTable {
       gameController.ui.showEvent(
         `👤 ${merchant}`,
         '"Here, take these as a token of my gratitude."\n\n(The merchant hands you a bag)\n\n📢 Tip: Next time you encounter the merchant, you can trade.',
-        [{ text: 'Leave', onClick: () => { gameController._startMission('🎯 Search ruins', 10); } }]
+        [{ text: 'Leave', onClick: () => { tile.content = null; gameController._startMission(PROGRESS_BAR_TEXTS.SEARCH_RUINS.replace(PROGRESS_BAR_TEXTS.MISSION_PREFIX, ''), 10); EventTable.handleUnlockChain(gameController, tile.q, tile.r); } }]
       );
     };
 
@@ -698,10 +855,12 @@ static handleShop(gameController, tile, content) {
    * @param {Object} content
    */
   static handleRuin(gameController, tile, content) {
-    const ruinName = content.name || 'Ancient Ruins Entrance';
+    const ruinName = content.name || 'Ancient Ruins ';
     const enemyName = content.enemyName || 'Corrupted Guardian';
-    const description = content.description || 'A massive stone gate stands in the forest.\n\nAncient runes are carved on the gate.\n\nSuddenly, a corrupted figure emerges from the shadows...';
+    const monsterType = content.monsterType;  // 🎮 Support specific monster types
+    const description = content.description || 'You step into the heart of the ancient relic.\n\nBroken pillars and glowing runes surround the silent chamber.\n\nAt the enter, the core of the Dark Tree pulses with dark energy.\n\nSuddenly, the final corrupted guardian awakens...';
     const postCombatMessage = content.postCombatMessage;
+    const isEndGame = content.isEndGame;  // 🎮 提取 isEndGame 标志
 
     gameController.ui.showEvent(
       `📍 ${ruinName}`,
@@ -711,10 +870,28 @@ static handleShop(gameController, tile, content) {
           text: '⚔️ Combat',
           onClick: () => {
             tile.content = null;
-            const bossContent = makeBoss(enemyName, 3, 'HARD');
+            let combatContent;
+            
+            // 🎮 If monster type is specified, create targeted encounter
+            if (monsterType === 'dark_overlord') {
+              combatContent = makeDungeon(enemyName, 5, 'EXTREME');
+              combatContent.enemyGroup = ['dark_overlord'];
+            } else if (monsterType === 'stone_golem') {
+              combatContent = makeDungeon(enemyName, 3, 'HARD');
+              combatContent.enemyGroup = ['stone_golem'];
+            } else if (monsterType === 'swift_assassin') {
+              combatContent = makeDungeon(enemyName, 3, 'HARD');
+              combatContent.enemyGroup = ['swift_assassin'];
+            } else {
+              combatContent = makeBoss(enemyName, 3, 'HARD');
+            }
+            
             // 保存战斗后的对话
-            bossContent.postCombatMessage = postCombatMessage;
-            gameController.fsm.transition(GameState.COMBAT, bossContent);
+            combatContent.postCombatMessage = postCombatMessage;
+            if (isEndGame) {
+              combatContent.isEndGame = isEndGame;  // 🎮 复制 isEndGame 标志
+            }
+            gameController.fsm.transition(GameState.COMBAT, combatContent);
           }
         },
         {
@@ -722,6 +899,66 @@ static handleShop(gameController, tile, content) {
           onClick: () => {
             gameController.player.movementPoints = 0;
             gameController.ui.updateMovementUI(0);
+            EventTable.handleUnlockChain(gameController, tile.q, tile.r);
+          }
+        }
+      ]
+    );
+  }
+
+  // ── 事件处理：古代遗迹前的广场 ─────────────────────────────────────────
+
+  /**
+   * 处理古代遗迹前的广场事件
+   * @param {Object} gameController
+   * @param {Object} tile
+   * @param {Object} content
+   */
+  static handleAncientPlaza(gameController, tile, content) {
+    const ruinName = content.name || 'Ancient Plaza';
+    const enemyName = content.enemyName || 'Corrupted Guardian';
+    const monsterType = content.monsterType;  // 🎮 Support specific monster types
+    const description = content.description || 'An ancient plaza lies before the ruined relic.\n\nCracked stone tiles and broken pillars surround the silent square.\n\nSuddenly, a corrupted guardian rises from the center of the plaza...';
+    const postCombatMessage = content.postCombatMessage;
+    const isEndGame = content.isEndGame;  // 🎮 提取 isEndGame 标志
+
+    gameController.ui.showEvent(
+      `📍 ${ruinName}`,
+      description,
+      [
+        {
+          text: '⚔️ Combat',
+          onClick: () => {
+            tile.content = null;
+            let combatContent;
+            
+            // 🎮 If monster type is specified, create targeted encounter
+            if (monsterType === 'dark_overlord') {
+              combatContent = makeDungeon(enemyName, 5, 'EXTREME');
+              combatContent.enemyGroup = ['dark_overlord'];
+            } else if (monsterType === 'stone_golem') {
+              combatContent = makeDungeon(enemyName, 3, 'HARD');
+              combatContent.enemyGroup = ['stone_golem'];
+            } else if (monsterType === 'swift_assassin') {
+              combatContent = makeDungeon(enemyName, 3, 'HARD');
+              combatContent.enemyGroup = ['swift_assassin'];
+            } else {
+              combatContent = makeBoss(enemyName, 3, 'HARD');
+            }
+            
+            combatContent.postCombatMessage = postCombatMessage;
+            if (isEndGame) {
+              combatContent.isEndGame = isEndGame;  // 🎮 复制 isEndGame 标志
+            }
+            gameController.fsm.transition(GameState.COMBAT, combatContent);
+          }
+        },
+        {
+          text: '🏃 Retreat',
+          onClick: () => {
+            gameController.player.movementPoints = 0;
+            gameController.ui.updateMovementUI(0);
+            EventTable.handleUnlockChain(gameController, tile.q, tile.r);
           }
         }
       ]

@@ -2,7 +2,7 @@
 import { GameState, MapConfig, TurnConfig, MapPresets } from './Constants.js';
 import { HexMap, createMapByPreset } from '../world/HexMap.js';
 import { Tile, TileContentType, makePortal, hexToPixel, makeBoss, TileType, makeNPC, makeVillage, makeMerchant, makeRuin, makeCorruptedDeer, makeInjuredVillager } from '../world/Tile.js';
-import { NPC_LIST, VILLAGE_LIST, MERCHANT_LIST, RUIN_LIST, CORRUPTED_DEER_LIST } from '../data/EventTable.js';
+import { NPC_LIST, VILLAGE_LIST, MERCHANT_LIST, RUIN_LIST, CORRUPTED_DEER_LIST, UNLOCK_CHAIN } from '../data/EventTable.js';
 import { StateMachine } from './StateMachine.js';
 import { CombatManager } from './CombatManager.js';
 import { Enemy } from '../entities/Enemy.js';
@@ -16,6 +16,7 @@ import { EventTable } from '../data/EventTable.js';
 import { findPath, getReachableTiles } from '../utils/Pathfinder.js';
 import { rollEncounter, ENEMY_TYPES } from '../data/EncounterTable.js';
 import { TutorialManager } from './TutorialManager.js';
+import { TurnManager, PROGRESS_BAR_TEXTS } from './TurnManager.js';
 import { NOVICE_DUNGEON_LIST, NOVICE_TREASURE_LIST, NOVICE_ALTAR_LIST, NOVICE_SHOP_LIST, MAIN_SHOP_LIST } from '../data/EventTable.js';
 import { makeDungeon, makeTreasure, makeAltar, makeShop } from '../world/Tile.js';
 export class GameController {
@@ -29,17 +30,16 @@ export class GameController {
     this.selectedHeroes = [];
     this.combatManager = null;
     this.currentBossContent = null;
-    this.turnCount = 0;
+    
+    // ── 使用 TurnManager 集中管理回合条、任务栏、进度显示 ────────────────
+    this.turnManager = new TurnManager(ui, TurnConfig.MAX_TURNS);
+    
     this.trapCooldown = 0;
-    this.bossMode = false;
     this.bossModePenaltyActive = false;
     this.bossModePenaltyWarned = false;
-    this.currentMaxTurns = TurnConfig.MAX_TURNS;
-    this.currentMissionName = null;
     this.merchantEncountered = false;
     this._isMoving = false;
     this.isDevMode = false;
-    this._progressBarTitle = null;  // 保存进度条标题以便恢复
     this.rangeHighlight = null;
     this.gold = 0;
     // ── 两步移动新增状态 ──────────────────────────────────────────
@@ -51,6 +51,21 @@ export class GameController {
     this.fsm = new StateMachine(GameState.INITIALIZING);
     this._setupStates();
   }
+
+  // ─────────────────────────────────────────────────────────────────────
+  // 向后兼容性代理：保留原属性名称指向 TurnManager
+  // ─────────────────────────────────────────────────────────────────────
+  get turnCount() { return this.turnManager.turnCount; }
+  set turnCount(val) { this.turnManager.setTurnCount(val); }
+  
+  get currentMaxTurns() { return this.turnManager.currentMaxTurns; }
+  set currentMaxTurns(val) { this.turnManager.setMaxTurns(val); }
+  
+  get bossMode() { return this.turnManager.bossMode; }
+  set bossMode(val) { this.turnManager.bossMode = val; }
+  
+  get currentMissionName() { return this.turnManager.currentMissionName; }
+  set currentMissionName(val) { this.turnManager.currentMissionName = val; }
 
   _setupStates() {
     this.fsm.addState(GameState.CHARACTER_SELECT, {
@@ -119,7 +134,8 @@ export class GameController {
             } else {
               content = makeNPC(npc.name, npc.dialogue, npc.options || {});
             }
-            targetMap.placeContent(npc.q, npc.r, content, 0);
+            // 🎮 强制覆盖已有的随机事件
+            tile.content = content;
           }
         }
 
@@ -129,7 +145,8 @@ export class GameController {
           const tile = targetMap.getTile(village.q, village.r);
           if (tile && tile.type === TileType.GRASS) {
             tile.isFixedEvent = true;  // 先标记为固定事件
-            targetMap.placeContent(village.q, village.r, makeVillage(village.name), 0);
+            // 🎮 强制覆盖已有的随机事件
+            tile.content = makeVillage(village.name);
           }
         }
 
@@ -139,7 +156,8 @@ export class GameController {
           const tile = targetMap.getTile(merchant.q, merchant.r);
           if (tile && tile.type === TileType.GRASS) {
             tile.isFixedEvent = true;  // 先标记为固定事件
-            targetMap.placeContent(merchant.q, merchant.r, makeMerchant(merchant.name), 0);
+            // 🎮 强制覆盖已有的随机事件
+            tile.content = makeMerchant(merchant.name);
           }
         }
 
@@ -152,7 +170,15 @@ export class GameController {
             const content = makeRuin(ruin.name, ruin.enemyName);
             content.description = ruin.description;
             content.postCombatMessage = ruin.postCombatMessage;
-            targetMap.placeContent(ruin.q, ruin.r, content, 0);
+            content.monsterType = ruin.monsterType;  // 🎮 Copy monster type for specific encounters
+            if (ruin.contentImageType) {
+              content.contentImageType = ruin.contentImageType;  // 🎮 自定义贴图类型
+            }
+            if (ruin.isEndGame) {
+              content.isEndGame = ruin.isEndGame;  // 🎮 标记为结局事件
+            }
+            // 🎮 强制覆盖已有的随机事件
+            tile.content = content;  // 直接覆盖，而不是用 placeContent
           }
         }
 
@@ -162,14 +188,34 @@ export class GameController {
           const tile = targetMap.getTile(deer.q, deer.r);
           if (tile && tile.type === TileType.GRASS) {
             tile.isFixedEvent = true;  // 先标记为固定事件
-            targetMap.placeContent(deer.q, deer.r, makeCorruptedDeer(deer.name), 0);
+            // 🎮 强制覆盖已有的随机事件
+            tile.content = makeCorruptedDeer(deer.name);
           }
         }
 
-        // 玩家出生在新手村
-        this.currentMapName = 'Novice Village';
-        this.player.setGridPos(noviceQ, noviceR, this.noviceVillage);
-        this.noviceVillage.revealAround(noviceQ, noviceR, 5);
+        // 🎮 锁定解锁链中的格子（除了第一个） - 在所有内容放置后进行此操作
+        for (let i = 1; i < UNLOCK_CHAIN.length; i++) {
+          const event = UNLOCK_CHAIN[i];
+          const tile = this.map.getTile(event.q, event.r);
+          if (tile) {
+            // 改为山脉，使其无法到达
+            tile.type = TileType.MOUNTAIN;
+            tile.content = null;  // 清除事件内容
+            console.log(`🎮 锁定事件格子 (${event.q}, ${event.r}) - ${event.name}`);
+          }
+        }
+
+        // 玩家出生位置：dev 模式直接生成在主世界，否则在新手村
+        if (this.isDevMode) {
+          this.currentMapName = 'Main Map';
+          this.player.setGridPos(mainQ, mainR, this.map);
+          // Dev 模式：全屏视野
+          this.map.revealAround(mainQ, mainR, 100);
+        } else {
+          this.currentMapName = 'Novice Village';
+          this.player.setGridPos(noviceQ, noviceR, this.noviceVillage);
+          this.noviceVillage.revealAround(noviceQ, noviceR, 5);
+        }
 
         // ── Place Novice Village Dungeons ──────────────────────────────────
         for (const ev of NOVICE_DUNGEON_LIST) {
@@ -217,39 +263,6 @@ export class GameController {
           }
         }
 
-        // ── Place Final Boss at (6, 1) ──────────────────────────────────
-        const bossTile = this.map.getTile(6, 1);
-        if (bossTile) {
-          bossTile.type = TileType.GRASS;
-          bossTile.isFixedEvent = true;
-          const bossContent = makeBoss('Dark Tree', 5);
-          bossContent.postCombatMessage = {
-            type: 'storyDialogue',
-            scenes: [
-              {
-                image: './resource/img/map/chapter1/end1.png',
-                lines: [
-                  'As the massive creature collapses to the ground,',
-                  'the core of the Dark Tree begins to shatter.',
-                  'Fragments of dark energy scatter into the air,',
-                  'and the corrupted land slowly begins to recover its life.'
-                ]
-              },
-              {
-                image: './resource/img/map/chapter1/end2.png',
-                lines: [
-                  'After the Dark Tree finally falls,',
-                  'beneath its withered roots,',
-                  'you discover a long-buried treasure.',
-                  'Shimmering gold coins and precious relics',
-                  'await the one who has claimed victory.'
-                ]
-              }
-            ]
-          };
-          this.map.placeContent(6, 1, bossContent, 0);
-        }
-
         // ── 启动教程系统 ────────────────────────────────────────
         if (!this.isDevMode) {
           this.tutorial = new TutorialManager(this);
@@ -262,13 +275,15 @@ export class GameController {
 
     this.fsm.addState(GameState.MAP_EXPLORATION, {
       enter: () => {
-        this.turnCount = 0;
+        // ── 使用 TurnManager 重置回合 ──────────────────────────────────────────────
+        this.turnManager.resetTurnCount();
         this.ui.showMapUI();
+        
         // 根据当前地图设置进度条标题
         if (this.currentMapName === 'Novice Village') {
-          this.ui.updateProgressBarTitle('🏘️ Novice Village');
+          this.turnManager.restoreProgressBarTitle('novice');
         } else {
-          this.ui.updateProgressBarTitle('Find Ruins');
+          this.turnManager.restoreProgressBarTitle('main');
         }
         this._startTurn();
       },
@@ -289,32 +304,27 @@ export class GameController {
           // 先显示战斗后的故事对话（如果存在）
           if (this.currentBossContent?.postCombatMessage) {
             const msg = this.currentBossContent.postCombatMessage;
+            // 🎮 保存 isEndGame 标志，因为回调执行时 currentBossContent 可能已被清空
+            const isEndGame = this.currentBossContent?.isEndGame;
+            console.log('🎮 战斗胜利，当前 isEndGame=', isEndGame, 'postCombatMessage=', msg);
             
             // 处理新的故事对话框格式（带图片）
             if (msg.type === 'storyDialogue' && msg.scenes) {
               this.ui.storyDialogueBox.show({ scenes: msg.scenes }, () => {
-                setTimeout(() => {
-                  this.ui.showChestReward(loot, () => {
-                    this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
-                      const hero = this.selectedHeroes?.[heroIndex];
-                      if (!hero) return;
-                      if (action === 'put') hero.inventory.push(loot);
-                      else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
-                      this.ui.updatePartyStatus(this.selectedHeroes);
-                    });
-                  });
-                }, 300);
-              });
-            } 
-            // 处理传统的文字对话框格式
-            else {
-              this.ui.showEvent(
-                '📖 Story',
-                typeof msg === 'string' ? msg : msg,
-                [{
-                  text: 'Continue', onClick: () => {
-                    setTimeout(() => {
-                      this.ui.showChestReward(loot, () => {
+                console.log('🎮 故事对话完成，isEndGame=', isEndGame);
+                // 🎮 如果是结局事件，故事对话后直接返回主界面
+                if (isEndGame) {
+                  console.log('🎮 执行返回主界面');
+                  setTimeout(() => {
+                    this.fsm.transition(GameState.CHARACTER_SELECT);
+                  }, 300);
+                } else {
+                  setTimeout(() => {
+                    console.log(`🎮 [storyDialogue] 显示宝箱奖励`);
+                    this.ui.showChestReward(loot, () => {
+                      console.log(`🎮 [storyDialogue] 宝箱关闭回调，调用解锁处理`);
+                      this._handlePostCombatUnlock();  // 🎮 在宝箱关闭时调用
+                      setTimeout(() => {
                         this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
                           const hero = this.selectedHeroes?.[heroIndex];
                           if (!hero) return;
@@ -322,8 +332,45 @@ export class GameController {
                           else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
                           this.ui.updatePartyStatus(this.selectedHeroes);
                         });
-                      });
-                    }, 300);
+                      }, 100);
+                    });
+                  }, 300);
+                }
+              });
+            } 
+            // 处理传统的文字对话框格式
+            else {
+              console.log(`🎮 显示传统对话框格式的 postCombatMessage`);
+              this.ui.showEvent(
+                '📖 Story',
+                typeof msg === 'string' ? msg : msg,
+                [{
+                  text: 'Continue', onClick: () => {
+                    console.log(`🎮 战斗后对话 Continue 被点击，isEndGame=${isEndGame}`);
+                    // 🎮 如果是结局事件，故事对话后直接返回主界面
+                    if (isEndGame) {
+                      setTimeout(() => {
+                        this.fsm.transition(GameState.CHARACTER_SELECT);
+                      }, 300);
+                    } else {
+                      setTimeout(() => {
+                        console.log(`🎮 显示宝箱奖励`);
+                        this.ui.showChestReward(loot, () => {
+                          console.log(`🎮 宝箱关闭回调，调用解锁处理`);
+                          // 🎮 宝箱关闭时处理解锁链
+                          this._handlePostCombatUnlock();
+                          setTimeout(() => {
+                            this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
+                              const hero = this.selectedHeroes?.[heroIndex];
+                              if (!hero) return;
+                              if (action === 'put') hero.inventory.push(loot);
+                              else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                              this.ui.updatePartyStatus(this.selectedHeroes);
+                            });
+                          }, 100);
+                        });
+                      }, 300);
+                    }
                   }
                 }]
               );
@@ -332,13 +379,17 @@ export class GameController {
           } else {
             setTimeout(() => {
               this.ui.showChestReward(loot, () => {
-                this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
-                  const hero = this.selectedHeroes?.[heroIndex];
-                  if (!hero) return;
-                  if (action === 'put') hero.inventory.push(loot);
-                  else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
-                  this.ui.updatePartyStatus(this.selectedHeroes);
-                });
+                // 🎮 宝箱关闭时处理解锁链
+                this._handlePostCombatUnlock();
+                setTimeout(() => {
+                  this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
+                    const hero = this.selectedHeroes?.[heroIndex];
+                    if (!hero) return;
+                    if (action === 'put') hero.inventory.push(loot);
+                    else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                    this.ui.updatePartyStatus(this.selectedHeroes);
+                  });
+                }, 100);
               });
             }, 300);
           }
@@ -355,8 +406,11 @@ export class GameController {
   }
 
   _enterCombat(contentData) {
-    console.log('contentData.type =', contentData.type);
     this.currentBossContent = contentData;
+    // 🎮 保存战斗位置用于解锁链
+    this.combatLocationQ = this.player.q;
+    this.combatLocationR = this.player.r;
+    console.log(`🎮 进入战斗，位置: (${this.combatLocationQ}, ${this.combatLocationR})`);
     const isBoss = contentData.type === TileContentType.BOSS || contentData.type === 'boss';
     const level = contentData.level ?? 1;
 
@@ -376,6 +430,14 @@ export class GameController {
           e.maxHp = Math.floor(e.maxHp * def.hpMulti);
         }
         e.hp = e.maxHp;
+        
+        // 🎮 Dev mode: Set all monster stats to 1 for easy testing
+        if (this.isDevMode) {
+          e.maxHp = 1;
+          e.hp = 1;
+          e.attack = 1;
+        }
+        
         enemies.push(e);
       });
       return enemies;
@@ -404,6 +466,14 @@ export class GameController {
             agility:   Math.floor((8  + (level - 1) * 2)   * 4),
           }
       );
+      
+      // 🎮 Dev mode: Set boss stats to 1 for easy testing
+      if (this.isDevMode) {
+        boss.maxHp = 1;
+        boss.hp = 1;
+        boss.attack = 1;
+      }
+      
       boss.id     = 'e1_' + Date.now();
       boss.enemyKey = 'dark_overlord';
       boss.enemyCategory = def.type;
@@ -415,6 +485,12 @@ export class GameController {
       boss.hp    = boss.maxHp;
 
       startCombat([boss]);
+      return;
+    }
+
+    // 🎮 如果事件配置了特定的敌人组，使用它
+    if (contentData.enemyGroup && Array.isArray(contentData.enemyGroup)) {
+      startCombat(buildEnemies(contentData.enemyGroup));
       return;
     }
 
@@ -552,6 +628,20 @@ export class GameController {
     this.ui.hideCombatOverlay();
   }
 
+  // 🎮 战斗胜利后处理解锁链
+  _handlePostCombatUnlock() {
+    console.log(`🎮 战斗后解锁检查，位置: (${this.combatLocationQ}, ${this.combatLocationR})`);
+    if (this.combatLocationQ !== undefined && this.combatLocationR !== undefined) {
+      console.log(`🎮 触发 handleUnlockChain`);
+      EventTable.handleUnlockChain(this, this.combatLocationQ, this.combatLocationR);
+      // 🎮 清除战斗位置信息，防止重复调用
+      this.combatLocationQ = undefined;
+      this.combatLocationR = undefined;
+    } else {
+      console.warn(`❌ 战斗位置信息不完整: Q=${this.combatLocationQ}, R=${this.combatLocationR}`);
+    }
+  }
+
   update(dt) {
     if (this.fsm.currentState === GameState.MAP_EXPLORATION) {
       this.player.update(dt);
@@ -576,8 +666,7 @@ export class GameController {
     this.pendingPath = null;
     this.pendingTarget = null;
     this.pathHighlight = null;
-    this.turnCount += 1;
-    this.ui.updateProgressBar(this.turnCount, this.currentMaxTurns);
+    // \u2500\u2500 \u4f7f\u7528 TurnManager \u66f4\u65b0\u56de\u5408\u8ba1\u6570\u548c\u8fdb\u5ea6\u6761 \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n    this.turnManager.incrementTurn();
 
     const roller = this.selectedHeroes.length > 0
       ? this.selectedHeroes.reduce((a, b) => ((a.speed ?? 0) >= (b.speed ?? 0) ? a : b))
@@ -617,13 +706,11 @@ export class GameController {
       this.ui.updatePartyStatus(this.selectedHeroes);
     }
 
-    if (!this.bossMode && this.turnCount === this.currentMaxTurns) {
-      this.bossMode = true;
+    if (!this.turnManager.bossMode && this.turnManager.isTurnLimitReached()) {
+      // ── 使用 TurnManager 进入 Boss 模式 ──────────────────────────────────────────────
+      this.turnManager.enterBossMode(10);
       this.bossModePenaltyActive = true;
-      this.turnCount = 0;
-      this.currentMaxTurns = 10;
-      this.ui.updateBossMode();
-      this.ui.setProgressBarCritical();
+      this.ui.setCritical();
 
       document.body.classList.add('shake');
       setTimeout(() => document.body.classList.remove('shake'), 500);
@@ -639,12 +726,83 @@ export class GameController {
       const bossTile = this.map.getTile(20, 0);
       if (bossTile) this.map.placeContent(20, 0, makeBoss('Final Boss', 10));
 
-    } else if (this.bossMode && this.turnCount === this.currentMaxTurns) {
+    } else if (this.turnManager.bossMode && this.turnManager.isTurnLimitReached()) {
       this.fsm.transition(GameState.GAME_OVER);
     }
   }
 
-  onEndTurnBtnClick() { this._startTurn(); }
+  onEndTurnBtnClick() { this._startTurnFixed(); }
+
+  // 新的 turnCount 增加方法
+  _startTurnFixed() {
+    this.rangeHighlight = null;
+    this.pendingPath = null;
+    this.pendingTarget = null;
+    this.pathHighlight = null;
+    
+    // 直接处理 turnCount 增加
+    this.turnManager.turnCount = this.turnManager.turnCount + 1;
+    this.turnManager._updateProgressBar();
+
+    const roller = this.selectedHeroes.length > 0
+      ? this.selectedHeroes.reduce((a, b) => ((a.speed ?? 0) >= (b.speed ?? 0) ? a : b))
+      : this.player;
+
+    let total = this.isDevMode ? 999 : rollSpeed(roller, 0.5, 20).gradeIndex + 1;
+
+    const hasTravelerSet = this.selectedHeroes.some(hero =>
+        (hero.equipSlots ?? []).some(item => item?.effect === 'movement_plus_2')
+    );
+    if (hasTravelerSet) total += 2;
+
+    this.player.movementPoints = total;
+    this.ui.updateMovementUI(total);
+    this.ui.updatePartyStatus(this.selectedHeroes);
+
+    if (this.trapCooldown > 0) this.trapCooldown--;
+
+    // Boss 惩罚阶段：每回合扣除英雄最大血量的 5%
+    if (this.bossModePenaltyActive) {
+      let totalDamage = 0;
+      for (const hero of this.selectedHeroes) {
+        const damage = Math.max(1, Math.floor(hero.maxHp * 0.05));
+        hero.hp = Math.max(0, hero.hp - damage);
+        totalDamage += damage;
+      }
+      if (!this.bossModePenaltyWarned) {
+        this.bossModePenaltyWarned = true;
+        this.ui.showEvent(
+          '⚠️ Threat',
+          `Every moment of delay weakens your vitality!\nAll heroes lose 5% of their maximum health.`,
+          [{ text: 'Continue', onClick: () => { } }]
+        );
+      }
+      this.ui.updatePartyStatus(this.selectedHeroes);
+    }
+
+    if (!this.turnManager.bossMode && this.turnManager.isTurnLimitReached()) {
+      this.turnManager.enterBossMode(10);
+      this.bossModePenaltyActive = true;
+      this.ui.setCritical();
+
+      document.body.classList.add('shake');
+      setTimeout(() => document.body.classList.remove('shake'), 500);
+
+      this.map.revealAround(20, 0, 10);
+
+      for (const tile of this.map.tiles.values()) {
+        const dq = tile.q - 20, dr = tile.r - 0, ds = -dq - dr;
+        if (Math.max(Math.abs(dq), Math.abs(dr), Math.abs(ds)) <= 4) {
+          tile.type = TileType.FOREST;
+        }
+      }
+      const bossTile = this.map.getTile(20, 0);
+      if (bossTile) this.map.placeContent(20, 0, makeBoss('Final Boss', 10));
+
+    } else if (this.turnManager.bossMode && this.turnManager.isTurnLimitReached()) {
+      this.fsm.transition(GameState.GAME_OVER);
+    }
+  }
 
   // ── 两步移动：第一次点击显示路径，第二次点击执行移动 ──────────────
 
@@ -776,7 +934,7 @@ export class GameController {
   _handleTileContent(tile) {
     // 特殊坐标：主世界(-8, 7)自动切换为寻找村庄
     if (this.currentMapName !== 'Novice Village' && tile.q === -8 && tile.r === 7) {
-      this.ui.updateProgressBarTitle('Find Village');
+      this.ui.updateProgressBarTitle(PROGRESS_BAR_TEXTS.FIND_VILLAGE);
     }
 
     if (!tile.content) {
@@ -828,34 +986,36 @@ export class GameController {
       this.camera.y = window.innerHeight - MapConfig.PADDING - bottomLeft.y;
     }
     this.ui.updatePartyStatus(this.selectedHeroes);
+    // ── 重置回合计数并更新进度条标题 ────────────────────────────────────
+    this.turnManager.resetTurnCount();
+    if (targetMapName === 'Novice Village') {
+      this.turnManager.restoreProgressBarTitle('novice');
+    } else {
+      this.turnManager.restoreProgressBarTitle('main');
+    }
     this.fsm.transition(GameState.MAP_EXPLORATION);
   }
 
   _startMission(missionName, maxTurns = 5) {
-    this.currentMissionName = missionName;
-    this.currentMaxTurns = maxTurns;
-    this.turnCount = 0;
-    this.bossMode = false;
+    // ── 使用 TurnManager 统一管理会战、回合、进度条 ──────────────────────────────────────
+    this.turnManager.startMission(missionName, maxTurns);
     this.bossModePenaltyActive = false;
     this.bossModePenaltyWarned = false;
     document.body.classList.remove('screen-flare');
-    this.ui.setProgressBarNormal();
-    this.ui.updateProgressBar(0, maxTurns);
-    this.ui.updateProgressBarTitle(`🎯 ${missionName}`);
+    this.turnManager.setNormal();
   }
 
   // ── 更新进度条标题（根据当前任务或地图） ──────────────────────
   _updateProgressBarTitle() {
     let title;
-    if (this.currentMissionName) {
-      title = `🎯 ${this.currentMissionName}`;
+    if (this.turnManager.currentMissionName) {
+      title = `🎯 ${this.turnManager.currentMissionName}`;
     } else if (this.currentMapName === 'Novice Village') {
       title = '🏘️ Novice Village';
     } else {
       title = 'Find Ruins';
     }
-    this._progressBarTitle = title;
-    this.ui.updateProgressBarTitle(title);
+    this.turnManager.setProgressBarTitle(title);
   }
 
   _executeTrapRoll() {
@@ -1004,10 +1164,8 @@ export class GameController {
             map: serializeMap(this.map),
             noviceVillage: serializeMap(this.noviceVillage),
             currentMapName: this.currentMapName,
-            turnCount: this.turnCount,
-            currentMaxTurns: this.currentMaxTurns,
-            bossMode: this.bossMode,
-            bossModePenaltyActive: this.bossModePenaltyActive
+            // ── 使用 TurnManager 序列化 ──────────────────────────────────────────────
+            turnState: this.turnManager.serialize()
         };
 
         localStorage.setItem('for_the_treasure_save', JSON.stringify(data));
@@ -1064,12 +1222,24 @@ export class GameController {
         this.map = restoreMap(data.map);
         this.noviceVillage = restoreMap(data.noviceVillage);
 
-        // 3. 恢复游戏进程
+        // 3. 恢复游戏进程 （使用 TurnManager）
         this.currentMapName = data.currentMapName;
-        this.turnCount = data.turnCount;
-        this.currentMaxTurns = data.currentMaxTurns || 20;
-        this.bossMode = data.bossMode;
-        this.bossModePenaltyActive = data.bossModePenaltyActive;
+        if (data.turnState) {
+          this.turnManager.deserialize(data.turnState);
+        } else {
+          // 兼容旧保存文件
+          this.turnCount = data.turnCount;
+          this.currentMaxTurns = data.currentMaxTurns || 20;
+          this.turnManager.bossMode = data.bossMode;
+          this.bossModePenaltyActive = data.bossModePenaltyActive;
+          // ── 恢复进度条UI ──
+          this.turnManager._updateProgressBar();
+          if (data.currentMapName === 'Novice Village') {
+            this.turnManager.restoreProgressBarTitle('novice');
+          } else {
+            this.turnManager.restoreProgressBarTitle('main');
+          }
+        }
 
         // 4. 恢复玩家位置和动作点
         const curMap = this.currentMapName === 'Novice Village' ? this.noviceVillage : this.map;
@@ -1086,16 +1256,10 @@ export class GameController {
         this.ui.updateMovementUI(this.player.movementPoints);
         this.ui.updatePartyStatus(this.selectedHeroes);
         this.ui.inventoryUI?.update(this.selectedHeroes);
-        this.ui.updateProgressBar(this.turnCount, this.currentMaxTurns);
-        // 设置进度条标题
-        if (this.currentMissionName) {
-          this.ui.updateProgressBarTitle(`🎯 ${this.currentMissionName}`);
-        } else if (this.currentMapName === 'Novice Village') {
-          this.ui.updateProgressBarTitle('🏘️ Novice Village');
-        } else {
-          this.ui.updateProgressBarTitle('Find Ruins');
-        }
-        if (this.bossMode) this.ui.updateBossMode();
+        // ── 使用 TurnManager 恢复进度条状态 ──────────────────────────────────────────────
+        this.turnManager._updateProgressBar();
+        this._updateProgressBarTitle();
+        if (this.turnManager.bossMode) this.ui.updateBossMode();
 
         return true;
     } catch (e) {
@@ -1111,5 +1275,12 @@ export class GameController {
     const storage = this.ui.inventoryUI;
     DataLoader.getAllWeapons().forEach(w => storage.addToStorage({ ...w }));
     ItemDB.forEach(it => storage.addToStorage({ ...it }));
+
+    // Dev 模式：设置英雄攻击力为 999
+    this.selectedHeroes.forEach(hero => {
+      hero.strength = 999;
+      hero._baseStrength = 999;
+      hero.refreshDerivedStats?.();
+    });
   }
 }
