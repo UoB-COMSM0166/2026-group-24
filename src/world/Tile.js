@@ -233,7 +233,9 @@ export class Tile {
           ctx.restore();
         }
       } else {
-        const contentImg = DataLoader.getImage(this.content.type);
+        // 🎮 使用 contentImageType 如果存在，否则使用 content.type
+        const imageType = this.content.contentImageType || this.content.type;
+        const contentImg = DataLoader.getImage(imageType);
         if (contentImg) {
           const scale = 0.98;
           const iw = size * 2 * scale;
