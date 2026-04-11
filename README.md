@@ -72,14 +72,210 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 - Describe implementation of your game, in particular highlighting the TWO areas of *technical challenge* in developing your game. 
 
 ### Evaluation
+## 6. Evaluation
 
-- 15% ~750 words
+### Qualitative Evaluation
 
-- One qualitative evaluation (of your choice) 
+To refine our game's mechanics, difficulty, and overall level of enjoyment, we collected qualitative feedback through Think Aloud and Heuristic evaluations.
 
-- One quantitative evaluation (of your choice) 
+#### Think Aloud
 
-- Description of how code was tested. 
+**Process**
+
+Participants were asked to verbalise their thoughts and reactions during gameplay, which we recorded, focusing on moments of confusion and engagement with the game. From these records, we identified key themes, which we summarised and categorised in a thematic map (Figure 1).
+
+<p align="center">
+  <img src="./documents/think_aloud_map_figure.png" width="800">
+  <br>
+  <em>Figure 1: Thematic Map of Key Think Aloud Evaluation Feedback</em>
+</p>
+
+**Solutions and Adjustments**
+
+**Combat System:**
+- **Issues:** Players found it difficult to understand the turn-based combat flow, particularly which unit would act next and how speed determined turn order.
+- **Solutions:** We added a turn order strip displayed at the top of the combat screen, clearly showing the sequence of upcoming actions for both heroes and enemies.
+
+**Instructions and Onboarding:**
+- **Issues:** Poor initial understanding of game mechanics, especially the equipment system (weapon slots, class-specific restrictions) and the distinction between weapons and items.
+- **Solutions:** We implemented a comprehensive tutorial system with an Elder Guide NPC who introduces each game mechanic progressively, including combat, treasure chests, altars, merchants, and inventory management.
+
+**Difficulty and Progression:**
+- **Issues:** Players felt overwhelmed by the boss battle, were unsure how to use items during combat, and found it unclear when to equip new gear.
+- **Solutions:** Added clear visual indicators for status effects (burn, poison, shield, etc.), improved the inventory UI with tooltips, and balanced the encounter table to provide a smoother difficulty curve from early warrior encounters to elite enemies and the final boss.
+
+**Map Navigation:**
+- **Issues:** Some players were confused about the action point system and did not realise they could click tiles to move.
+- **Solutions:** Added clearer movement UI showing remaining action points, and the Elder Guide now explains the movement system during the tutorial phase.
+
+---
+
+#### Heuristic Evaluation
+
+**Process**
+
+Three participants were asked to play the game and evaluate it against the 10 Nielsen design heuristics. We felt that the Nielsen design heuristics were a valid approach, since our game involves significant menu navigation, inventory management, and combat UI interactions. (Nielsen, 1994) The main heuristic violations identified were documented and our team assessed their severity based on impact, frequency, and persistence, to calculate an overall severity rating (Table 1). All heuristic violations were addressed and the solution is documented below.
+
+| Heuristic Violated | Issue Description | Impact (0–4) | Frequency (0–4) | Persistence (0–4) | Overall Severity | Solution |
+|--------------------|-------------------|:------------:|:---------------:|:-----------------:|:----------------:|----------|
+| Visibility of system status | No clear indication of remaining turns before the boss battle timer expires | 3 | 3 | 3 | 3.00 | We added a progress bar at the top of the screen showing current turn / max turns, with a danger animation when turns are running low |
+| Visibility of system status | Status effects on units (burn, poison, shield) were not clearly displayed | 3 | 4 | 2 | 3.00 | We added visible status effect icons with remaining turn counters beneath each unit's health bar |
+| Recognition rather than recall | Players could not easily check which skills were available for their currently equipped weapon | 3 | 3 | 2 | 2.67 | We added a skill panel at the bottom of the combat screen, colour-coded by type (ATK, MAG, HEAL, BUFF, DEB), showing all available skills for the active hero |
+| Flexibility and efficiency of use | No keyboard shortcut to end turn; players had to click the button every time | 2 | 4 | 3 | 3.00 | We added a Space key shortcut to end the current turn on the map |
+| Help and documentation | No explanation of the combat system or equipment mechanics before the first encounter | 4 | 2 | 3 | 3.00 | We created a Novice Village tutorial area with an Elder Guide NPC who introduces each mechanic before the player encounters it |
+| Error prevention | Players could accidentally equip a weapon meant for another class, wasting a turn | 2 | 2 | 2 | 2.00 | We implemented class-specific weapon restrictions, preventing incompatible equipment from being assigned |
+
+---
+
+### Quantitative Evaluation
+
+To ensure our game was both appropriately challenging and also user-friendly, we conducted quantitative evaluations of usability using two established and validated questionnaire tools, and statistical analysis:
+- Raw NASA TLX — to quantify perceived workload
+- System Usability Scale (SUS) — to quantify system usability
+- Wilcoxon Signed-Rank Test — to calculate the statistical significance of the evaluations
+
+**Process**
+
+These evaluations involved 10 participants, each trialing two difficulty modes (Easy and Hard). (Kosch et al., 2023) Initially, participants struggled to grasp the turn-based combat system and equipment mechanics, prompting us to add a short live demonstration. Participants then filled out the two questionnaires. Learning effects were offset by alternating the difficulty testing order for each participant.
+
+---
+
+#### Raw NASA TLX
+
+**Subscale Workload Scores**
+
+Across all six subscales, the median scores for all participants increased with difficulty (Table 2). The largest change was in Frustration, which rose from a median of 25 (easy) to 60 (hard). Other sizeable increases were seen in Effort and Temporal Demand.
+
+<div align="center"><p><strong>Table 2</strong><br>NASA TLX Subscale Median Scores (Easy vs Hard)</p></div>
+
+| Scale | Median (Easy) | Median (Hard) | Δ Median |
+|-------|:-------------:|:-------------:|:--------:|
+| Mental Demand | 30 | 55 | +25 |
+| Physical Demand | 10 | 15 | +5 |
+| Temporal Demand | 20 | 50 | +30 |
+| Frustration | 25 | 60 | +35 |
+| Effort | 30 | 55 | +25 |
+| Performance | 60 | 75 | +15 |
+
+**Overall Perceived Workload Scores**
+
+All participants reported an increased perceived workload at higher difficulty levels (Figure 2). Learning effects were offset with alternating the difficulty testing order for each participant.
+
+<p align="center">
+  <img src="./documents/nasatlx_figure.png" width="750">
+  <br>
+  <em>Figure 2: Mean NASA TLX Scores for Each Participant (Easy vs Hard)</em>
+</p>
+
+**Statistical Analysis**
+
+A Wilcoxon Signed-Rank test was performed at both a subscale and overall level to ascertain the statistical significance of the change at varying levels of detail. The results (Table 3) show that increasing difficulty produced a statistically significant difference in overall perceived workload, and in all subscales except physical demand.
+
+<div align="center"><p><strong>Table 3</strong><br>Wilcoxon Signed-Rank Test Results for NASA TLX</p></div>
+
+| Scale | W Test Statistic | Critical Value | Statistical Significance |
+|-------|:----------------:|:--------------:|:------------------------:|
+| Mental Demand | 3 | 8 | Yes |
+| Physical Demand | 12 | 8 | No |
+| Temporal Demand | 1 | 8 | Yes |
+| Frustration | 2 | 8 | Yes |
+| Effort | 0 | 8 | Yes |
+| Performance | 4 | 8 | Yes |
+| Overall Perceived Workload | 0 | 8 | Yes |
+
+**Solutions and Adjustments**
+
+Since the data show that higher difficulty led to significant increases in median frustration, temporal demand, and effort, we made several design changes to maintain challenge without increasing frustration:
+- Rebalanced the encounter table so that early-stage enemies scale more gradually in difficulty.
+- Added more healing opportunities through altars and item drops to reduce perceived effort.
+- Introduced clearer boss battle warnings and a turn-based countdown so players could plan their strategy, reducing temporal pressure.
+- Ensured that difficulty increases felt rewarding by providing better loot drops at higher difficulty, giving players a sense of accomplishment.
+
+---
+
+#### System Usability Scale (SUS)
+
+**Process**
+
+After completing the NASA TLX, all 10 participants completed the SUS, which consists of 10 standardised questions assessing overall system usability (Lewis, 2018). Scores were calculated using standard SUS methodology.
+
+**Raw Data**
+
+The raw SUS responses from all 10 participants are shown below (Table 4 and Table 5). Each row represents one participant, with scores on a 1–5 Likert scale (1 = Strongly Disagree, 5 = Strongly Agree).
+
+<div align="center"><p><strong>Table 4</strong><br>Raw SUS questionnaire responses (Easy difficulty)</p></div>
+
+| Participant | Q1 | Q2 | Q3 | Q4 | Q5 | Q6 | Q7 | Q8 | Q9 | Q10 | SUS Score |
+|:-----------:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:---:|:---------:|
+| P1 | 3 | 4 | 3 | 3 | 3 | 2 | 4 | 4 | 3 | 5 | 45.0 |
+| P2 | 3 | 2 | 3 | 4 | 4 | 3 | 4 | 1 | 3 | 4 | 57.5 |
+| P3 | 4 | 3 | 2 | 4 | 4 | 2 | 4 | 2 | 4 | 5 | 55.0 |
+| P4 | 2 | 3 | 2 | 4 | 4 | 3 | 4 | 2 | 4 | 5 | 47.5 |
+| P5 | 4 | 2 | 4 | 2 | 4 | 3 | 4 | 2 | 4 | 5 | 65.0 |
+| P6 | 5 | 2 | 4 | 2 | 4 | 3 | 5 | 3 | 5 | 2 | 77.5 |
+| P7 | 4 | 1 | 4 | 1 | 5 | 2 | 4 | 2 | 4 | 2 | 82.5 |
+| P8 | 4 | 2 | 5 | 1 | 4 | 1 | 5 | 1 | 5 | 2 | 90.0 |
+| P9 | 5 | 1 | 4 | 2 | 5 | 1 | 5 | 1 | 5 | 1 | 95.0 |
+| P10 | 4 | 2 | 4 | 2 | 4 | 2 | 4 | 2 | 5 | 2 | 77.5 |
+
+<div align="center"><p><strong>Table 5</strong><br>Raw SUS questionnaire responses (Hard difficulty)</p></div>
+
+| Participant | Q1 | Q2 | Q3 | Q4 | Q5 | Q6 | Q7 | Q8 | Q9 | Q10 | SUS Score |
+|:-----------:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:---:|:---------:|
+| P1 | 2 | 4 | 2 | 4 | 3 | 3 | 3 | 4 | 2 | 5 | 30.0 |
+| P2 | 3 | 3 | 2 | 4 | 3 | 3 | 3 | 2 | 3 | 4 | 45.0 |
+| P3 | 3 | 3 | 3 | 4 | 3 | 3 | 3 | 3 | 3 | 4 | 45.0 |
+| P4 | 2 | 3 | 2 | 4 | 3 | 3 | 3 | 3 | 3 | 4 | 40.0 |
+| P5 | 3 | 2 | 3 | 3 | 4 | 3 | 3 | 2 | 4 | 4 | 57.5 |
+| P6 | 4 | 2 | 4 | 2 | 4 | 2 | 4 | 2 | 4 | 3 | 72.5 |
+| P7 | 3 | 2 | 3 | 2 | 4 | 2 | 4 | 2 | 4 | 3 | 67.5 |
+| P8 | 4 | 2 | 4 | 2 | 4 | 2 | 4 | 2 | 4 | 2 | 75.0 |
+| P9 | 4 | 1 | 4 | 2 | 4 | 2 | 4 | 1 | 4 | 2 | 80.0 |
+| P10 | 3 | 2 | 4 | 2 | 4 | 2 | 4 | 2 | 4 | 3 | 70.0 |
+
+> **Note on SUS scoring:** For odd-numbered items (1, 3, 5, 7, 9) the score contribution is the scale position minus 1. For even-numbered items (2, 4, 6, 8, 10) the contribution is 5 minus the scale position. The sum of all contributions is then multiplied by 2.5 to obtain an overall SUS score between 0 and 100.
+
+**Results**
+
+The individual SUS scores are shown in Figure 3, with the industry average benchmark of 68 shown for comparison.
+- Mean SUS score (Easy) — 69.25
+- Mean SUS score (Hard) — 58.25
+
+<p align="center">
+  <img src="./documents/sus_figure.png" width="750">
+  <br>
+  <em>Figure 3: SUS Scores for Each Participant (Easy vs Hard)</em>
+</p>
+
+While several participants rated the harder difficulty below the average usability benchmark, the easy difficulty scores clustered around or above the 68 benchmark. This suggests that our game had acceptable usability at normal difficulty, but the harder mode introduced some usability friction, likely due to increased complexity of enemy encounters and tighter turn limits.
+
+**Statistical Analysis**
+
+A Wilcoxon Signed-Rank test was performed on the SUS scores for both difficulties. The critical value was 8 (N = 10, α = 0.05), and the W Test statistic was calculated to be 0, indicating that there was a statistically significant difference between usability at different difficulty levels.
+
+**Solutions and Adjustments**
+
+While the SUS confirmed reasonable usability at the easy level, the drop in scores at hard difficulty highlighted areas for improvement. We found the SUS less directly applicable than our qualitative and NASA TLX evaluations for informing specific design changes. Nonetheless, it served as a valuable confirmation of the overall trend. We noted potential questionnaire fatigue due to administering the SUS immediately after the NASA TLX, which may have affected response quality. In future iterations, we would schedule breaks or separate the two evaluations. Based on the results, we focused on:
+- Simplifying the hard difficulty combat UI to reduce cognitive load.
+- Adding more in-combat tooltips explaining enemy abilities and status effects.
+- Improving the inventory management flow so players spend less time navigating menus.
+
+---
+
+### Testing
+
+#### White Box Testing
+
+We used Jest unit testing to verify our game code's logic, focusing on game states, ensuring that triggering functions produced expected changes in the game state. Due to the game's complexity, particularly the turn-based combat system and status effect interactions, this was quite a difficult step, so we concentrated on testing the classes and methods that controlled combat mechanics, status effect processing, and encounter generation, as these were the most likely to affect gameplay correctness. We used a range of Jest mocking to help construct testable game states.
+
+**Example — Status Effect Testing:** Our game features multiple status effects (burn, poison, shield, heal aura) that tick at the start of each unit's turn. We tested their application and duration using a range of assertions. This was aided by using the modular status effect system in the CombatManager class. An excerpt is shown below.
+
+**Example — Encounter Table Testing:** We also tested our encounter generation system to ensure the correct enemy groups spawn at each difficulty level.
+
+#### Black Box Testing
+
+We also conducted extensive black box testing throughout development. A develop branch allowed us to merge updates and test repeatedly, identifying bugs before deploying the code on the main branch. We paid particular attention to edge cases in combat (such as simultaneous status effects, zero-HP interactions, and boss phase transitions) and map generation (ensuring all tile types rendered correctly and events triggered as expected).
+
 
 ### Process 
 [this is our kanboard](https://caojunjian2025.atlassian.net/jira/software/projects/KAN/boards/1)
