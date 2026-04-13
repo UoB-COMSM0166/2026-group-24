@@ -66,35 +66,37 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 - System architecture. Class diagrams, behavioural diagrams. 
 
 ### Implementation
-##Challenge 1: Hexagonal Grid Pathfinding System
+#### Challenge 1: Hexagonal Grid Pathfinding System
 One of the key challenges we faced was implementing a navigation system based on a hexagonal grid, enabling players to explore and move smoothly across large-scale maps. In the early stages of game design, we chose the hexagonal grid as the core map structure in order to provide more natural movement directions and more tactical path-planning possibilities. Because players frequently select target positions during gameplay, the system must compute paths and reachable ranges in real time. When the map size expands to hundreds of tiles, pathfinding calculations can easily become a runtime performance bottleneck. At the same time, the camera system must support panning, zooming, and coordinate transformation simultaneously. If these functions are not handled in a unified manner, mouse interactions may become inaccurate or visual jitter may occur.
 The primary difficulty came from the performance limitations of the A* pathfinding algorithm. In the early implementation, the open set in Pathfinder.js was stored using a standard array. Each time a new node was inserted, the array was sorted to select the optimal node. This implementation resulted in a time complexity of O(n² log n) for a single pathfinding operation. As the map size increased, noticeable lag occurred when players selected distant targets, becoming the major runtime performance bottleneck. To address this issue, we redesigned the priority queue structure by implementing a custom MinHeap (binary minimum heap). This data structure sorts nodes according to their cumulative cost value (g-value), reducing the complexity of push and pop operations to O(log n). With the new implementation, the overall complexity of the A* algorithm was optimized to O(n log n), significantly improving pathfinding efficiency.
 In addition, we optimized the logical rules of the pathfinding system. In the game, tiles containing events (such as treasure chests or shops) are allowed to serve as destination nodes but cannot be used as intermediate nodes in a path. This rule is implemented through the isPassable(tile, isGoal) function, where the Boolean parameter isGoal distinguishes between the destination and intermediate nodes. This ensures that the generated paths correctly follow the intended gameplay rules.
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/5f786c67-f0ff-4239-8f92-57b127aa7cf9" 
-       style="width: 45%; height: auto; object-fit: cover; display: inline-block; vertical-align: middle;" />
-
-<span style="display:inline-block; width: 100px;"></span>
-
-<img src="https://github.com/user-attachments/assets/1b609a4e-4f82-428e-ad3e-84b441fc5d2b" 
-    style="width: 45%; height: auto; object-fit: cover; display: inline-block; vertical-align: middle;" />
-
+  <table>
+    <tr>
+      <td align="center">
+        <img src="https://github.com/user-attachments/assets/5f786c67-f0ff-4239-8f92-57b127aa7cf9" width="400"/>
+      </td>
+      <td align="center">
+        <img src="https://github.com/user-attachments/assets/1b609a4e-4f82-428e-ad3e-84b441fc5d2b" width="400"/>
+      </td>
+    </tr>
+  </table>
 </p>
 
 
 
-##Challenge 2: Multi-Layer Turn-Based Combat State Management System
+
+#### Challenge 2: Multi-Layer Turn-Based Combat State Management System
 Another major challenge was implementing a multi-layer turn-based combat state management system, designed to support complex combat interactions between multiple characters and enemies. In the game design, each unit can not only perform attacks and skills but may also be affected by multiple status effects, such as burn, freeze, poison, shield, and attack enhancement. Therefore, the system must be capable of managing multiple status effects simultaneously and executing their logic at the correct timing points.
 Damage calculation in combat is not simply a matter of subtracting numerical values. Instead, multiple modifiers must be applied in a specific order, including equipment effects, buffs, debuffs, and triggered effects from special items. If these logical operations are not clearly structured, it can easily result in incorrect damage calculations or code that is difficult to maintain. Therefore, this challenge involved not only state management but also complex data flow design and modular extensibility.
 The first major difficulty came from the unified representation and management of status effects. In CombatManager.js, each unit's status effects are stored within a statusEffects object, where the effect type serves as the key and the remaining number of turns serves as the value. For example, when the burn effect is applied, statusEffects.burn is set to 3, indicating that the effect will persist for the next three turns. Different status effects have different trigger timings. For instance, burn and poison deal damage at the start of a turn, freeze skips a unit's action, while some effects are triggered when the unit receives damage.
 To avoid scattered conditional logic, we adopted a centralized management strategy. At the start of nextTurn(), the _tickStatus() function is called to process all status effects in a unified manner, including immediate damage, healing effects, and duration reduction. When adding a new status effect, developers only need to implement the corresponding logic within _applyStatus() and _tickStatus(), significantly reducing system maintenance complexity.
 The second key difficulty arose from the complexity of the damage calculation logic. During combat, a single damage calculation requires multiple modifiers to be applied sequentially, and the order of execution directly affects the final result. In the _getIncomingDamage() function, we apply effects in a strictly defined sequence. For example, the system first checks the protective effect of the Star Cloak, which may completely block incoming damage if triggered. Next, damage amplification effects from Shockwave and Entangle are applied. Then, damage reduction provided 
 by the Rock Shield is calculated. Finally, additional vulnerability effects provided by equipment are applied.
-## Challenge 2
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/84a1bb46-c112-40ce-a810-19ba2b779717" 
-       style="width: 45%; height: auto;" />
+       style="width: 25%; height: auto;" />
 </p>
 
 
