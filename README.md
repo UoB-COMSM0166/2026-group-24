@@ -77,7 +77,7 @@ In addition, we optimized the logical rules of the pathfinding system. In the ga
         <img src="https://github.com/user-attachments/assets/5f786c67-f0ff-4239-8f92-57b127aa7cf9" width="400"/>
       </td>
       <td align="center">
-        <img src="https://github.com/user-attachments/assets/1b609a4e-4f82-428e-ad3e-84b441fc5d2b" width="400"/>
+        <img src="https://github.com/user-attachments/assets/1b609a4e-4f82-428e-ad3e-84b441fc5d2b" width="450"/>
       </td>
     </tr>
   </table>
