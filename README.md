@@ -63,7 +63,20 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 ### Design
 
 - 15% ~750 words 
-- System architecture. Class diagrams, behavioural diagrams. 
+- System architecture. Class diagrams, behavioural diagrams.
+
+- We adopt a modular, object-oriented architecture centered around the GameController, which precisely coordinates interactions between subsystems throughout the game's lifecycle via a finite state machine (StateMachine). The overall architecture divides the core logic into multiple highly decoupled, independent modules—including core scheduling (GameLoop), level and world management, an independent combat system, entity interactions, and resource management—thereby significantly enhancing the system's maintainability and scalability.
+Operationally, the GameController maintains the overall macro game state (such as map exploration, story progression, and turn advancement) and dispatches module execution within the update loop.
+
+Level and World Management: This is maintained by the underlying hexagonal grid system (HexMap) combined with a dynamic event system (EventTable). This module supports seamless transitions and independent state preservation for multi-tier map structures (e.g., Main World and Novice Village).
+
+
+Combat and Entity System: The system strictly separates combat logic from map exploration logic. When an encounter is triggered, the state machine transitions control to an independent CombatManager. Acting as a sub-control center, this module manages the instantiation of friendly and hostile entities (Player and Enemy), coordinates turn phases, processes skills and stat calculations, and smoothly returns status feedback and loot settlement to the main controller after the battle concludes.
+
+
+Resource and Presentation Management: The game's underlying configuration files (heroes, weapons, monster indices, etc.) are centrally loaded and persisted by the DataLoader; meanwhile, visual rendering (Renderer) and view interactions (UIManager) operate independently from the logic layer.
+
+By decoupling exploration control, combat calculations, and resource loading from one another, the system not only ensures efficient and stable low-level operations but also gains tremendous flexibility in supporting complex multi-layer map structures and expanding deep combat mechanics.
 
 ### Implementation
 #### Challenge 1: Hexagonal Grid Pathfinding System
