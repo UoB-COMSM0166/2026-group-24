@@ -443,7 +443,7 @@ If given the opportunity to develop a sequel or an extended version of this proj
 | Team Member | Contribution |
 |---|---|
 | Junjie Peng | |
-| Songyun Han |Game architecture design, State machine implementation, Map system, Auto-pathfinding & movable range display, Camera controls (drag & zoom), Randomised dice function, UI asset editing (assistance) |
+| Songyun Han |Game architecture design, State machine implementation, Map system, War fog, Auto-pathfinding & movable range display, Camera controls (drag & zoom), Randomised dice function, UI asset editing (assistance) |
 | Jian Ye | |
 | Junjian Cao | |
 | Xiaoyu Zhao | |
