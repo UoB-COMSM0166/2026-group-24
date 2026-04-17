@@ -452,3 +452,12 @@ If given the opportunity to develop a sequel or an extended version of this proj
 </div>
 
 ## 11 AI statement
+Throughout this project, our team utilised AI tools in two specific areas to support our development process, while ensuring that all design decisions, logic, and overall implementation remained our own.
+
+Firstly, we used AI assistance during the programming phase of the project. When implementing complex logic structures, such as state machines, we consulted AI tools to help generate initial code templates and suggest appropriate syntax. These outputs were not used directly; rather, they served as a starting point which our team then critically reviewed, modified, and integrated into our broader codebase. All architectural decisions, debugging, and final implementation were carried out by team members themselves.
+
+Secondly, AI tools were used to assist with image editing during the UI development process. Specifically, we used AI-powered image editing tools to process and refine visual assets used in our interface, such as background removal, resizing, and style adjustments. The overall UI design, layout, and visual direction were conceived and executed by our team, with AI serving purely as an editing aid to improve efficiency.
+
+In both cases, AI was used as a practical tool to reduce repetitive workload and improve the quality of specific outputs, rather than to replace our own thinking or decision-making. All core contributions — including system design, user interface planning, and project logic — reflect the independent work of our team members.
+
+We believe our use of AI was responsible, transparent, and consistent with the spirit of the project requirements.
