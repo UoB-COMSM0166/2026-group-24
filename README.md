@@ -1,10 +1,5 @@
-# 2026-group-24
-2026 COMSM0166 group 24
 
-## COMSM0166 Project Template
-A project template for the Software Engineering Discipline and Practice module (COMSM0166).
-
-## Info
+# Info
 
 This is the template for your group project repo/report. We'll be setting up your repo and assigning you to it after the group forming activity. You can delete this info section, but please keep the rest of the repo structure intact.
 
@@ -13,7 +8,7 @@ You will be developing your game using [P5.js](https://p5js.org) a javascript li
 - [P5.js tutorials](https://p5js.org/tutorials/) 
 - [Coding Train P5.js](https://thecodingtrain.com/tracks/code-programming-with-p5-js) course - go here for enthusiastic video tutorials from Dan Shiffman (recommended!)
 
-## FOR THE TREASURE
+# FOR THE TREASURE
 
 STRAPLINE. Add an exciting one sentence description of your game here.
 
@@ -23,7 +18,7 @@ LINK. GAME LINK: https://uob-comsm0166.github.io/2026-group-24/
 
 VIDEO. Include a demo video of your game here (you don't have to wait until the end, you can insert a work in progress video)
 
-## Your Group
+# Your Group
 
 <p align="center">
 <img src="./documents/groupphoto.jpg" width="600" height="800">
@@ -42,9 +37,9 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 
 </div>
 
-## Project Report
+# Project Report
 
-### 1 Introduction
+## 1 Introduction
 
 For The Treasure is an adventure role-playing game that integrates roguelike mechanics with turn-based tactical combat. Players assemble a party of two heroes — selected from four distinct classes including the Knight, Wizard, Priest, and Ranger — each with a unique stat profile and weapon specialisation, before setting out to defeat enemies, resolve crises, and ultimately claim a legendary treasure.
 
@@ -60,19 +55,19 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
   <img src="./documents/POKEMON.png" style="width: 45%; height: 300px; object-fit: cover; display: inline-block; vertical-align: middle;" />
 </p>
 
-### 2 Requirements
+## 2 Requirements
 <p align="center">
 <img src="/documents/paper_prototypes.gif" width="600" height="800">
 </p>
 - 15% ~750 words
 - Early stages design. Ideation process. How did you decide as a team what to develop? Use case diagrams, user stories. 
 
-### 3 Design
+## 3 Design
 
 - 15% ~750 words 
 - System architecture. Class diagrams, behavioural diagrams.
 
-#### 3.1 Gameplay Flow Overview
+### 3.1 Gameplay Flow Overview
 
 This flowchart illustrates the overall gameplay process and core mechanics of the system, capturing both the linear progression and branching interactions within the game.
 
@@ -118,8 +113,8 @@ Resource and Presentation Management: The game's underlying configuration files 
 
 By decoupling exploration control, combat calculations, and resource loading from one another, the system not only ensures efficient and stable low-level operations but also gains tremendous flexibility in supporting complex multi-layer map structures and expanding deep combat mechanics.
 
-### 4 Implementation
-#### 4.1 Challenge 1: Hexagonal Grid Pathfinding System
+## 4 Implementation
+### 4.1 Challenge 1: Hexagonal Grid Pathfinding System
 One of the key challenges we faced was implementing a navigation system based on a hexagonal grid, enabling players to explore and move smoothly across large-scale maps. In the early stages of game design, we chose the hexagonal grid as the core map structure in order to provide more natural movement directions and more tactical path-planning possibilities. Because players frequently select target positions during gameplay, the system must compute paths and reachable ranges in real time. When the map size expands to hundreds of tiles, pathfinding calculations can easily become a runtime performance bottleneck. At the same time, the camera system must support panning, zooming, and coordinate transformation simultaneously. If these functions are not handled in a unified manner, mouse interactions may become inaccurate or visual jitter may occur.
 
 The primary difficulty came from the performance limitations of the A* pathfinding algorithm. In the early implementation, the open set in Pathfinder.js was stored using a standard array. Each time a new node was inserted, the array was sorted to select the optimal node. This implementation resulted in a time complexity of O(n² log n) for a single pathfinding operation. As the map size increased, noticeable lag occurred when players selected distant targets, becoming the major runtime performance bottleneck. To address this issue, we redesigned the priority queue structure by implementing a custom MinHeap (binary minimum heap). This data structure sorts nodes according to their cumulative cost value (g-value), reducing the complexity of push and pop operations to O(log n). With the new implementation, the overall complexity of the A* algorithm was optimized to O(n log n), significantly improving pathfinding efficiency.
@@ -138,7 +133,7 @@ In addition, we optimized the logical rules of the pathfinding system. In the ga
   </table>
 </p>
 
-#### 4.2 Challenge 2: Multi-Layer Turn-Based Combat State Management System
+### 4.2 Challenge 2: Multi-Layer Turn-Based Combat State Management System
 Another major challenge was implementing a multi-layer turn-based combat state management system, designed to support complex combat interactions between multiple characters and enemies. In the game design, each unit can not only perform attacks and skills but may also be affected by multiple status effects, such as burn, freeze, poison, shield, and attack enhancement. Therefore, the system must be capable of managing multiple status effects simultaneously and executing their logic at the correct timing points.
 
 Damage calculation in combat is not simply a matter of subtracting numerical values. Instead, multiple modifiers must be applied in a specific order, including equipment effects, buffs, debuffs, and triggered effects from special items. If these logical operations are not clearly structured, it can easily result in incorrect damage calculations or code that is difficult to maintain. Therefore, this challenge involved not only state management but also complex data flow design and modular extensibility.
@@ -155,15 +150,15 @@ by the Rock Shield is calculated. Finally, additional vulnerability effects prov
        style="width: 25%; height: auto;" />
 </p>
 
-### 5 Evaluation
+## 5 Evaluation
 
-#### 5.1 Qualitative Evaluation
+### 5.1 Qualitative Evaluation
 
 To iteratively improve our game's mechanics, difficulty balance, and player enjoyment, we gathered qualitative feedback through two complementary methods: Think Aloud sessions and a Heuristic Evaluation.
 
-##### 5.1.1 Think Aloud
+#### 5.1.1 Think Aloud
 
-###### 5.1.1.1 Process
+##### 5.1.1.1 Process
 
 Ten participants were invited to play the game while verbalising their thoughts in real time. Sessions were recorded and reviewed, with particular attention paid to moments of confusion, frustration, or engagement. The recurring themes were then organised into a thematic map (Figure 1), which guided our design iterations.
 
@@ -173,7 +168,7 @@ Ten participants were invited to play the game while verbalising their thoughts 
   <em>Figure 1: Thematic Map of Key Think Aloud Evaluation Feedback</em>
 </p>
 
-###### 5.1.1.2 Solutions and Adjustments
+##### 5.1.1.2 Solutions and Adjustments
 
 **Combat System:**
 - **Issues:** Players struggled to follow the turn-based combat flow, especially regarding which unit would act next and how speed stats influenced turn ordering.
@@ -191,9 +186,9 @@ Ten participants were invited to play the game while verbalising their thoughts 
 - **Issues:** Players were unfamiliar with the action point system and did not realise that tiles were clickable to move.
 - **Solutions:** A movement UI now clearly displays remaining action points, and the Elder Guide tutorial explicitly covers the movement mechanic before the player's first encounter.
 
-##### 5.1.2 Heuristic Evaluation
+#### 5.1.2 Heuristic Evaluation
 
-###### 5.1.2.1 Process
+##### 5.1.2.1 Process
 
 Three evaluators played through the game and assessed it against Nielsen's 10 usability heuristics (Nielsen, 1994). This framework was chosen because our game relies heavily on menu navigation, inventory management, and combat UI — areas where these heuristics are particularly applicable. Each identified violation was rated by the team across three dimensions — impact, frequency, and persistence — to derive a composite severity score (Table 1). All violations were subsequently addressed.
 
@@ -212,20 +207,20 @@ Three evaluators played through the game and assessed it against Nielsen's 10 us
 
 </div>
 
-#### 5.2 Quantitative Evaluation
+### 5.2 Quantitative Evaluation
 
 To measure both perceived workload and usability more rigorously, we administered two validated questionnaire instruments alongside statistical testing:
 - **Raw NASA TLX** — to quantify perceived cognitive workload across difficulty modes
 - **System Usability Scale (SUS)** — to assess overall interface usability
 - **Wilcoxon Signed-Rank Test** — to determine whether observed differences were statistically significant
 
-##### 5.2.1 Process
+#### 5.2.1 Process
 
 Ten participants each played the game in both Easy and Hard difficulty modes (Kosch et al., 2023). Early sessions revealed that participants were unfamiliar with turn-based combat and equipment mechanics, so a short live demonstration was incorporated before testing. Following gameplay, participants completed both questionnaires. To mitigate learning effects, the order in which participants experienced each difficulty was counterbalanced.
 
-##### 5.2.2 Raw NASA TLX
+#### 5.2.2 Raw NASA TLX
 
-###### 5.2.2.1 Subscale Workload Scores
+##### 5.2.2.1 Subscale Workload Scores
 
 Median scores across all six NASA TLX subscales rose with difficulty (Table 2). The most pronounced increase was in Frustration, climbing from 25 (Easy) to 60 (Hard). Effort and Temporal Demand also showed substantial increases.
 
@@ -244,7 +239,7 @@ Median scores across all six NASA TLX subscales rose with difficulty (Table 2). 
 
 </div>
 
-###### 5.2.2.2 Overall Perceived Workload Scores
+##### 5.2.2.2 Overall Perceived Workload Scores
 
 Every participant reported higher perceived workload under the harder difficulty setting (Figure 2). Counterbalancing the test order helped minimise the influence of learning effects on these results.
 
@@ -254,7 +249,7 @@ Every participant reported higher perceived workload under the harder difficulty
   <em>Figure 2: Mean NASA TLX Scores for Each Participant (Easy vs Hard)</em>
 </p>
 
-###### 5.2.2.3 Statistical Analysis
+##### 5.2.2.3 Statistical Analysis
 
 A Wilcoxon Signed-Rank test was applied at both the subscale and overall level to assess the significance of workload differences. As shown in Table 3, the overall workload increase was statistically significant, as were all individual subscales except Physical Demand.
 
@@ -274,7 +269,7 @@ A Wilcoxon Signed-Rank test was applied at both the subscale and overall level t
 
 </div>
 
-###### 5.2.2.4 Solutions and Adjustments
+##### 5.2.2.4 Solutions and Adjustments
 
 Given that Hard difficulty produced statistically significant increases in Frustration, Temporal Demand, and Effort, we introduced several changes to preserve challenge without undermining player experience:
 - Rebalanced the enemy encounter table so that difficulty scales more gradually in the early game.
@@ -282,13 +277,13 @@ Given that Hard difficulty produced statistically significant increases in Frust
 - Added clearer boss battle warnings and a visible turn countdown, giving players time to plan ahead and reducing time pressure.
 - Improved Hard difficulty loot drops so that increased challenge feels rewarding rather than punishing.
 
-##### 5.2.3 System Usability Scale (SUS)
+#### 5.2.3 System Usability Scale (SUS)
 
-###### 5.2.3.1 Process
+##### 5.2.3.1 Process
 
 Immediately following the NASA TLX, all 10 participants completed the SUS — a standardised 10-question instrument for assessing system usability (Lewis, 2018). Scores were derived using the standard SUS calculation method.
 
-###### 5.2.3.2 Raw Data
+##### 5.2.3.2 Raw Data
 
 Individual question responses (on a 1–5 Likert scale) and calculated SUS scores for each participant are presented in Tables 4 and 5 below.
 
@@ -332,7 +327,7 @@ Individual question responses (on a 1–5 Likert scale) and calculated SUS score
 
 > **Note on SUS scoring:** Odd-numbered items (Q1, Q3, Q5, Q7, Q9) contribute (scale position − 1); even-numbered items (Q2, Q4, Q6, Q8, Q10) contribute (5 − scale position). The sum of all contributions is multiplied by 2.5 to yield a score between 0 and 100.
 
-###### 5.2.3.3 Results
+##### 5.2.3.3 Results
 
 Individual SUS scores are plotted in Figure 3, with the industry-standard benchmark of 68 shown for reference.
 - Mean SUS score (Easy) — **69.25**
@@ -346,20 +341,20 @@ Individual SUS scores are plotted in Figure 3, with the industry-standard benchm
 
 At Easy difficulty, scores broadly clustered around or above the 68 benchmark, indicating acceptable usability. Under Hard difficulty, several participants scored notably lower, suggesting that the increased enemy complexity and tighter turn constraints introduced meaningful usability friction.
 
-###### 5.2.3.4 Statistical Analysis
+##### 5.2.3.4 Statistical Analysis
 
 A Wilcoxon Signed-Rank test on the paired SUS scores yielded a W statistic of 0 against a critical value of 8 (N = 10, α = 0.05), confirming a statistically significant difference in usability between the two difficulty settings.
 
-###### 5.2.3.5 Solutions and Adjustments
+##### 5.2.3.5 Solutions and Adjustments
 
 The SUS results validated our qualitative and NASA TLX findings by confirming that Hard difficulty introduced usability friction not present in Easy mode. We found the SUS somewhat less actionable than the other instruments for identifying specific design changes, though it was valuable for confirming the overall pattern. We also noted a risk of questionnaire fatigue from administering both instruments in the same session — in future studies, we would separate the two evaluations or introduce breaks between them. Based on these findings, we prioritised:
 - Streamlining the Hard difficulty combat UI to lower cognitive demands during play.
 - Adding in-combat tooltips to make enemy abilities and status effects more transparent.
 - Refining the inventory management flow to reduce time spent navigating menus mid-encounter.
 
-### 6 Testing
+## 6 Testing
 
-#### 6.1 White Box Testing
+### 6.1 White Box Testing
 
 Jest unit tests were used to verify the correctness of our game's internal logic, focusing on state transitions — confirming that function calls produced expected changes in game state. Given the complexity of the turn-based combat system and the variety of status effect interactions, this required careful scoping. We prioritised testing the classes and methods governing combat mechanics, status effect processing, and encounter generation, as these had the greatest potential to affect gameplay correctness. Jest mocking was used extensively to construct controlled, reproducible game states.
 
@@ -367,15 +362,15 @@ Jest unit tests were used to verify the correctness of our game's internal logic
 
 **Example — Encounter Table Testing:** We also validated the encounter generation system, confirming that the correct enemy compositions spawn at each difficulty tier.
 
-#### 6.2 Black Box Testing
+### 6.2 Black Box Testing
 
 Extensive black box testing was carried out throughout the development cycle. A dedicated `develop` branch was used to consolidate and test feature merges before they were promoted to the `main` branch. Particular focus was given to edge cases in combat (e.g. simultaneous status effects, zero-HP transitions, boss phase changes) and map generation (verifying that all tile types rendered correctly and that events fired as expected).
-### 7 Process
+## 7 Process
 [this is our kanboard](https://caojunjian2025.atlassian.net/jira/software/projects/KAN/boards/1)
 
 Our team adopted a hybrid collaboration model combining both online and offline working modes, which proved to be highly flexible and allowed us to identify and resolve issues in a timely manner throughout the development process.
 
-#### 7.1 Online Collaboration
+### 7.1 Online Collaboration
 
 * The backbone of our online communication was a weekly team meeting held via a voice channel application called OOPZ. These regular sessions gave every member a dedicated space to share their individual progress, discuss blockers they had encountered, and evaluate the work completed since the previous meeting. Crucially, they also served as a forum for constructive peer feedback — members could propose improvements to each other's implementations and collectively agree on the priorities for the upcoming development phase. This rhythm of structured, recurring communication kept the entire team aligned and prevented misunderstandings from snowballing into larger problems.
 
@@ -383,15 +378,15 @@ Our team adopted a hybrid collaboration model combining both online and offline 
 
 For version control, we followed a disciplined Git workflow: pull → edit → commit → push. We used IntelliJ IDEA as our primary development environment, which provided convenient built-in Git integration. Our agreed convention was to create a new branch for each feature or fix and only merge into the main branch after the changes had been reviewed and tested during a team meeting. This practice allowed members to browse each other's pre-written function stubs and interface definitions, making cross-module integration significantly smoother.
 
-#### 7.2 Offline Collaboration
+### 7.2 Offline Collaboration
 
 Beyond our digital tools, we made full use of our scheduled in-person class time. Each week, team members brought their own laptops to the classroom, where we could discuss technical challenges face-to-face and engage in pair programming on the spot. This real-time, side-by-side collaboration proved especially effective for solving complex problems that were difficult to articulate through text or voice alone. Being physically present together created an energy and immediacy that online tools simply could not replicate.
 
-#### 7.3 Team Roles
+### 7.3 Team Roles
 
 Every member of our team was involved in programming work, which reflected the complexity and scope of the game we set out to build. Given the large number of functional modules required, we divided responsibilities roughly along the following lines: inventory system, combat system, map generation, event handling, finite state machine, and item data. However, it is worth emphasising that these modules were far from isolated — they were deeply interconnected. For instance, the item system fed into both the inventory and combat modules; the event system interacted with the map; and the state machine threaded through virtually every other component. As a result, clear inter-member communication and regular pair programming were not merely helpful, but essential.
 
-#### 7.4 Challenges and How We Adapted
+### 7.4 Challenges and How We Adapted
 
 The tight coupling between modules created real difficulties, particularly in the early stages of the project. Our most persistent pain point was Git merge conflicts. When multiple members edited overlapping areas of the codebase simultaneously, merging branches into main often produced a tangled mess of conflicts that cost us significant time and frustration to resolve.
 
@@ -399,23 +394,23 @@ Recognising this as a structural problem rather than a one-off incident, we adap
 
 Looking back, the early turbulence with version control was genuinely challenging, but it pushed us to develop better habits and a more disciplined approach to collaboration. By the latter half of the project, our hybrid online-offline model had matured into a workflow that felt natural and efficient. More than the technical skills we developed, the experience strengthened our interpersonal relationships and built a genuine sense of mutual trust within the team — something we consider one of the most valuable outcomes of this project.
 
-### 8 Sustainability, ethics and accessability
+## 8 Sustainability, ethics and accessability
 
-### 9 Conclusion
+## 9 Conclusion
 
-#### 9.1 Project Reflection
+### 9.1 Project Reflection
 
 Developing **For the Treasure** was a rewarding journey that challenged our technical and design capabilities alike. We are proud of the cohesive core gameplay loop we delivered: exploring procedurally populated hexagonal maps, managing a diverse party of four distinct hero classes — Knight, Wizard, Priest, and Ranger — and engaging in strategic turn-based combat enriched by a deep weapon system and status-effect mechanics. From unpredictable event encounters to challenging dungeon bosses, the variety keeps exploration consistently engaging, while the Novice Village tutorial and Elder Guide dialogue provide an accessible entry point for new players.
 
 However, development required tough choices. Due to time constraints, features such as planned chapter expansions were scaled back. These compromises underscored the importance of scope management and maintaining a firm feature freeze. Ultimately, For the Treasure stands as a testament to our growth as developers. Building a feature-rich, playable RPG from the ground up remains a deeply satisfying achievement that reflects our ability to navigate complexity and shifting priorities under real-world constraints.
 
-#### 9.2 Lessons Learnt
+### 9.2 Lessons Learnt
 
 By adopting an agile methodology supported by a Kanban board, we were able to identify and resolve issues within the same development cycle rather than deferring them. For instance, during playtesting, we discovered that combat damage values were severely unbalanced: certain skills could eliminate enemies in a single hit, stripping away all strategic tension. This was logged as a high-priority card and patched in the following sprint, preventing the imbalance from compounding as new systems were built atop the core combat loop.
 
 Through think aloud testing sessions, we observed players verbalizing their confusion and expectations in real time, revealing friction points that internal testing had overlooked. These insights directly informed the design of the new player tutorial and the creation of "Elder Guide" dialogues, which contextualized complex mechanics within the game’s narrative. Consequently, players now navigate systems they once found unintuitive with noticeably greater confidence and independence.
 
-#### 9.3 Reflect on challenges
+### 9.3 Reflect on challenges
 
 The development of **For the Treasure** was defined by two central technical challenges that tested our ability to maintain system integrity while scaling complexity:
 
@@ -423,9 +418,9 @@ The development of **For the Treasure** was defined by two central technical cha
 * **State Management Sophistication**: Developing the multi-layered combat system taught us the necessity of logic decoupling and execution sequencing. We moved away from a simplistic "hit-and-subtract" damage model to a centralized modifier pipeline, where status effects (burn, shield, etc.) and equipment buffs are processed as distinct middleware layers. This transition forced us to implement a rigid trigger-based lifecycle—processing effects at precise moments like onTurnStart or onDamageReceive. This architectural shift not only prevented the "spaghetti code" typically caused by overlapping status effects but also ensured that complex interactions, such as damage reduction being applied before vulnerability multipliers, remained mathematically consistent and easily extensible for new skills.
 
 These obstacles ultimately moved us away from nested conditional logic toward a more professional, hook-based StateMachine architecture, significantly improving the game's extensibility.
-#### 9.4 Future Work
+### 9.4 Future Work
 
-##### 9.4.1 Immediate Next Steps
+#### 9.4.1 Immediate Next Steps
 
 Our immediate goal is to focus on **refinement and content expansion**, transforming the existing demo into a more polished and complete experience.
 
@@ -433,13 +428,13 @@ Our immediate goal is to focus on **refinement and content expansion**, transfor
 * **Numerical Balancing:** We will establish a more robust balancing framework to ensure the difficulty curve remains both challenging and fair. This will help prevent "power creep" from making the late-game tedious, while also avoiding excessive frustration in the early stages.
 * **User Experience (UX) & Polish:** We aim to resolve remaining UI defects and **enhance the feedback**  (visual and audio) for player actions to improve the overall "game feel."
 
-##### 9.4.2 Sequel
+#### 9.4.2 Sequel
 
 If given the opportunity to develop a sequel or an extended version of this project, our vision would be to expand this single-player demo into a **multiplayer online game**.
 
 * **Immersive Narrative Systems:** Beyond simple random encounters, we would introduce a **dynamic faction system** or a "living world" concept, where player choices have long-term consequences on the game environment.
 * **Technical Evolution:** We will re-engineer the core architecture to support **network synchronization for cooperative multiplayer**, enabling strategic, team-based gameplay.
-### 10 Contribution Statement
+## 10 Contribution Statement
 
 - Provide a table of everyone's contribution, which *may* be used to weight individual grades. We expect that the contribution will be split evenly across team-members in most cases. Please let us know as soon as possible if there are any issues with teamwork as soon as they are apparent and we will do our best to help your team work harmoniously together.
 
@@ -456,4 +451,4 @@ If given the opportunity to develop a sequel or an extended version of this proj
 
 </div>
 
-### 11 AI statement
+## 11 AI statement
