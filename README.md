@@ -65,7 +65,7 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 - 15% ~750 words 
 - System architecture. Class diagrams, behavioural diagrams.
 
-## Gameplay Flow Overview
+#### Gameplay Flow Overview
 
 This flowchart illustrates the overall gameplay process and core mechanics of the system, capturing both the linear progression and branching interactions within the game.
 
@@ -388,6 +388,8 @@ Recognising this as a structural problem rather than a one-off incident, we adap
 Looking back, the early turbulence with version control was genuinely challenging, but it pushed us to develop better habits and a more disciplined approach to collaboration. By the latter half of the project, our hybrid online-offline model had matured into a workflow that felt natural and efficient. More than the technical skills we developed, the experience strengthened our interpersonal relationships and built a genuine sense of mutual trust within the team — something we consider one of the most valuable outcomes of this project.
 
 
+### Sustainability, ethics and accessability
+
 ### Conclusion
 
 
@@ -440,12 +442,4 @@ If given the opportunity to develop a sequel or an extended version of this proj
 | Xiaoyu Zhao | |
 | Shangqing Li | |
 
-### Additional Marks
-
-You can delete this section in your own repo, it's just here for information. in addition to the marks above, we will be marking you on the following two points:
-
-- **Quality** of report writing, presentation, use of figures and visual material (5% of report grade) 
-  - Please write in a clear concise manner suitable for an interested layperson. Write as if this repo was publicly available.
-- **Documentation** of code (5% of report grade)
-  - Organize your code so that it could easily be picked up by another team in the future and developed further.
-  - Is your repo clearly organized? Is code well commented throughout?
+### AI statement
