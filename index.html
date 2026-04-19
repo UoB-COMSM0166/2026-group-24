@@ -334,15 +334,22 @@
 .hp-text { font-size: 11px; text-align: right; color: #cbd5e1; margin-top: 4px; font-family: 'Press Start 2P', monospace; font-weight: bold; }
 
 .stat-detail { 
-    font-size: 12px; 
+    font-size: 11px; 
     color: #e2e8f0; 
-    margin-top: 10px; 
+    margin-top: 8px; 
     display: none; 
     border-top: 1px dashed rgba(255,255,255,0.15); 
-    padding-top: 10px; 
+    padding-top: 8px; 
     pointer-events: none;
-    line-height: 1.5;
+    line-height: 1.4;
 }
+.hero-status-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.hero-status-sub { font-size:9px; color:rgba(255, 235, 190, 0.72); letter-spacing:0.04em; text-transform:uppercase; }
+.hero-detail-title { margin-bottom:6px; font-weight:bold; color:#f5deb3; letter-spacing:0.04em; }
+.hero-detail-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; }
+.hero-detail-chip { background:linear-gradient(180deg, rgba(255,235,190,0.08), rgba(255,255,255,0.02)); border:1px solid rgba(215,179,106,0.14); border-radius:3px; padding:6px 8px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.hero-detail-label { font-size:9px; color:rgba(255,244,223,0.72); letter-spacing:0.08em; }
+.hero-detail-value { font-size:12px; color:#fff4df; }
 
     #top-progress { position: fixed; top: 0; left: 0; right: 0; display: none; flex-direction: column; align-items: center; padding: 10px 40px 14px; background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(4px); z-index: 20; gap: 6px; }
     #top-progress-header { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 700px; }
@@ -371,8 +378,9 @@
     @keyframes pulse-heal { 0% { transform: scale(0.5); opacity: 0; } 50% { opacity: 1; } 100% { transform: scale(1.2); opacity: 0; } }
     .vivid-card.selected::before { content: "Ready"; position: absolute; top: 5px; right: 10px; color: #f4c96b; font-weight: bold; letter-spacing: 0.08em; text-transform: uppercase; }
     #party-status-overlay { top: 58px; }
-    .hero-status-box { background: linear-gradient(180deg, rgba(255, 235, 190, 0.06) 0%, transparent 18%), linear-gradient(145deg, rgba(31, 22, 14, 0.94), rgba(10, 14, 17, 0.95)); border: 2px solid rgba(215, 179, 106, 0.24); border-left: 6px solid var(--ui-gold); padding: 14px 18px; min-width: 274px; box-shadow: 0 0 0 2px rgba(9,8,6,0.72), 0 16px 34px rgba(0,0,0,0.45); border-radius: 4px; backdrop-filter: blur(10px); color: var(--ui-ink); position: relative; overflow: hidden; image-rendering: pixelated; }
+    .hero-status-box { background: linear-gradient(180deg, rgba(255, 235, 190, 0.06) 0%, transparent 18%), linear-gradient(145deg, rgba(31, 22, 14, 0.94), rgba(10, 14, 17, 0.95)); border: 2px solid rgba(215, 179, 106, 0.24); border-left: 6px solid var(--ui-gold); padding: 12px 14px; min-width: 238px; box-shadow: 0 0 0 2px rgba(9,8,6,0.72), 0 16px 34px rgba(0,0,0,0.45); border-radius: 4px; backdrop-filter: blur(10px); color: var(--ui-ink); position: relative; overflow: hidden; image-rendering: pixelated; }
     .hero-status-box:hover { background: linear-gradient(180deg, rgba(255, 235, 190, 0.08) 0%, transparent 18%), linear-gradient(145deg, rgba(42, 28, 18, 0.96), rgba(14, 18, 22, 0.98)); box-shadow: 0 0 0 2px rgba(9,8,6,0.78), 0 18px 36px rgba(0,0,0,0.52); border-left: 6px solid var(--ui-gold-bright); }
+    .hero-status-box.expanded { min-width: 238px; }
     #top-progress { top: 12px; left: 50%; right: auto; transform: translateX(-50%); padding: 12px 18px 16px; width: min(760px, calc(100vw - 32px)); background: linear-gradient(180deg, rgba(23, 17, 12, 0.9), rgba(10, 15, 19, 0.86)); border: 2px solid rgba(215, 179, 106, 0.24); border-radius: 4px; backdrop-filter: blur(10px); box-shadow: 0 0 0 2px rgba(9,8,6,0.76), 0 18px 40px var(--ui-shadow); }
     #top-progress::before { content:''; position:absolute; inset:0; border-radius:2px; pointer-events:none; background: linear-gradient(180deg, rgba(255,235,190,0.08) 0%, transparent 28%); }
     #top-progress-header { position: relative; z-index: 1; }
@@ -395,7 +403,7 @@
       .vivid-card { width: min(92vw, 420px); min-width: 0; }
       #top-progress { width: calc(100vw - 20px); padding: 10px 12px 14px; }
       #party-status-overlay { left: 10px; top: 54px; max-width: calc(100vw - 20px); }
-      .hero-status-box { min-width: 0; width: min(290px, calc(100vw - 20px)); }
+      .hero-status-box { min-width: 0; width: min(260px, calc(100vw - 20px)); }
       #hud { width: calc(100vw - 24px); justify-content: space-between; }
       #movement-points { min-width: 0; flex: 1; }
     }
