@@ -68,7 +68,6 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 - System architecture. Class diagrams, behavioural diagrams.
 
 ### 3.1 Gameplay Flow Overview
-
 This flowchart illustrates the overall gameplay process and core mechanics of the system, capturing both the linear progression and branching interactions within the game.
 
 The process begins at the **Title Screen**, where the player can either start a new game or load an existing save. Selecting a new game leads to **Character Selection**, followed by a **Story/Intro** sequence and a **Novice Village Tutorial**, which introduces basic gameplay mechanics. Once all tutorial tasks are completed, the player transitions through a **Portal** into the main gameplay phase, **Map Exploration**.
