@@ -590,7 +590,7 @@ If given the opportunity to develop a sequel or an extended version of this proj
 | Xiaoyu Zhao | |
 | Shangqing Li | |
 
-</div>
+</div> 
 
 ## 11 AI statement
 Throughout this project, our team utilised AI tools in two specific areas to support our development process, while ensuring that all design decisions, logic, and overall implementation remained our own.
