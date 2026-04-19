@@ -59,6 +59,28 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
   <sub>Figure 1.2: Pokémon</sub>
 </p>
 
+<table>
+  <tr>
+    <td align="center">
+      <img src="./documents/FTK.png" width="400"/><br/>
+      <sub>Figure 1.1: For the King</sub>
+    </td>
+    <td align="center">
+      <img src="./documents/POKEMON.png" width="400"/><br/>
+      <sub>Figure 1.2: Pokémon</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./documents/POKEMON.png" width="400"/><br/>
+      <sub>Figure 1.3: 描述三</sub>
+    </td>
+    <td align="center">
+      <img src="./documents/POKEMON.png" width="400"/><br/>
+      <sub>Figure 1.4: 描述四</sub>
+    </td>
+  </tr>
+</table>
 ## 2 Requirements
 <p align="center">
 <img src="/documents/paper_prototypes.gif" width="600" height="800">
