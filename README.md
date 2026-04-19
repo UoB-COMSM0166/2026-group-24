@@ -50,19 +50,37 @@ The game draws primary inspiration from For the King and Pokémon, adopting the 
 The defining innovation of For The Treasure lies in its deep integration of roguelike randomness. The game adheres to a single-life permadeath rule, and virtually every element — from item rarity rolls to enemy encounter generation — is governed by probability and dice mechanics. At the map level, the game employs a random seed system that sequentially constructs hexagonal terrain distribution, barrier placement, and event population based on the seed value, ensuring full map reproducibility while guaranteeing a distinct layout in every playthrough. This design fundamentally sustains long-term replayability and the desire to explore, making each run a genuinely unique adventure.
 
 <p align="center">
-  <span style="display: inline-block; text-align: center;">
-    <img src="./documents/FTK.png" style="width: 400px;" /><br />
-    <sub>Figure 1: For the King</sub>
-  </span>
-
-<span style="margin: 0 20px;"></span>
-
-  <span style="display: inline-block; text-align: center;">
-    <img src="./documents/POKEMON.png" style="width: 400px;" /><br />
-    <sub>Figure 2: Pokémon</sub>
-  </span>
+  <img src="./documents/FTK.png" width="600"/><br/>
+  <sub>Figure 1.1: For the King</sub>
 </p>
 
+<p align="center">
+  <img src="./documents/POKEMON.png" width="600"/><br/>
+  <sub>Figure 1.2: Pokémon</sub>
+</p>
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="./documents/FTK.png" width="400"/><br/>
+      <sub>Figure 1.1: For the King</sub>
+    </td>
+    <td align="center">
+      <img src="./documents/POKEMON.png" width="400"/><br/>
+      <sub>Figure 1.2: Pokémon</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="./documents/POKEMON.png" width="400"/><br/>
+      <sub>Figure 1.3: 描述三</sub>
+    </td>
+    <td align="center">
+      <img src="./documents/POKEMON.png" width="400"/><br/>
+      <sub>Figure 1.4: 描述四</sub>
+    </td>
+  </tr>
+</table>
 ## 2 Requirements
 <p align="center">
 <img src="/documents/paper_prototypes.gif" width="600" height="800">
@@ -125,20 +143,28 @@ Following the player's action, the `CombatManager` triggers the enemy AI, which 
 | InputHandler | Input processor | Captures mouse and keyboard events and translates them into game commands for GameController |
 | GameStory | Story display manager | Stores narrative content and triggers story screens at key moments throughout the game |
 
-</div>
 
-- We adopt a modular, object-oriented architecture centered around the GameController, which precisely coordinates interactions between subsystems throughout the game's lifecycle via a finite state machine (StateMachine). The overall architecture divides the core logic into multiple highly decoupled, independent modules—including core scheduling (GameLoop), level and world management, an independent combat system, entity interactions, and resource management—thereby significantly enhancing the system's maintainability and scalability.
+###   3.2 Final Class Diagram
+
+ We adopt a modular, object-oriented architecture centered around the GameController, which precisely coordinates interactions between subsystems throughout the game's lifecycle via a finite state machine (StateMachine). The overall architecture divides the core logic into multiple highly decoupled, independent modules—including core scheduling (GameLoop), level and world management, an independent combat system, entity interactions, and resource management—thereby significantly enhancing the system's maintainability and scalability.
 Operationally, the GameController maintains the overall macro game state (such as map exploration, story progression, and turn advancement) and dispatches module execution within the update loop.
-
 Level and World Management: This is maintained by the underlying hexagonal grid system (HexMap) combined with a dynamic event system (EventTable). This module supports seamless transitions and independent state preservation for multi-tier map structures (e.g., Main World and Novice Village).
-
-
 Combat and Entity System: The system strictly separates combat logic from map exploration logic. When an encounter is triggered, the state machine transitions control to an independent CombatManager. Acting as a sub-control center, this module manages the instantiation of friendly and hostile entities (Player and Enemy), coordinates turn phases, processes skills and stat calculations, and smoothly returns status feedback and loot settlement to the main controller after the battle concludes.
-
-
 Resource and Presentation Management: The game's underlying configuration files (heroes, weapons, monster indices, etc.) are centrally loaded and persisted by the DataLoader; meanwhile, visual rendering (Renderer) and view interactions (UIManager) operate independently from the logic layer.
-
 By decoupling exploration control, combat calculations, and resource loading from one another, the system not only ensures efficient and stable low-level operations but also gains tremendous flexibility in supporting complex multi-layer map structures and expanding deep combat mechanics.
+
+<p align="center">
+  <img src="./documents/game_class_diagram_new.png" width="650">
+</p>
+<p align="center"><b>Figure 3.3:New Class Diagram</b></p>
+
+The main improvements to the system are reflected in the following three aspects.
+
+Firstly, we have carried out the decomposition work for the design of the core control system. In the initial class diagram design, the GameController and CombatManager included a massive amount of mixed responsibilities. Now, the core logic is clearly defined and separated into specialized independent classes, which include TurnManager, Dice, TaskList, and TutorialManager. This improvement makes different kinds of game rules and lifecycle mechanics can be managed under a more modular and highly cohesive structure.
+
+Secondly, we have made the improvement upon the structure of the world generation mechanism. Previously, the HexMap was responsible for both storing data and generating the map. Now, a dedicated MapGenerator has been extracted to handle procedural generation and entity placement. The HexMap strictly adopts the grid-based Tile structure for the representation of the map environment. Every Tile records its coordinate position (q, r), its type, and its content, thus supporting more fine-grained map control and rendering examination.
+
+In the end, we have carried out a refactoring work on the User Interface (UI) interaction mechanism. In the beginning design stage, the UI logic was mainly processed in a unified way by a single monolithic UIManager. In the final design, this overly centralized structure has been got rid of, and the interface logic was distributed by us to specific UI component classes like CombatUI, InventoryUI, ShopUI, and StoryDialogueBox. When a specific interface needs to be shown, the system directly uses the UIManager as a router to manage the lifecycle of these independent views. This method lets the interface rendering logic be more clear, and therefore it decreases system coupling degree.
 
 ## 4 Implementation
 ### 4.1 Challenge 1: Hexagonal Grid Pathfinding System
@@ -449,9 +475,9 @@ Allows updates without reprinting materials
 Reduces overall resource waste
 #### 8.1
 
-![Traditional Board Game Components](./images/zhuoyou.jpg)
+![Traditional Board Game Components](./documents/zhuoyou.jpg)
 
-**Figure 1.** Example of traditional board game components, including cards, dice, tokens, and physical materials. Traditional board games require paper maps, cards, and plastic pieces, which consume natural resources during production. Digital games can reduce the need for these physical materials and lower environmental impact.
+**Figure 1.** 
 
 
 ### Technical Impact
@@ -483,9 +509,9 @@ Image resources
 This unified resource management improves runtime efficiency, reduces redundant code, and increases overall system stability.
 #### 8.2
 
-![Game Engine Architecture](./images/huanjing.jpg)
+![Game Engine Architecture](./documents/huanjing.jpg)
 
-**Figure 2.** Diagram of the game engine architecture showing the major modules of the system, including the Graphics Engine, AI Engine, Physics Engine, Sound Engine, and User Control module. These components work together to manage rendering, logic processing, sound output, and user interaction within the game.
+**Figure 2.** 
 
 ### Individual Impact
 
