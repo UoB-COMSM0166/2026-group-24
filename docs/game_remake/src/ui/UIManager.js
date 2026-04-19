@@ -47,9 +47,9 @@ export class UIManager {
     // --- 在这里定义每个英雄的微调参数 ---
     const configs = {
         'wizard': { width: 220, height: 220, offsetX: 20, offsetY: -10, frameCount: 6 },
-        'knight': { width: 316, height: 280, offsetX: 12, offsetY: -95 },
-        'priest': { width: 316, height: 280, offsetX: 12, offsetY: -90 },
-        'ranger': { width: 316, height: 280, offsetX: 12, offsetY: -95 },
+        'knight': { width: 272, height: 250, offsetX: 2, offsetY: -120 },
+        'priest': { width: 272, height: 250, offsetX: 3, offsetY: -110 },
+        'ranger': { width: 272, height: 250, offsetX: 2, offsetY: -120 },
         'default': { width: 150, height: 150, offsetX: 0, offsetY: 0 }
     };
 
@@ -93,27 +93,40 @@ export class UIManager {
 
     heroes.forEach(hero => {
       const hpPct = Math.max(0, (hero.hp / hero.maxHp) * 100);
-      const skills = (hero.skillSlots || []).filter(s => s);
-      const skillsHtml = skills.length > 0 
-        ? skills.map(s => `<div style="color: #ccc; font-size: 10px; margin-top: 2px;">• ${s.name}: ${s.desc}</div>`).join('')
-        : '<div style="color: #666; font-size: 10px;">(No skills equipped)</div>';
+      const attributes = [
+        ['STR', hero.strength],
+        ['VIT', hero.vitality],
+        ['AGI', hero.agility],
+        ['INT', hero.intellect],
+        ['AWR', hero.awareness],
+        ['TAL', hero.talent],
+      ];
+      const attributeHtml = attributes.map(([label, value]) => `
+        <div class="hero-detail-chip">
+          <span class="hero-detail-label">${label}</span>
+          <strong class="hero-detail-value">${value}</strong>
+        </div>
+      `).join('');
 
       const box = document.createElement('div');
       box.className = 'hero-status-box';
       box.innerHTML = `
-        <div style="font-weight:bold; font-size:14px; text-shadow: 1px 1px 2px black;">${hero.name}</div>
+        <div class="hero-status-head">
+          <div style="font-weight:bold; font-size:13px; text-shadow: 1px 1px 2px black;">${hero.name}</div>
+          <div class="hero-status-sub">Click to view stats</div>
+        </div>
         <div class="hp-bar-bg"><div class="hp-bar-fill" style="width: ${hpPct}%; background: ${hpPct < 30 ? 'linear-gradient(90deg, #e74c3c, #c0392b)' : ''}"></div></div>
         <div class="hp-text">HP ${hero.hp} / ${hero.maxHp}</div>
         <div class="stat-detail">
-          <div style="margin-bottom: 6px; font-weight: bold; border-bottom: 1px solid rgba(255,165,0,0.3); padding-bottom: 2px;">Attributes</div>
-          <div style="margin-bottom: 8px;"><div style="margin-bottom: 8px;">STR: ${hero.strength} | VIT: ${hero.vitality} | AGI: ${hero.agility} | INT: ${hero.intellect} | AWR: ${hero.awareness} | TAL: ${hero.talent}</div>
-          <div style="margin-bottom: 4px; font-weight: bold; border-bottom: 1px solid rgba(255,165,0,0.3); padding-bottom: 2px;">Current Skills</div>
-          ${skillsHtml}
+          <div class="hero-detail-title">Attributes</div>
+          <div class="hero-detail-grid">${attributeHtml}</div>
         </div>
       `;
       box.onclick = () => {
         const detail = box.querySelector('.stat-detail');
-        detail.style.display = detail.style.display === 'block' ? 'none' : 'block';
+        const isOpen = detail.style.display !== 'block';
+        detail.style.display = isOpen ? 'block' : 'none';
+        box.classList.toggle('expanded', isOpen);
       };
       this.els.partyStatus.appendChild(box);
     });
