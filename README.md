@@ -65,15 +65,22 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 - 15% ~750 words 
 - System architecture. Class diagrams, behavioural diagrams.
 
-## Gameplay Flow Overview
+## Combat Sequence Description
 
-This flowchart illustrates the overall gameplay process and core mechanics of the system, capturing both the linear progression and branching interactions within the game.
+Figure X illustrates the sequence of interactions between key system objects during a single combat encounter. The diagram captures the collaboration between the `PlayerInput` actor, `GameController`, `CombatManager`, `Hero`, `Enemy`, and `CombatUI`.
 
-The process begins at the **Title Screen**, where the player can either start a new game or load an existing save. Selecting a new game leads to **Character Selection**, followed by a **Story/Intro** sequence and a **Novice Village Tutorial**, which introduces basic gameplay mechanics. Once all tutorial tasks are completed, the player transitions through a **Portal** into the main gameplay phase, **Map Exploration**.
+The sequence begins when the player clicks on a monster tile, triggering the `GameController` to transition into the **COMBAT** state and initialise a new `CombatManager` instance with the current heroes and enemies. Once the player starts the battle, the `CombatManager` sorts all units by their speed stat to determine turn order.
 
-**Map Exploration** represents the central loop of the game. From this state, players can perform multiple actions, such as saving progress, triggering tile-based events, or entering combat scenarios. Encounters include both standard **Combat** and more challenging **Boss Battles**, each with distinct outcomes. Victory results in a **Loot Drop**, while defeat leads directly to **Game Over**. Additionally, boss encounters introduce a turn-based constraint, requiring players to win within a limited number of turns.
+On the player's turn, the `CombatUI` presents available skill buttons. The player selects a skill and a target, after which the `CombatManager` executes a dice roll to determine the outcome. The roll result, ranging from 1 to 6, maps to different damage multipliers:
+- A roll of **1** results in a miss
+- A roll of **6** delivers a perfect hit with double damage
 
-After resolving events or combat, the game proceeds to the **End Turn** phase. The system then evaluates whether the maximum number of turns has been reached. If not, the player returns to **Map Exploration**, forming a continuous gameplay loop; otherwise, the game terminates.
+The calculated damage is then applied to the `Enemy`, and the `CombatUI` displays a floating damage number to provide visual feedback.
+
+Following the player's action, the `CombatManager` triggers the enemy AI, which selects a skill and attacks the `Hero`. After both sides have acted, `evaluateTurn()` checks whether all enemies are defeated or all heroes have fallen.
+
+- **Victory** transitions the game back to `MAP_EXPLORATION`
+- **Defeat** results in the game being reloaded
 
 
 | Class | Description | Key Responsibilities |
