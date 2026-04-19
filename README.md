@@ -147,8 +147,8 @@ One of the key challenges we faced was implementing a navigation system based on
 The primary difficulty came from the performance limitations of the A* pathfinding algorithm. In the early implementation, the open set in Pathfinder.js was stored using a standard array. Each time a new node was inserted, the array was sorted to select the optimal node. This implementation resulted in a time complexity of O(n² log n) for a single pathfinding operation. As the map size increased, noticeable lag occurred when players selected distant targets, becoming the major runtime performance bottleneck. To address this issue, we redesigned the priority queue structure by implementing a custom MinHeap (binary minimum heap). This data structure sorts nodes according to their cumulative cost value (g-value), reducing the complexity of push and pop operations to O(log n). With the new implementation, the overall complexity of the A* algorithm was optimized to O(n log n), significantly improving pathfinding efficiency.
 
 In addition, we optimized the logical rules of the pathfinding system. In the game, tiles containing events (such as treasure chests or shops) are allowed to serve as destination nodes but cannot be used as intermediate nodes in a path. This rule is implemented through the isPassable(tile, isGoal) function, where the Boolean parameter isGoal distinguishes between the destination and intermediate nodes. This ensures that the generated paths correctly follow the intended gameplay rules.
-<p align="center">
-  <table>
+
+  <table align="center">
     <tr>
       <td align="center">
         <img src="https://github.com/user-attachments/assets/5f786c67-f0ff-4239-8f92-57b127aa7cf9" width="400"/>
@@ -158,7 +158,7 @@ In addition, we optimized the logical rules of the pathfinding system. In the ga
       </td>
     </tr>
   </table>
-</p>
+
 
 ### 4.2 Challenge 2: Multi-Layer Turn-Based Combat State Management System
 Another major challenge was implementing a multi-layer turn-based combat state management system, designed to support complex combat interactions between multiple characters and enemies. In the game design, each unit can not only perform attacks and skills but may also be affected by multiple status effects, such as burn, freeze, poison, shield, and attack enhancement. Therefore, the system must be capable of managing multiple status effects simultaneously and executing their logic at the correct timing points.
