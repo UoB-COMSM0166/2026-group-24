@@ -64,40 +64,38 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 
 ## 3 Design
 
-- 15% ~750 words 
-- System architecture. Class diagrams, behavioural diagrams.
+- 15% ~750 words
+- System architecture, including class diagrams and behavioural diagrams
 
-### 3.1 Gameplay Flow Overview
-This flowchart illustrates the overall gameplay process and core mechanics of the system, capturing both the linear progression and branching interactions within the game.
+---
 
-The process begins at the **Title Screen**, where the player can either start a new game or load an existing save. Selecting a new game leads to **Character Selection**, followed by a **Story/Intro** sequence and a **Novice Village Tutorial**, which introduces basic gameplay mechanics. Once all tutorial tasks are completed, the player transitions through a **Portal** into the main gameplay phase, **Map Exploration**.
+## 3.1 Gameplay Flow Overview
 
-**Map Exploration** represents the central loop of the game. From this state, players can perform multiple actions, such as saving progress, triggering tile-based events, or entering combat scenarios. Encounters include both standard **Combat** and more challenging **Boss Battles**, each with distinct outcomes. Victory results in a **Loot Drop**, while defeat leads directly to **Game Over**. Additionally, boss encounters introduce a turn-based constraint, requiring players to win within a limited number of turns.
+<p align="center">
+  <img src="liucheng.png" width="650">
+</p>
+<p align="center"><b>Figure 1: Gameplay Flow Overview</b></p>
 
-After resolving events or combat, the game proceeds to the **End Turn** phase. The system then evaluates whether the maximum number of turns has been reached. If not, the player returns to **Map Exploration**, forming a continuous gameplay loop; otherwise, the game terminates.
+The gameplay flow is structured as a top-to-bottom process representing the progression of time and player interaction within the system. The game begins at the title screen, where the player can either start a new game or load an existing save. A new game leads to character selection, followed by a story introduction and a tutorial phase in the novice village.
 
-<div align="center">
+Once all tutorial tasks are completed, the player transitions through a portal into the main gameplay phase, known as map exploration. This phase forms the core gameplay loop, where the player can explore the map, trigger tile-based events, save progress, or enter combat encounters. The system supports multiple outcomes, including victory, defeat, and turn-based termination, ensuring dynamic gameplay behaviour.
 
-| Class | Description | Key Responsibilities |
-|-------|-------------|---------------------|
-| GameController | Central control class | Holds all core component references, drives the state machine, and coordinates update() and render() each frame |
-| StateMachine | Game state manager | Registers game states and handles transitions between character select, exploration, combat, and game over |
-| GameLoop | Main loop driver | Calls update() and render() every frame via requestAnimationFrame to keep the game running continuously |
-| Character | Abstract base class | Defines six core stats, calculates derived combat values, and provides shared methods for all character types |
-| Player | Player character | Manages weapon slots, equipment, and inventory, and handles weapon switching and map movement |
-| Enemy | Enemy unit | Scales stats by level and difficulty, and supports stat overrides for boss-type enemies |
-| CombatManager | Combat flow controller | Generates turn order, handles player actions and enemy AI, and manages damage calculation and win/loss evaluation |
-| HexMap | World map container | Stores hex grid data, generates terrain and events on initialisation, and provides tile queries and coordinate conversion |
-| Tile | Single hex grid cell | Records terrain type, reveal state, and event content as the basic building block of the game world |
-| Camera | Viewport controller | Supports panning and zooming, converts between screen and world coordinates, and enforces map boundaries |
-| Pathfinder | Pathfinding utility | Implements A* to find the shortest movement path and calculates all reachable tiles within movement points |
-| Renderer | Rendering utility | Draws the map, characters, health bars, and movement highlights for both exploration and combat scenes |
-| UIManager | UI layer manager | Manages all interface screens including HUD, combat overlay, and event popups, bridging game logic and the DOM |
-| DataLoader | Asset loader | Loads hero, skill, and weapon data alongside image assets at startup and caches them for runtime access |
-| InputHandler | Input processor | Captures mouse and keyboard events and translates them into game commands for GameController |
-| GameStory | Story display manager | Stores narrative content and triggers story screens at key moments throughout the game |
+---
 
-</div>
+## 3.2 Combat Sequence Description
+
+<p align="center">
+  <img src="class-diagram.png" width="650">
+</p>
+<p align="center"><b>Figure 2: Class Diagram</b></p>
+
+Figure 2 illustrates the system architecture using a class diagram, showing the relationships between key components. The `GameController` acts as the central control unit, coordinating interactions between subsystems such as `StateMachine`, `CombatManager`, `Renderer`, and `UIManager`.
+
+Core gameplay entities such as `Player` and `Enemy` inherit from the abstract `Character` class, demonstrating the use of generalisation. Composition relationships are used where appropriate, such as between `GameController` and `StateMachine`, indicating strong ownership.
+
+Utility classes such as `Pathfinder`, `DataLoader`, and `Renderer` provide supporting functionality, including pathfinding, asset management, and rendering. Associations between classes represent long-term relationships, while dependencies indicate temporary interactions such as method calls.
+
+The diagram clearly reflects a modular and extensible system design, where responsibilities are well distributed across components.
 
 - We adopt a modular, object-oriented architecture centered around the GameController, which precisely coordinates interactions between subsystems throughout the game's lifecycle via a finite state machine (StateMachine). The overall architecture divides the core logic into multiple highly decoupled, independent modules—including core scheduling (GameLoop), level and world management, an independent combat system, entity interactions, and resource management—thereby significantly enhancing the system's maintainability and scalability.
 Operationally, the GameController maintains the overall macro game state (such as map exploration, story progression, and turn advancement) and dispatches module execution within the update loop.
