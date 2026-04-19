@@ -70,7 +70,7 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 ### 3.1 Gameplay Flow Overview
 
 <p align="center">
-  <img src="liucheng.png" width="650">
+  <img src="./documents/liucheng.png" width="650">
 </p>
 <p align="center"><b>Figure 3.1: Gameplay Flow Overview</b></p>
 
@@ -92,7 +92,7 @@ Following the player's action, the `CombatManager` triggers the enemy AI, which 
 - **Defeat** results in the game being reloaded
 
 <p align="center">
-  <img src="class-diagram.png" width="650">
+  <img src="./documents/class_diagram.png" width="650">
 </p>
 <p align="center"><b>Figure 3.2: Class Diagram</b></p>
 
