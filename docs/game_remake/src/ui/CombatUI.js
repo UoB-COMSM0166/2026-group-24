@@ -724,6 +724,17 @@ const UnitDisplay = ({ unit, isEnemy, isActive, canTarget, onTarget, shakingId, 
   const isDead = unit.hp <= 0;
   const activeColor = isEnemy ? '#f87171' : '#fbbf24';
   const barW = isEnemy && unit.monsterType === 'boss' ? '130px' : '110px';
+  const enemyScaleMap = {
+    stone_golem: 1.7,
+    dark_overlord: 1.28,
+  };
+  const enemyOffsetYMap = {
+    stone_golem: -12,
+    dark_overlord: -10,
+  };
+  const enemyKey = unit.enemyKey || unit.monsterType;
+  const figureScale = isEnemy ? (enemyScaleMap[enemyKey] || 1.22) : 1;
+  const figureOffsetY = isEnemy ? (enemyOffsetYMap[enemyKey] || -8) : 0;
 
   let currentAction = animAction || 'idle';
   if (isDead) {
@@ -777,7 +788,9 @@ const UnitDisplay = ({ unit, isEnemy, isActive, canTarget, onTarget, shakingId, 
             filter: 'blur(4px)'
           }} />
         )}
-        {getFigure(unit, currentAction, onAnimComplete, isEnemy ? true : flipX)}
+        <div style={{ transform: `translateY(${figureOffsetY}px) scale(${figureScale})`, transformOrigin: 'bottom center' }}>
+          {getFigure(unit, currentAction, onAnimComplete, isEnemy ? true : flipX)}
+        </div>
         {isDead && (
           <div style={{
             position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
@@ -1163,7 +1176,14 @@ const CombatApp = ({ state, callbacks }) => {
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-end', minWidth: '200px', justifyContent: 'center' }}>
+          <div style={{
+            display: 'flex',
+            gap: '32px',
+            alignItems: 'flex-end',
+            minWidth: '200px',
+            justifyContent: 'center',
+            transform: 'translateY(0px)'
+          }}>
             {enemies.map(e => {
               const isActive = activeUnit?.id === e.id && !['WIN', 'LOSE', 'START'].includes(phase);
               const canTarget = phase === 'AWAIT_TARGET' && e.hp > 0;
