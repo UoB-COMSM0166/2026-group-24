@@ -47,9 +47,9 @@ export class UIManager {
     // --- 在这里定义每个英雄的微调参数 ---
     const configs = {
         'wizard': { width: 220, height: 220, offsetX: 20, offsetY: -10, frameCount: 6 },
-        'knight': { width: 316, height: 280, offsetX: 12, offsetY: -95 },
-        'priest': { width: 316, height: 280, offsetX: 12, offsetY: -90 },
-        'ranger': { width: 316, height: 280, offsetX: 12, offsetY: -95 },
+        'knight': { width: 272, height: 250, offsetX: 2, offsetY: -120 },
+        'priest': { width: 272, height: 250, offsetX: 3, offsetY: -110 },
+        'ranger': { width: 272, height: 250, offsetX: 2, offsetY: -120 },
         'default': { width: 150, height: 150, offsetX: 0, offsetY: 0 }
     };
 
