@@ -453,7 +453,7 @@ Allows updates without reprinting materials
 Reduces overall resource waste
 #### 8.1
 
-![Traditional Board Game Components](./images/zhuoyou.jpg)
+![Traditional Board Game Components](./documents/zhuoyou.jpg)
 
 **Figure 1.** Example of traditional board game components, including cards, dice, tokens, and physical materials. Traditional board games require paper maps, cards, and plastic pieces, which consume natural resources during production. Digital games can reduce the need for these physical materials and lower environmental impact.
 
@@ -487,7 +487,7 @@ Image resources
 This unified resource management improves runtime efficiency, reduces redundant code, and increases overall system stability.
 #### 8.2
 
-![Game Engine Architecture](./images/huanjing.jpg)
+![Game Engine Architecture](./documents/huanjing.jpg)
 
 **Figure 2.** Diagram of the game engine architecture showing the major modules of the system, including the Graphics Engine, AI Engine, Physics Engine, Sound Engine, and User Control module. These components work together to manage rendering, logic processing, sound output, and user interaction within the game.
 
