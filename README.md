@@ -50,9 +50,15 @@ The game draws primary inspiration from For the King and Pokémon, adopting the 
 The defining innovation of For The Treasure lies in its deep integration of roguelike randomness. The game adheres to a single-life permadeath rule, and virtually every element — from item rarity rolls to enemy encounter generation — is governed by probability and dice mechanics. At the map level, the game employs a random seed system that sequentially constructs hexagonal terrain distribution, barrier placement, and event population based on the seed value, ensuring full map reproducibility while guaranteeing a distinct layout in every playthrough. This design fundamentally sustains long-term replayability and the desire to explore, making each run a genuinely unique adventure.
 
 <p align="center">
-  <img src="./documents/FTK.png" style="width: 45%; height: 300px; object-fit: cover; display: inline-block; vertical-align: middle;" />
-  <span style="display:inline-block; width: 100px;"></span>
-  <img src="./documents/POKEMON.png" style="width: 45%; height: 300px; object-fit: cover; display: inline-block; vertical-align: middle;" />
+  <span style="display: inline-block; text-align: center; vertical-align: top; margin: 0 10px;">
+    <img src="./documents/FTK.png" style="width: 400px; display: block; margin-bottom: 5px;" /><br />
+    <sub style="display: block;">Figure 1.1: For the King</sub>
+  </span>
+
+  <span style="display: inline-block; text-align: center; vertical-align: top; margin: 0 10px;">
+    <img src="./documents/POKEMON.png" style="width: 400px; display: block; margin-bottom: 5px;" /><br />
+    <sub style="display: block;">Figure 1.2: Pokémon</sub>
+  </span>
 </p>
 
 ## 2 Requirements
