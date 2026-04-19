@@ -415,6 +415,94 @@ Looking back, the early turbulence with version control was genuinely challengin
 
 ## 8 Sustainability, ethics and accessability
 
+### Sustainability
+Both designing and running digital games have environmental impacts. As a digital game, this project requires computers or devices to operate, which consumes electrical energy. Additionally, the game uses a continuous update and rendering loop mechanism. While this ensures smooth visuals and improves user experience, it also requires the processor to keep running, leading to increased energy consumption.
+
+To address this issue, we implemented the browser's animation frame mechanism to control refresh frequency. This helps reduce unnecessary calculations and improves overall energy efficiency.
+
+During development, the game uses a resource preloading system, which loads images and audio files at the start of the game instead of repeatedly accessing them during runtime. This improves performance while reducing unnecessary system workload and energy consumption.
+
+Furthermore, this digital game partially replaces traditional board games, reducing reliance on physical materials. Traditional board games typically require:
+
+Paper maps
+Cards
+Character sheets
+Plastic tokens
+Packaging materials
+
+These materials consume natural resources such as paper and plastic during production and generate carbon emissions. In contrast, this game stores character information, skill data, and equipment data in JSON format, and displays maps and characters digitally on screen.
+
+This digital approach:
+
+Reduces the use of paper and plastic materials
+Minimizes packaging waste
+Lowers transportation-related emissions
+Allows updates without reprinting materials
+Reduces overall resource waste
+#### 8.1
+
+![Traditional Board Game Components](./images/zhuoyou.jpg)
+
+**Figure 1.** Example of traditional board game components, including cards, dice, tokens, and physical materials. Traditional board games require paper maps, cards, and plastic pieces, which consume natural resources during production. Digital games can reduce the need for these physical materials and lower environmental impact.
+
+
+### Technical Impact
+
+During the development process, we learned and applied several new technologies, demonstrating modular programming and system design principles commonly used in software engineering.
+
+The game is primarily built using:
+
+JavaScript
+HTML
+Canvas rendering technology
+
+This combination allows the game to run directly in a browser without requiring additional software installation. As a result, the system has high compatibility and improved accessibility for users.
+
+A modular design approach was used to structure the combat system. The combat management module handles:
+
+Turn order management
+Skill execution
+Damage calculation
+
+This structure ensures an organized combat flow and follows object-oriented programming principles, improving both code readability and maintainability.
+
+Additionally, a resource management system was implemented to centrally load:
+
+Character data
+Skill data
+Image resources
+
+This unified resource management improves runtime efficiency, reduces redundant code, and increases overall system stability.
+#### 8.2
+
+![Game Engine Architecture](./images/huanjing.jpg)
+
+**Figure 2.** Diagram of the game engine architecture showing the major modules of the system, including the Graphics Engine, AI Engine, Physics Engine, Sound Engine, and User Control module. These components work together to manage rendering, logic processing, sound output, and user interaction within the game.
+
+### Individual Impact
+
+The game also has positive effects on players at an individual level.
+
+During gameplay, players must:
+
+Choose movement paths
+Plan character actions
+Select appropriate skills
+Adapt strategies based on changing situations
+
+These decision-making processes help develop:
+
+Logical thinking skills
+Problem-solving abilities
+Strategic planning skills
+
+Player comfort was also considered during the design process. To help relieve stress, the game includes multiple reward and feedback systems, providing players with:
+
+A sense of achievement
+Motivation to continue playing
+Emotional satisfaction
+
+This allows players to relax after studying or working, helping improve mood and overall well-being.
 ## 9 Conclusion
 
 ### 9.1 Project Reflection
