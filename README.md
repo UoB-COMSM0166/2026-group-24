@@ -74,9 +74,9 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 </p>
 <p align="center"><b>Figure 3.1: Gameplay Flow Overview</b></p>
 
-### 3.2 Combat Sequence Description
 
-Figure 3.2 illustrates the sequence of interactions between key system objects during a single combat encounter. The diagram captures the collaboration between the `PlayerInput` actor, `GameController`, `CombatManager`, `Hero`, `Enemy`, and `CombatUI`.
+
+Figure 3.1 illustrates the sequence of interactions between key system objects during a single combat encounter. The diagram captures the collaboration between the `PlayerInput` actor, `GameController`, `CombatManager`, `Hero`, `Enemy`, and `CombatUI`.
 
 The sequence begins when the player clicks on a monster tile, triggering the `GameController` to transition into the **COMBAT** state and initialise a new `CombatManager` instance with the current heroes and enemies. Once the player starts the battle, the `CombatManager` sorts all units by their speed stat to determine turn order.
 
