@@ -94,14 +94,14 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 <table>
   <thead>
     <tr>
-      <th>Epic 史诗</th>
-      <th>User Story 用户故事</th>
-      <th>Acceptance Criterion 验收标准</th>
+      <th>Epic</th>
+      <th>User Story</th>
+      <th>Acceptance Criterion</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td rowspan="2"><b>Exploration and Traversal</b><br/>探索与穿越</td>
+      <td rowspan="2"><b>Exploration and Traversal</b></td>
       <td>
         As a player, I want to use a rope tool to traverse difficult terrain so that I can explore polluted areas of the planet.<br/><br/>
         作为玩家，我想使用绳索工具穿越复杂地形，以便探索星球上被污染的区域。
