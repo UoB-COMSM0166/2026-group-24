@@ -87,7 +87,35 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 </p>
 - 15% ~750 words
 - Early stages design. Ideation process. How did you decide as a team what to develop? Use case diagrams, user stories. 
+### Identifying Top-Level Needs with User Stories
 
+<table>
+  <thead>
+    <tr>
+      <th>Epic 史诗</th>
+      <th>User Story 用户故事</th>
+      <th>Acceptance Criterion 验收标准</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="2"><b></b></td>
+      <td>
+      </td>
+      <td>
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="3"><b></b></td>
+      <td>
+      </td>
+      <td>
+      </td>
+      <td>
+      </td>
+    </tr>
+  </tbody>
+</table>
 ## 3 Design
 
 - 15% ~750 words
