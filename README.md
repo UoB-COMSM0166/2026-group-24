@@ -137,7 +137,7 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
     <tr>
       <td rowspan="2"><b>Roguelite Mechanics</b></td>
       <td>
-        As a player, I want my character to die permanently upon defeat so that each run feels meaningful and high-stakes.
+        As a rougelite enthusiast, I want my character to die permanently upon defeat so that each run feels meaningful and high-stakes.
       </td>
       <td>
         Given the player's HP reaches zero, when the defeat condition is triggered, then all progress for that run is lost and the player is returned to the start screen with no carry-over state.
@@ -145,7 +145,7 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
     </tr>
     <tr>
       <td>
-        As a player, I want items and enemy encounters to be randomised each run so that every playthrough feels fresh and unpredictable.
+        As a rougelite enthusiast, I want items and enemy encounters to be randomised each run so that every playthrough feels fresh and unpredictable.
       </td>
       <td>
         Given a new run begins, when the map and events are generated, then item drops and enemy placements are randomised so that no two runs follow the same pattern.
