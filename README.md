@@ -95,6 +95,33 @@ In the subsequent laboratory workshop sessions, we applied the knowledge and met
 <img src="/documents/paper_prototypes.gif" width="600" height="800">
 </p>
 
+### Stakeholder Analysis (Onion Model)
+
+
+<p align="center">
+  <img src="./documents/onion.png" width="650">
+</p>
+<p align="center"><b>Figure 2.1: Onion Model of Stakeholders for “For the Treasure”</b></p>
+
+To systematically identify stakeholders within the project, we adopt the Onion Model, which categorises stakeholders based on their proximity to and interaction with the system.
+
+At the core of the model lies the system itself, *For the Treasure*. The game represents the central entity of all interactions, incorporating key mechanics such as map exploration, turn-based combat, and character progression.
+
+The second layer consists of **direct users**, including players and testers. Players are the primary beneficiaries of the system, and their experience directly determines the success of the game. Testers interact with the system during development, providing valuable feedback that helps identify usability issues and refine gameplay mechanics.
+
+The third layer represents the **development team**, including developers, UI/UX designers, data balancing designers, and maintainers. This group is responsible for implementing, maintaining, and improving the system. Their role ensures that the game functions correctly, remains scalable, and delivers a consistent user experience.
+
+The outermost layer represents the **wider environment**, including professors, peers, course staff, and supporting platforms such as p5.js and GitHub. These stakeholders do not directly use the system but influence it through feedback, evaluation, and technical support. Additionally, the general public, as potential future players, represents long-term system impact.
+
+A key insight from this model is the role of **surrogate stakeholders**. Professors and peers act as representatives of broader player groups, allowing requirements to be gathered even when direct access to real users is limited. This is particularly useful in early-stage development, enabling rapid feedback and iterative design improvements.
+
+However, reliance on surrogate stakeholders introduces potential limitations. They may not fully reflect the diversity of real users, especially in terms of gameplay preferences, skill levels, or accessibility needs. Therefore, their feedback must be complemented by broader user testing.
+
+Furthermore, we identify **negative stakeholders**, such as players who may perceive the game as too difficult or unbalanced, and users experiencing performance issues on low-end devices. Recognising these stakeholders helps anticipate risks and improve system design.
+
+Overall, the Onion Model provides a structured framework for understanding stakeholder relationships, ensuring that both direct and indirect influences are considered within the requirements engineering process.
+
+
 ### Feasibility Studies
 
 After a period of discussion and testing, we ultimately validated the feasibility of the core mechanics and gameplay of the game. By implementing a central state machine to manage the interaction system between the map and various game elements — including combat, events, and treasure chests — we successfully integrated the rich game content into a cohesive whole. This culminated in the completion of a fully runnable version 2.0, following the initial paper prototype, which formally marked the beginning of the iterative refinement of both the visual presentation and gameplay features built upon this foundation.
@@ -203,6 +230,27 @@ Through the study conducted in both laboratory workshops and lecture sessions, w
     </tr>
   </tbody>
 </table>
+
+
+
+### Use-Case Breakdown
+
+<p align="center">
+  <img src="./documents/usecase.png" width="650">
+</p>
+<p align="center"><b>Figure 3.X: Use Case Diagram</b></p>
+
+Based on our identified stakeholders and user needs, we developed a Use Case Diagram to represent the core interactions between the player and the system. The diagram focuses on high-level gameplay actions rather than low-level mechanics, allowing us to clearly define the system’s functional scope during the requirements phase.
+
+From this model, we identified three main areas of interaction: map exploration, combat, and system management. During exploration, players can navigate the map, trigger tile-based events, and interact with the game world. These interactions form the core gameplay loop and are essential for maintaining player engagement. The inclusion of movement and event triggering as supporting use cases ensures that exploration is both dynamic and responsive.
+
+In addition, inventory management was identified as a key supporting system. Players are able to manage and equip items, which directly influence their performance in combat. This connection between exploration, inventory, and combat reflects the integrated design of the game’s mechanics.
+
+Combat is represented as a structured interaction sequence, where players select skills and perform actions against enemies. The use case diagram highlights this as a simplified flow, abstracting away internal logic while still capturing the player’s role in decision-making.
+
+Overall, the use case diagram helped us define clear system boundaries and prioritise essential gameplay features, ensuring that the design remains focused on player interaction and usability.
+
+
 ## 3 Design
 
 - 15% ~750 words
