@@ -427,10 +427,19 @@ Our team adopted a hybrid collaboration model combining both online and offline 
 
 * The backbone of our online communication was a weekly team meeting held via a voice channel application called OOPZ. These regular sessions gave every member a dedicated space to share their individual progress, discuss blockers they had encountered, and evaluate the work completed since the previous meeting. Crucially, they also served as a forum for constructive peer feedback — members could propose improvements to each other's implementations and collectively agree on the priorities for the upcoming development phase. This rhythm of structured, recurring communication kept the entire team aligned and prevented misunderstandings from snowballing into larger problems.
 
+<p align="center">
+  <img src="./documents/Voice Channel.png" width="600"/><br/>
+  <sub>Figure 7.1: voice channel</sub>
+</p>
+
 * To complement our meetings, we adopted Jira as our Kanban management tool. After each meeting, individual tasks were broken down and placed onto the Kanban board, giving everyone a clear, at-a-glance view of their own responsibilities and those of their teammates. This transparency was invaluable: rather than relying on informal memory or fragmented chat messages, the board served as a single source of truth for the project's current state.
 
 For version control, we followed a disciplined Git workflow: pull → edit → commit → push. We used IntelliJ IDEA as our primary development environment, which provided convenient built-in Git integration. Our agreed convention was to create a new branch for each feature or fix and only merge into the main branch after the changes had been reviewed and tested during a team meeting. This practice allowed members to browse each other's pre-written function stubs and interface definitions, making cross-module integration significantly smoother.
 
+<p align="center">
+  <img src="./documents/kanban.png" width="600"/><br/>
+  <sub>Figure 7.2: kanban</sub>
+</p>
 ### 7.2 Offline Collaboration
 
 Beyond our digital tools, we made full use of our scheduled in-person class time. Each week, team members brought their own laptops to the classroom, where we could discuss technical challenges face-to-face and engage in pair programming on the spot. This real-time, side-by-side collaboration proved especially effective for solving complex problems that were difficult to articulate through text or voice alone. Being physically present together created an energy and immediacy that online tools simply could not replicate.
