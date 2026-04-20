@@ -89,6 +89,8 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 - Early stages design. Ideation process. How did you decide as a team what to develop? Use case diagrams, user stories. 
 ### Identifying Top-Level Needs with User Stories
 
+## 用户故事与验收标准
+
 <table>
   <thead>
     <tr>
@@ -99,19 +101,45 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
   </thead>
   <tbody>
     <tr>
-      <td rowspan="2"><b></b></td>
+      <td rowspan="2"><b>Exploration and Traversal</b><br/>探索与穿越</td>
       <td>
+        As a player, I want to use a rope tool to traverse difficult terrain so that I can explore polluted areas of the planet.<br/><br/>
+        作为玩家，我想使用绳索工具穿越复杂地形，以便探索星球上被污染的区域。
       </td>
       <td>
+        Given the player is near a rope anchor point, when they activate the rope tool, then the player can swing or climb to reach higher or distant platforms.<br/><br/>
+        当玩家靠近绳索锚点并激活绳索工具时，即可通过摆动或攀爬抵达更高或更远的平台。
       </td>
     </tr>
     <tr>
-      <td rowspan="3"><b></b></td>
       <td>
+        As a player, I want to explore interconnected areas so that I can gradually uncover the world.<br/><br/>
+        作为玩家，我想要探索相互连接的区域，以便逐步揭开这个世界的奥秘。
       </td>
       <td>
+        Given the player moves through the environment, when they reach a transition point between areas, then the camera follows the player and loads the connected area smoothly.<br/><br/>
+        当玩家在场景中移动，到达区域间的过渡点时，相机会跟随玩家并流畅加载相连的区域。
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="2"><b>Pollution Purification</b><br/>污染净化</td>
+      <td>
+        As a player, I want to purify polluted creatures and cores so that the environment can gradually recover.<br/><br/>
+        作为玩家，我想净化被污染的生物和核心，这样环境就能逐渐恢复。
       </td>
       <td>
+        Given a polluted creature or core is present, when the player uses cleaning energy, then the pollution entity is removed and the purification progress increases.<br/><br/>
+        当存在被污染的生物或核心时，玩家使用净化能量，污染实体将被移除，同时净化进度会提升。
+      </td>
+    </tr>
+    <tr>
+      <td>
+        As a player, I want to purify polluted creatures and pollution cores so that I can clear obstacles in my path.<br/><br/>
+        作为玩家，我想净化被污染的生物和污染核心，以便清除路上的障碍。
+      </td>
+      <td>
+        Given a polluted creature or pollution core is present, when the player uses cleaning energy to purify it, then the entity disappears and the path becomes accessible.<br/><br/>
+        当存在被污染的生物或污染核心时，玩家使用净化能量将其净化后，该实体消失，道路变得可通行。
       </td>
     </tr>
   </tbody>
