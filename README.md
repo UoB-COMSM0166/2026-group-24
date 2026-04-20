@@ -89,7 +89,7 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 - Early stages design. Ideation process. How did you decide as a team what to develop? Use case diagrams, user stories. 
 ### Identifying Top-Level Needs with User Stories
 
-## 用户故事与验收标准
+## Epics, User Stories & Acceptance Criteria
 
 <table>
   <thead>
@@ -101,45 +101,88 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
   </thead>
   <tbody>
     <tr>
-      <td rowspan="2"><b>Exploration and Traversal</b></td>
+      <td rowspan="2"><b>Map Exploration</b></td>
       <td>
-        As a player, I want to use a rope tool to traverse difficult terrain so that I can explore polluted areas of the planet.<br/><br/>
-        作为玩家，我想使用绳索工具穿越复杂地形，以便探索星球上被污染的区域。
+        As a player, I want to move across a hexagonal tile map so that I can explore the world and discover new areas.
       </td>
       <td>
-        Given the player is near a rope anchor point, when they activate the rope tool, then the player can swing or climb to reach higher or distant platforms.<br/><br/>
-        当玩家靠近绳索锚点并激活绳索工具时，即可通过摆动或攀爬抵达更高或更远的平台。
+        Given the player selects a hex tile, when it is within the movement range, then the player moves to that tile and the remaining steps decrease accordingly.
       </td>
     </tr>
     <tr>
       <td>
-        As a player, I want to explore interconnected areas so that I can gradually uncover the world.<br/><br/>
-        作为玩家，我想要探索相互连接的区域，以便逐步揭开这个世界的奥秘。
+        As a player, I want a limited number of steps per turn so that I must plan my movement strategically.
       </td>
       <td>
-        Given the player moves through the environment, when they reach a transition point between areas, then the camera follows the player and loads the connected area smoothly.<br/><br/>
-        当玩家在场景中移动，到达区域间的过渡点时，相机会跟随玩家并流畅加载相连的区域。
+        Given the player has used all available steps, when they attempt to move further, then the action is blocked and a visual indicator shows that no steps remain.
       </td>
     </tr>
     <tr>
-      <td rowspan="2"><b>Pollution Purification</b><br/>污染净化</td>
+      <td rowspan="2"><b>Combat System</b></td>
       <td>
-        As a player, I want to purify polluted creatures and cores so that the environment can gradually recover.<br/><br/>
-        作为玩家，我想净化被污染的生物和核心，这样环境就能逐渐恢复。
+        As a player, I want to engage in turn-based combat so that I can defeat enemies through strategic decision-making.
       </td>
       <td>
-        Given a polluted creature or core is present, when the player uses cleaning energy, then the pollution entity is removed and the purification progress increases.<br/><br/>
-        当存在被污染的生物或核心时，玩家使用净化能量，污染实体将被移除，同时净化进度会提升。
+        Given the player encounters an enemy, when combat begins, then both sides take turns performing actions until one side is defeated.
       </td>
     </tr>
     <tr>
       <td>
-        As a player, I want to purify polluted creatures and pollution cores so that I can clear obstacles in my path.<br/><br/>
-        作为玩家，我想净化被污染的生物和污染核心，以便清除路上的障碍。
+        As a player, I want to use a variety of skills and apply status effects so that I can devise diverse combat strategies.
       </td>
       <td>
-        Given a polluted creature or pollution core is present, when the player uses cleaning energy to purify it, then the entity disappears and the path becomes accessible.<br/><br/>
-        当存在被污染的生物或污染核心时，玩家使用净化能量将其净化后，该实体消失，道路变得可通行。
+        Given the player selects a skill during their turn, when the skill is used, then the corresponding effect (damage, buff, debuff, or status) is applied and reflected in the combat log.
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="2"><b>Roguelite Mechanics</b></td>
+      <td>
+        As a player, I want my character to die permanently upon defeat so that each run feels meaningful and high-stakes.
+      </td>
+      <td>
+        Given the player's HP reaches zero, when the defeat condition is triggered, then all progress for that run is lost and the player is returned to the start screen with no carry-over state.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        As a player, I want items and enemy encounters to be randomised each run so that every playthrough feels fresh and unpredictable.
+      </td>
+      <td>
+        Given a new run begins, when the map and events are generated, then item drops and enemy placements are randomised so that no two runs follow the same pattern.
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="2"><b>Equipment & Accessory System</b></td>
+      <td>
+        As a player, I want to collect a wide variety of class-specific equipment and accessories so that I can build a character suited to my playstyle.
+      </td>
+      <td>
+        Given the player obtains a piece of equipment or accessory, when they open the inventory, then the item is displayed with its stats and any class restrictions clearly indicated.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        As a player, I want to freely mix and match equipment and accessories so that I can experiment with different build combinations.
+      </td>
+      <td>
+        Given the player equips a combination of items, when the loadout is confirmed, then the combined stat bonuses and any synergy effects are calculated and displayed in real time.
+      </td>
+    </tr>
+    <tr>
+      <td rowspan="2"><b>UI & Feedback</b></td>
+      <td>
+        As a new player, I want an in-game tutorial so that I can learn the core mechanics without consulting external resources.
+      </td>
+      <td>
+        Given the player launches the game for the first time, when the tutorial begins, then interactive prompts guide the player through movement, combat, and inventory step by step.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        As a player, I want to see the current turn count and active quest hints on screen so that I can track my progress at a glance.
+      </td>
+      <td>
+        Given the player is in an active run, when a new turn begins or a quest objective updates, then the turn counter increments and the relevant quest hint is displayed in the HUD without obscuring gameplay.
       </td>
     </tr>
   </tbody>
