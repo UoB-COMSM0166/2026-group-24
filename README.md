@@ -142,7 +142,7 @@ Following the player's action, the `CombatManager` triggers the enemy AI, which 
 | DataLoader | Asset loader | Loads hero, skill, and weapon data alongside image assets at startup and caches them for runtime access |
 | InputHandler | Input processor | Captures mouse and keyboard events and translates them into game commands for GameController |
 | GameStory | Story display manager | Stores narrative content and triggers story screens at key moments throughout the game |
-
+</div>
 
 ###   3.2 Final Class Diagram
 
