@@ -98,12 +98,15 @@ In the subsequent laboratory workshop sessions, we applied the knowledge and met
 ### Feasibility Studies
 
 After a period of discussion and testing, we ultimately validated the feasibility of the core mechanics and gameplay of the game. By implementing a central state machine to manage the interaction system between the map and various game elements — including combat, events, and treasure chests — we successfully integrated the rich game content into a cohesive whole. This culminated in the completion of a fully runnable version 2.0, following the initial paper prototype, which formally marked the beginning of the iterative refinement of both the visual presentation and gameplay features built upon this foundation.
+
+<p align="center">
+<img src="/documents/early map demo.png" width="600" height="800">
+</p>
+
 ### Identifying Top-Level Needs with User Stories
 #### Epics, User Stories & Acceptance Criteria
 Through the study conducted in both laboratory workshops and lecture sessions, we developed a structured table to organise and manage our epics, user stories, and acceptance criteria. Throughout the subsequent game development process, we continuously referred to this table to ensure that every user requirement was addressed by a corresponding implemented feature in the game.
-<p align="center">
-<img src="/documents/paper_prototypes.gif" width="600" height="800">
-</p>
+
 <table>
   <thead>
     <tr>
