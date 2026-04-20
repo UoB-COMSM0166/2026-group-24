@@ -81,16 +81,23 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
     </td>
   </tr>
 </table>
+
 ## 2 Requirements
+
+- 15% ~750 words
+- Early stages design. Ideation process. How did you decide as a team what to develop? Use case diagrams, user stories. 
+
+### Ideation
+In the early stages of the project, the team held a series of meetings to discuss the choice of game theme, exploring how to design a game with creative mechanics, rich gameplay, and high replayability. After extensive deliberation, we decided to develop a roguelite game featuring large-scale map exploration combined with turn-based combat. This decision was greatly facilitated by the shared enthusiasm all team members had for the roguelite genre. To refine our vision and seek inspiration, every member of the team played For the King 2, studying its game design in depth. This proved to be a highly valuable exercise, as a significant portion of our design decisions were informed and inspired by that title.
+
+In the subsequent laboratory workshop sessions, we applied the knowledge and methodologies acquired during class to develop the first paper prototype of For the Treasure. This prototype helped solidify the overall design direction of the game and defined the core features to be implemented. We also engaged in cross-group discussions, gathering feedback from fellow students, which allowed us to make preliminary refinements to the game design.
 <p align="center">
 <img src="/documents/paper_prototypes.gif" width="600" height="800">
 </p>
-- 15% ~750 words
-- Early stages design. Ideation process. How did you decide as a team what to develop? Use case diagrams, user stories. 
+
 ### Identifying Top-Level Needs with User Stories
-
-## Epics, User Stories & Acceptance Criteria
-
+#### Epics, User Stories & Acceptance Criteria
+Through the study conducted in both laboratory workshops and lecture sessions, we developed a structured table to organise and manage our epics, user stories, and acceptance criteria. Throughout the subsequent game development process, we continuously referred to this table to ensure that every user requirement was addressed by a corresponding implemented feature in the game.
 <table>
   <thead>
     <tr>
