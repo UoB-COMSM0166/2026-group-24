@@ -103,7 +103,7 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
     <tr>
       <td rowspan="2"><b>Map Exploration</b></td>
       <td>
-        As a player, I want to move across a hexagonal tile map so that I can explore the world and discover new areas.
+        As an Adventure RPG enthusiast, I want to move across a hexagonal tile map so that I can explore the world and discover new areas.
       </td>
       <td>
         Given the player selects a hex tile, when it is within the movement range, then the player moves to that tile and the remaining steps decrease accordingly.
@@ -111,7 +111,7 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
     </tr>
     <tr>
       <td>
-        As a player, I want a limited number of steps per turn so that I must plan my movement strategically.
+        As an Adventure RPG enthusiast, I want a limited number of steps per turn so that I must plan my movement strategically.
       </td>
       <td>
         Given the player has used all available steps, when they attempt to move further, then the action is blocked and a visual indicator shows that no steps remain.
