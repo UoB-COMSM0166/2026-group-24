@@ -117,21 +117,21 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
         Given the player has used all available steps, when they attempt to move further, then the action is blocked and a visual indicator shows that no steps remain.
       </td>
     </tr>
-    <tr>
+   <tr>
       <td rowspan="2"><b>Combat System</b></td>
       <td>
-        As a player, I want to engage in turn-based combat so that I can defeat enemies through strategic decision-making.
+        As a turn-based game enthusiast, I want to engage in turn-based combat where I can use a variety of skills and apply status effects so that I can defeat enemies through diverse and strategic decision-making.
       </td>
       <td>
-        Given the player encounters an enemy, when combat begins, then both sides take turns performing actions until one side is defeated.
+        Given the player encounters an enemy, when combat begins, then both sides take turns performing actions; the player may select from multiple skills each turn, and the corresponding effects (damage, buff, debuff, or status) are applied and reflected in the combat log until one side is defeated.
       </td>
     </tr>
     <tr>
       <td>
-        As a player, I want to use a variety of skills and apply status effects so that I can devise diverse combat strategies.
+        As a turn-based game enthusiast, I want to choose from multiple distinct character classes so that I can experience different playstyles and combat approaches.
       </td>
       <td>
-        Given the player selects a skill during their turn, when the skill is used, then the corresponding effect (damage, buff, debuff, or status) is applied and reflected in the combat log.
+        Given the player starts a new run, when they reach the class selection screen, then at least three distinct classes are available, each with a unique skill set and stat profile, and the selected class is applied for the entire run.
       </td>
     </tr>
     <tr>
