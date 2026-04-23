@@ -123,6 +123,7 @@ export class TurnManager {
    */
   exitBossMode() {
     this.bossMode = false;
+    this._updateProgressBar();  // ── 更新 UI 状态 ──
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -150,6 +151,7 @@ export class TurnManager {
    */
   endMission() {
     this.currentMissionName = null;
+    this.exitBossMode();  // ── 清除 Boss 模式状态 ──
     this._restoreProgressBarTitle();
   }
 
