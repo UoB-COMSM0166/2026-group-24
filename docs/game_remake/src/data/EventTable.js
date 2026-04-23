@@ -134,13 +134,15 @@ export const CORRUPTED_DEER_LIST = [
     map: 'main',
     q: 7,
     r: -7,
-    name: 'CORRUPTED DEER'
+    name: 'CORRUPTED DEER',
+    monsterType: 'elite'  // ← Orc Elite
   },
   {
     map: 'main',
     q: -5,
     r: -2,
-    name: 'CORRUPTED DEER'
+    name: 'CORRUPTED DEER',
+    monsterType: 'elite'  // ← Orc Elite
   }
   // 后续可继续添加更多被腐化的鹿
 
@@ -975,6 +977,7 @@ static handleShop(gameController, tile, content) {
    */
   static handleCorruptedDeer(gameController, tile, content) {
     const deerName = content.name || 'Corrupted Deer';
+    const monsterType = content.monsterType;  // ← 获取怪物类型
 
     gameController.ui.showEvent(
       '📍 Forest',
@@ -984,8 +987,14 @@ static handleShop(gameController, tile, content) {
           text: '⚔️ Attack',
           onClick: () => {
             tile.content = null;
-            const combatContent = makeBoss(deerName, 2, 'NORMAL');
-            combatContent.isRareReward = true;
+            // ── 根据 monsterType 创建不同的敌人 ──
+            let combatContent;
+            if (monsterType === 'elite') {
+              combatContent = { type: 'dungeon', enemyGroup: ['elite'], reward: 'RARE' };
+            } else {
+              combatContent = makeBoss(deerName, 2, 'NORMAL');
+              combatContent.isRareReward = true;
+            }
             gameController.fsm.transition(GameState.COMBAT, combatContent);
           }
         },

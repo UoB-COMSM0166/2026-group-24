@@ -189,7 +189,7 @@ export class GameController {
           if (tile && tile.type === TileType.GRASS) {
             tile.isFixedEvent = true;  // 先标记为固定事件
             // 🎮 强制覆盖已有的随机事件
-            tile.content = makeCorruptedDeer(deer.name);
+            tile.content = makeCorruptedDeer(deer.name, deer.monsterType);
           }
         }
 
