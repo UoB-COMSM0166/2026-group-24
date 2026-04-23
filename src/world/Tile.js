@@ -81,8 +81,8 @@ export function makeMerchant(name = 'Traveling Merchant') {
 export function makeRuin(name = 'Ancient Ruin Entrance', enemyName = 'Corrupted Guardian') {
   return { type: TileContentType.RUIN, name, enemyName };
 }
-export function makeCorruptedDeer(name = 'Corrupted Deer') {
-  return { type: TileContentType.CORRUPTED_DEER, name};
+export function makeCorruptedDeer(name = 'Corrupted Deer', monsterType = null) {
+  return { type: TileContentType.CORRUPTED_DEER, name, monsterType};
 }
 export function makeInjuredVillager(name = 'INJURED VILLAGER', dialogue = '') {
   return { type: TileContentType.INJURED_VILLAGER, name, dialogue };
