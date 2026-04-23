@@ -280,10 +280,13 @@ export class GameController {
         this.ui.showMapUI();
         
         // 根据当前地图设置进度条标题
-        if (this.currentMapName === 'Novice Village') {
-          this.turnManager.restoreProgressBarTitle('novice');
-        } else {
-          this.turnManager.restoreProgressBarTitle('main');
+        // ── 如果有当前任务，不要重置标题 ──────────────────────────────
+        if (!this.turnManager.currentMissionName) {
+          if (this.currentMapName === 'Novice Village') {
+            this.turnManager.restoreProgressBarTitle('novice');
+          } else {
+            this.turnManager.restoreProgressBarTitle('main');
+          }
         }
         this._startTurn();
       },
@@ -988,10 +991,13 @@ export class GameController {
     this.ui.updatePartyStatus(this.selectedHeroes);
     // ── 重置回合计数并更新进度条标题 ────────────────────────────────────
     this.turnManager.resetTurnCount();
-    if (targetMapName === 'Novice Village') {
-      this.turnManager.restoreProgressBarTitle('novice');
-    } else {
-      this.turnManager.restoreProgressBarTitle('main');
+    // ── 如果有当前任务，不要重置标题 ──────────────────────────────
+    if (!this.turnManager.currentMissionName) {
+      if (targetMapName === 'Novice Village') {
+        this.turnManager.restoreProgressBarTitle('novice');
+      } else {
+        this.turnManager.restoreProgressBarTitle('main');
+      }
     }
     this.fsm.transition(GameState.MAP_EXPLORATION);
   }
@@ -1234,10 +1240,13 @@ export class GameController {
           this.bossModePenaltyActive = data.bossModePenaltyActive;
           // ── 恢复进度条UI ──
           this.turnManager._updateProgressBar();
-          if (data.currentMapName === 'Novice Village') {
-            this.turnManager.restoreProgressBarTitle('novice');
-          } else {
-            this.turnManager.restoreProgressBarTitle('main');
+          // ── 如果没有当前任务，才恢复默认标题 ──
+          if (!this.turnManager.currentMissionName) {
+            if (data.currentMapName === 'Novice Village') {
+              this.turnManager.restoreProgressBarTitle('novice');
+            } else {
+              this.turnManager.restoreProgressBarTitle('main');
+            }
           }
         }
 
