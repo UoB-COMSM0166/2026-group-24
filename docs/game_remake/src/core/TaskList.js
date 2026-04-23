@@ -27,6 +27,7 @@ const MISSION_TASKS = {
   'Main Map - Rescue Villagers': {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
+    nextMission: 'Rescue the Caravan',  // Auto-switch to next mission on completion
     tasks: {
       rescue_villagers: { 
         done: false, 
@@ -49,6 +50,7 @@ const MISSION_TASKS = {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
     nextMission: 'Search Ruins',  // Auto-switch to next mission on completion
+    maxTurns: 10,  // ── 任务时间限制 ──
     tasks: {
       rescue_caravan: {
         done: false,
@@ -64,6 +66,7 @@ const MISSION_TASKS = {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
     nextMission: 'Head south to seek the true treasure',
+    maxTurns: 10,  // ── 任务时间限制 ──
     tasks: {
       search_ruins: {
         done: false,
@@ -78,6 +81,7 @@ const MISSION_TASKS = {
   'Head south to seek the true treasure': {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
+    maxTurns: 15,  // ── 任务时间限制 ──
     tasks: {
       seek_treasure: {
         done: false,
@@ -88,10 +92,11 @@ const MISSION_TASKS = {
 };
 
 export class TaskList {
-  constructor(onAllTasksComplete = null) {
+  constructor(onAllTasksComplete = null, onMissionSwitch = null) {
     this._hudEl = null;
     this._debugBtn = null;
     this._onAllTasksComplete = onAllTasksComplete;
+    this._onMissionSwitch = onMissionSwitch;  // ── 任务切换回调 ──
     this._currentMission = 'Novice Village';
     this._showDebugBtn = true;
     this._autoCleanupOnComplete = true;  // Auto-cleanup current mission set on completion
@@ -134,6 +139,11 @@ export class TaskList {
     if (this._currentMission === missionName) return;
     
     this._initializeTasks(missionName);
+    
+    // ── 调用任务切换回调 ──────────────────────────────────────
+    if (this._onMissionSwitch) {
+      this._onMissionSwitch(missionName);
+    }
     
     // 清理旧 HUD
     if (this._hudEl) {
@@ -195,6 +205,14 @@ export class TaskList {
   // ══════════════════════════════════════════════════════════════════
   getCurrentMission() {
     return this._currentMission;
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  // 获取当前任务集的回合限制
+  // ══════════════════════════════════════════════════════════════════
+  getMissionMaxTurns() {
+    const mission = MISSION_TASKS[this._currentMission];
+    return mission?.maxTurns || 10;  // 默认 10 回合
   }
 
   // ══════════════════════════════════════════════════════════════════
@@ -301,6 +319,9 @@ export class TaskList {
     // 检查是否有下一个任务集
     const currentMissionConfig = MISSION_TASKS[this._currentMission];
     if (currentMissionConfig && currentMissionConfig.nextMission) {
+      // ── 清除 Boss 模式状态（任务切换时） ──────────────────────────
+      // 注意：GameController 的引用在这里不可用，所以在外部处理
+      
       // 延迟切换到下一个任务集，确保当前任务完全清理
       setTimeout(() => {
         this.switchToMission(currentMissionConfig.nextMission);

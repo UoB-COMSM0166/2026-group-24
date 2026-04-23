@@ -82,7 +82,10 @@ export class TutorialManager {
     this.allDone = false;
 
     // ── Task list management ───────────────────────────────────────
-    this.taskList = new TaskList(() => this._onAllTasksComplete());
+    this.taskList = new TaskList(
+      () => this._onAllTasksComplete(),
+      (missionName) => this._onMissionSwitch(missionName)  // ── 任务切换回调 ──
+    );
 
     // Track which event types have already been introduced
     this._introducedEvents = new Set();
@@ -285,12 +288,30 @@ export class TutorialManager {
 
     this.allDone = true;
 
+    // ── 清除 Boss 模式惩罚状态 ──────────────────────────────────
+    this.gc.bossModePenaltyActive = false;
+    this.gc.bossModePenaltyWarned = false;
+    this.gc.turnManager.endMission();
+
     if (this.gc.currentMapName === 'Novice Village') {
       this._unlockExitPortal();
       setTimeout(() => {
         this._showCompletionMessage();
       }, 1000);
     }
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  // Callback when mission is switched (auto transition)
+  // ══════════════════════════════════════════════════════════════════
+  _onMissionSwitch(missionName) {
+    // ── 任务切换时，清除 Boss 模式惩罚状态 ──────────────────────────────
+    this.gc.bossModePenaltyActive = false;
+    this.gc.bossModePenaltyWarned = false;
+
+    // ── 获取新任务的回合限制，并调用 _startMission 重置进度条 ────────────────
+    const maxTurns = this.taskList.getMissionMaxTurns();
+    this.gc._startMission(missionName, maxTurns);
   }
 
   _unlockExitPortal() {
