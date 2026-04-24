@@ -622,29 +622,7 @@ Looking back, the early turbulence with version control was genuinely challengin
 ## 8 Sustainability, ethics and accessability
 
 ### Sustainability
-Both designing and running digital games have environmental impacts. As a digital game, this project requires computers or devices to operate, which consumes electrical energy. Additionally, the game uses a continuous update and rendering loop mechanism. While this ensures smooth visuals and improves user experience, it also requires the processor to keep running, leading to increased energy consumption.
-
-To address this issue, we implemented the browser's animation frame mechanism to control refresh frequency. This helps reduce unnecessary calculations and improves overall energy efficiency.
-
-During development, the game uses a resource preloading system, which loads images and audio files at the start of the game instead of repeatedly accessing them during runtime. This improves performance while reducing unnecessary system workload and energy consumption.
-
-Furthermore, this digital game partially replaces traditional board games, reducing reliance on physical materials. Traditional board games typically require:
-
-Paper maps
-Cards
-Character sheets
-Plastic tokens
-Packaging materials
-
-These materials consume natural resources such as paper and plastic during production and generate carbon emissions. In contrast, this game stores character information, skill data, and equipment data in JSON format, and displays maps and characters digitally on screen.
-
-This digital approach:
-
-Reduces the use of paper and plastic materials
-Minimizes packaging waste
-Lowers transportation-related emissions
-Allows updates without reprinting materials
-Reduces overall resource waste
+Both the development and operation of a browser-based game consume electrical energy. The game's core update-and-render loop runs continuously while active, requiring sustained CPU and GPU processing. Left unaddressed, this would represent an avoidable energy overhead — particularly significant if the game were to attract a large user base. To mitigate this, we implemented the browser's requestAnimationFrame API to synchronise rendering with the display refresh cycle, avoiding redundant computation between frames. A resource preloading system further reduces runtime overhead by loading all image and audio assets once at startup rather than on demand, thereby decreasing repeated file I/O and processing cost during play. Considering the chain of effects from widespread use: if thousands of players were to run the game simultaneously, aggregate energy consumption across devices could become non-trivial. Future optimisations — such as pausing the render loop when the browser tab is inactive, or reducing asset resolution for low-power devices — would be worthwhile steps toward a lower carbon footprint at scale. A secondary environmental consideration is that *For the Treasure* is a digital replacement for a traditional board game. Physical equivalents require paper maps, plastic tokens, printed cards, and character sheets — materials that consume natural resources in production and generate packaging and transportation emissions. By storing all game data in JSON and rendering maps and characters digitally on screen, the game eliminates these material costs entirely and allows the game to be updated or expanded without any reprinting or physical distribution.
 #### 8.1
 
 ![Traditional Board Game Components](./documents/zhuoyou.jpg)
@@ -652,33 +630,9 @@ Reduces overall resource waste
 **Figure 1.** 
 
 
-### Technical Impact
+### Social Dimension
 
-During the development process, we learned and applied several new technologies, demonstrating modular programming and system design principles commonly used in software engineering.
-
-The game is primarily built using:
-
-JavaScript
-HTML
-Canvas rendering technology
-
-This combination allows the game to run directly in a browser without requiring additional software installation. As a result, the system has high compatibility and improved accessibility for users.
-
-A modular design approach was used to structure the combat system. The combat management module handles:
-
-Turn order management
-Skill execution
-Damage calculation
-
-This structure ensures an organized combat flow and follows object-oriented programming principles, improving both code readability and maintainability.
-
-Additionally, a resource management system was implemented to centrally load:
-
-Character data
-Skill data
-Image resources
-
-This unified resource management improves runtime efficiency, reduces redundant code, and increases overall system stability.
+At the level of direct use, *For the Treasure* is a single-player game, which limits the social interactions it directly mediates. However, its social impact should be considered in the broader context of how games shape behaviour and community. The roguelite genre, with its permadeath and randomised runs, encourages repeated engagement and a culture of challenge-sharing among players — fostering informal social communities around strategy discussion and run comparison. A potential negative social chain-of-effect concerns time displacement. If the game becomes highly engaging — which our NASA TLX and SUS results suggest it does at Easy difficulty — players may spend extended periods in play, potentially at the expense of social interaction, physical activity, or academic work. This is a known concern with game design generally. We have partially addressed this through a natural session structure: each run has a defined turn limit, creating a clear endpoint rather than an open-ended loop that encourages indefinite play. Difficulty settings also allow players to calibrate the intensity of their engagement.
 #### 8.2
 
 ![Game Engine Architecture](./documents/huanjing.jpg)
@@ -687,28 +641,7 @@ This unified resource management improves runtime efficiency, reduces redundant 
 
 ### Individual Impact
 
-The game also has positive effects on players at an individual level.
-
-During gameplay, players must:
-
-Choose movement paths
-Plan character actions
-Select appropriate skills
-Adapt strategies based on changing situations
-
-These decision-making processes help develop:
-
-Logical thinking skills
-Problem-solving abilities
-Strategic planning skills
-
-Player comfort was also considered during the design process. To help relieve stress, the game includes multiple reward and feedback systems, providing players with:
-
-A sense of achievement
-Motivation to continue playing
-Emotional satisfaction
-
-This allows players to relax after studying or working, helping improve mood and overall well-being.
+*For the Treasure* is designed to deliver cognitive and emotional value to individual players. The core gameplay loop — planning movement routes, managing a limited action budget, selecting skills in combat, and adapting strategies in response to random events — exercises logical thinking, forward planning, and probabilistic reasoning under uncertainty. These are transferable cognitive skills that extend beyond the game context. The game also provides positive emotional feedback through its reward systems: item drops, treasure discoveries, level-ups, and successful combat outcomes each deliver a moment of achievement. Our evaluation results support this: think-aloud participants reported enjoyment and engagement, and SUS scores at Easy difficulty averaged 69.25, above the usability benchmark of 68. The Novice Village tutorial and Elder Guide NPC were specifically designed to reduce onboarding frustration, ensuring that players derive satisfaction rather than stress from early interactions with the system. The chain-of-effects risk at the individual level mirrors the social concern above: a highly rewarding game loop, particularly one with permadeath and randomised content, can create compulsive replaying behaviour. The roguelite structure is specifically optimised for replayability. We consider this an honest trade-off inherent to the genre, and we mitigate it through the bounded run length. We also note that providing a Hard difficulty mode allows experienced players to find genuine challenge rather than artificially extending play time through repetition.
 ## 9 Conclusion
 
 ### 9.1 Project Reflection
