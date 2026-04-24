@@ -16,6 +16,10 @@ import { TitleScreen } from './src/ui/TitleScreen.js';
 // ── Canvas responsive ───────────────────────────────────────────────
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
+const bootLoadingScreen = document.getElementById('boot-loading-screen');
+const bootLoadingBar = document.getElementById('boot-loading-bar');
+const bootLoadingText = document.getElementById('boot-loading-text');
+const bootLoadingPercent = document.getElementById('boot-loading-percent');
 
 function resize() {
     canvas.width = window.innerWidth;
@@ -24,13 +28,32 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+function updateBootLoading({ percentage = 0, text = 'PREPARING ASSETS...' } = {}) {
+    const safePercent = Math.max(0, Math.min(100, percentage));
+    if (bootLoadingBar) bootLoadingBar.style.width = `${safePercent}%`;
+    if (bootLoadingPercent) bootLoadingPercent.textContent = `${safePercent}%`;
+    if (bootLoadingText) bootLoadingText.textContent = text;
+    if (bootLoadingScreen) bootLoadingScreen.classList.remove('is-hidden');
+}
+
+function hideBootLoading() {
+    if (bootLoadingScreen) bootLoadingScreen.classList.add('is-hidden');
+}
+
 // ── Start game ─────────────────────────────────────────────────
 async function init() {
+    updateBootLoading({ percentage: 0, text: 'PREPARING ASSETS...' });
 
     // 1. Load data
     try {
-        await DataLoader.loadAll();
+        await DataLoader.loadAll(({ percentage }) => {
+            updateBootLoading({
+                percentage,
+                text: percentage >= 100 ? 'READY TO START' : 'LOADING GAME ASSETS...'
+            });
+        });
     } catch (error) {
+        updateBootLoading({ percentage: 100, text: 'LOADING FAILED. CHECK CONSOLE.' });
         alert("Data loading failed! Please check if DataLoader.js, heroes.json and skills.json are in the src/data/ directory!");
         console.error(error);
         return;
@@ -65,6 +88,7 @@ async function init() {
       () => startGame(false, true)  // Developer mode
     );
     titleScreen.show();
+    hideBootLoading();
 }
 
 function startGame(isLoad = false, isDevMode = false) {

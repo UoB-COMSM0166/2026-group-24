@@ -288,6 +288,109 @@
       image-rendering: pixelated;
       image-rendering: crisp-edges;
     }
+    #boot-loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(242, 201, 107, 0.14), transparent 22%),
+        linear-gradient(180deg, #08111a 0%, #101f30 50%, #1d140d 100%);
+      color: #fff4df;
+      font-family: 'Press Start 2P', monospace;
+    }
+    #boot-loading-screen.is-hidden {
+      display: none;
+    }
+    .boot-loading-panel {
+      width: min(560px, calc(100vw - 32px));
+      padding: 26px 22px 22px;
+      border: 4px solid #2c2118;
+      outline: 4px solid rgba(242, 215, 154, 0.22);
+      background:
+        linear-gradient(180deg, rgba(255, 239, 196, 0.05) 0%, transparent 14%),
+        linear-gradient(180deg, rgba(46, 31, 20, 0.96), rgba(11, 16, 21, 0.96));
+      box-shadow:
+        0 0 0 4px rgba(9, 8, 6, 0.76),
+        12px 12px 0 rgba(0, 0, 0, 0.35),
+        0 22px 48px rgba(0, 0, 0, 0.45);
+      text-align: center;
+      image-rendering: pixelated;
+    }
+    .boot-loading-label {
+      font-size: clamp(18px, 2.5vw, 28px);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #f2d79a;
+      margin-bottom: 14px;
+      text-shadow:
+        3px 3px 0 #4f3118,
+        6px 6px 0 rgba(0, 0, 0, 0.45);
+    }
+    .boot-loading-track {
+      width: 100%;
+      height: 30px;
+      padding: 4px;
+      background:
+        linear-gradient(180deg, rgba(255, 239, 196, 0.05), transparent),
+        #11181f;
+      border: 3px solid #3a2b1e;
+      box-shadow:
+        inset 0 0 0 3px rgba(0, 0, 0, 0.38),
+        0 0 0 2px rgba(242, 215, 154, 0.08);
+      overflow: hidden;
+    }
+    .boot-loading-bar {
+      width: 0%;
+      height: 100%;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          #8f4c1f 0 12px,
+          #c9762d 12px 24px,
+          #efbf63 24px 36px,
+          #c9762d 36px 48px
+        );
+      box-shadow:
+        inset 0 -4px 0 rgba(82, 38, 13, 0.45),
+        inset 0 4px 0 rgba(255, 242, 214, 0.14),
+        0 0 14px rgba(211, 138, 56, 0.26);
+      transition: width 0.18s steps(12, end);
+      image-rendering: pixelated;
+      position: relative;
+    }
+    .boot-loading-bar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 246, 220, 0.08) 0 2px,
+          transparent 2px 14px
+        );
+    }
+    .boot-loading-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      font-size: clamp(10px, 1.4vw, 12px);
+      color: rgba(255, 244, 223, 0.82);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .boot-loading-percent-text {
+      color: #f2d79a;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+    }
+    .boot-loading-status {
+      color: #fff4df;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+    }
     .fullscreen { position: fixed; inset: 0; display: none; justify-content: center; align-items: center; flex-direction: column; background: rgba(10, 10, 30, 0.95); z-index: 50; }
     #hero-slots { display: flex; gap: 22px; margin-bottom: 14px; flex-wrap: wrap; justify-content: center; width: min(980px, 92vw); }
     .hero-card { width: 120px; background: #2c2c54; padding: 15px; border-radius: 8px; cursor: pointer; text-align: center; border: 2px solid transparent; }
@@ -411,6 +514,18 @@
 </head>
 
 <body>
+<div id="boot-loading-screen">
+  <div class="boot-loading-panel">
+    <div class="boot-loading-label">Loading...</div>
+    <div class="boot-loading-track">
+      <div id="boot-loading-bar" class="boot-loading-bar"></div>
+    </div>
+    <div class="boot-loading-meta">
+      <span id="boot-loading-text" class="boot-loading-status">Preparing assets...</span>
+      <span id="boot-loading-percent" class="boot-loading-percent-text">0%</span>
+    </div>
+  </div>
+</div>
 <canvas id="game-canvas"></canvas>
 
 <div id="party-status-overlay"></div>
