@@ -743,14 +743,13 @@ const UnitDisplay = ({ unit, isEnemy, isActive, canTarget, onTarget, shakingId, 
     currentAction = 'hit';
   }
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      opacity: isDead ? 0.3 : 1, filter: isDead ? 'grayscale(1)' : 'none',
-      cursor: canTarget ? 'pointer' : 'default',
-      transform: isActive ? 'scale(1.05)' : 'scale(1)',
-      transition: 'all 0.2s',
-    }}
-      onClick={() => canTarget && isEnemy && onTarget(unit.id)}>
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        opacity: isDead ? 0.3 : 1, filter: isDead ? 'grayscale(1)' : 'none',
+        cursor: 'default',
+        transform: isActive ? 'scale(1.05)' : 'scale(1)',
+        transition: 'all 0.2s',
+      }}>
 
       {isActive && !canTarget && (
         <div style={{
@@ -1184,65 +1183,92 @@ const CombatApp = ({ state, callbacks }) => {
             justifyContent: 'center',
             transform: 'translateY(0px)'
           }}>
-            {enemies.map(e => {
-              const isActive = activeUnit?.id === e.id && !['WIN', 'LOSE', 'START'].includes(phase);
-              const canTarget = phase === 'AWAIT_TARGET' && e.hp > 0;
-              const isCharging = animState?.attackerId === e.id;
-              let enemyAnimAction = null;
-              let enemyOnAnimComplete = null;
-              let enemyTransform = '';
-              let enemyTransitionClass = '';
+            {enemies.map((e, idx) => {
+                          const isActive = activeUnit?.id === e.id && !['WIN', 'LOSE', 'START'].includes(phase);
+                          const canTarget = phase === 'AWAIT_TARGET' && e.hp > 0;
+                          const isCharging = animState?.attackerId === e.id;
+                          let enemyAnimAction = null;
+                          let enemyOnAnimComplete = null;
+                          let enemyTransform = '';
+                          let enemyTransitionClass = '';
 
-              if (isCharging) {
-                if (animState.phase === 'charge') {
-                  enemyAnimAction = 'run';
-                  enemyTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
-                  enemyTransitionClass = 'unit-charge';
-                } else if (animState.phase === 'attack') {
-                  enemyAnimAction = pickAttackAnim(e.id, animState.skillType, animState.skillTarget, animState.skillPower);
-                  enemyTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
-                  enemyOnAnimComplete = onAttackAnimDone;
-                } else if (animState.phase === 'return') {
-                  enemyAnimAction = 'run';
-                  enemyTransform = 'translate(0px, 0px)';
-                  enemyTransitionClass = 'unit-return';
-                }
-              }
+                          if (isCharging) {
+                            if (animState.phase === 'charge') {
+                              enemyAnimAction = 'run';
+                              enemyTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
+                              enemyTransitionClass = 'unit-charge';
+                            } else if (animState.phase === 'attack') {
+                              enemyAnimAction = pickAttackAnim(e.id, animState.skillType, animState.skillTarget, animState.skillPower);
+                              enemyTransform = `translate(${chargeOffset.x}px, ${chargeOffset.y}px)`;
+                              enemyOnAnimComplete = onAttackAnimDone;
+                            } else if (animState.phase === 'return') {
+                              enemyAnimAction = 'run';
+                              enemyTransform = 'translate(0px, 0px)';
+                              enemyTransitionClass = 'unit-return';
+                            }
+                          }
 
-              return (
-                <div key={e.id}
-                  ref={el => { if (el) unitRefsMap.current[e.id] = el; }}
-                  style={{
-                    position: 'relative',
-                    transform: enemyTransform || undefined,
-                    zIndex: isCharging ? 50 : 1,
-                  }}
-                  className={`${shakingId === e.id ? 'unit-shake' : ''} ${enemyTransitionClass}`}
-                  onTransitionEnd={(event) => {
-                    if (event.target !== event.currentTarget || event.propertyName !== 'transform') return;
-                    if (animState?.attackerId === e.id) {
-                      if (animState.phase === 'charge') onChargeArrived();
-                      else if (animState.phase === 'return') onReturnArrived();
-                    }
-                  }}>
-                  {floatingTexts.filter(f => f.unitId === e.id).map(f => (
-                    <div key={f.id} className="float-text" style={{
-                      top: '-10px',
-                      color: f.type === 'heal' ? '#4ade80' : f.type === 'buff' ? '#fbbf24' : f.type === 'perfect' ? '#fbbf24' :
-                        f.type === 'crit' ? '#f97316' : f.type === 'weak' ? '#94a3b8' : '#f87171'
-                    }}>
-                      {f.type === 'heal' ? `+${f.value}` : f.value}
+                          return (
+                                          <div key={e.id}
+                                            ref={el => { if (el) unitRefsMap.current[e.id] = el; }}
+                                            style={{
+                                              position: 'relative',
+                                              transform: enemyTransform || undefined,
+                                              zIndex: isCharging ? 50 : (e.hp <= 0 ? 0 : (enemies.length - idx)),
+                                              pointerEvents: 'none',
+                                            }}
+                                            className={`${shakingId === e.id ? 'unit-shake' : ''} ${enemyTransitionClass}`}
+                                            onTransitionEnd={(event) => {
+                                              if (event.target !== event.currentTarget || event.propertyName !== 'transform') return;
+                                              if (animState?.attackerId === e.id) {
+                                                if (animState.phase === 'charge') onChargeArrived();
+                                                else if (animState.phase === 'return') onReturnArrived();
+                                              }
+                                            }}>
+                                            {floatingTexts.filter(f => f.unitId === e.id).map(f => (
+                                              <div key={f.id} className="float-text" style={{
+                                                top: '-10px',
+                                                color: f.type === 'heal' ? '#4ade80' : f.type === 'buff' ? '#fbbf24' : f.type === 'perfect' ? '#fbbf24' :
+                                                  f.type === 'crit' ? '#f97316' : f.type === 'weak' ? '#94a3b8' : '#f87171'
+                                              }}>
+                                                {f.type === 'heal' ? `+${f.value}` : f.value}
+                                              </div>
+                                            ))}
+                                            {canTarget && (
+                                              <div
+                                                onClick={(ev) => {
+                                                  ev.stopPropagation();
+                                                  console.log('[TARGET CLICKED]', e.id, e.name, 'hp=', e.hp);
+                                                  onTargetSelect(e.id);
+                                                }}
+                                                style={{
+                                                  position: 'absolute',
+                                                  left: '50%',
+                                                  bottom: '0px',
+                                                  transform: 'translateX(-50%)',
+                                                  width: '180px',
+                                                  height: '230px',
+                                                  border: '2px dashed #f87171',
+                                                  borderRadius: '10px',
+                                                  background: 'rgba(248,113,113,0.08)',
+                                                  boxShadow: '0 0 18px rgba(248,113,113,0.45) inset',
+                                                  cursor: 'pointer',
+                                                  zIndex: 100,
+                                                  pointerEvents: 'auto',
+                                                  animation: 'hp-pulse 1s ease-in-out infinite',
+                                                }}
+                                                title={`Target ${e.name}`}
+                                              />
+                                            )}
+                                            <UnitDisplay unit={e} isEnemy={true} isActive={isActive}
+                                              canTarget={canTarget} onTarget={onTargetSelect} shakingId={shakingId}
+                                              animAction={enemyAnimAction} onAnimComplete={enemyOnAnimComplete} />
+                                          </div>
+                                        );
+                        })}
+                      </div>
                     </div>
-                  ))}
-                  <UnitDisplay unit={e} isEnemy={true} isActive={isActive}
-                    canTarget={canTarget} onTarget={onTargetSelect} shakingId={shakingId}
-                    animAction={enemyAnimAction} onAnimComplete={enemyOnAnimComplete} />
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+                  </div>
 
       <div style={{
         height: '240px', background: 'rgba(12,10,9,0.97)',
