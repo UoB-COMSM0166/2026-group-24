@@ -1440,21 +1440,6 @@ const CombatApp = ({ state, callbacks }) => {
                     <span style={{ fontSize: '14px' }}>⚔</span>
                     <span>Weapon</span>
                   </button>
-                  <button
-                    onClick={() => setModal({ type: 'item', hero: activeHero })}
-                    style={{
-                      padding: '0 12px', height: '65px', borderRadius: '8px', cursor: 'pointer',
-                      background: 'rgba(6,78,59,0.45)', border: '1.5px solid #34d399',
-                      color: '#a7f3d0', fontWeight: 'bold', fontSize: '11px',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                      gap: '2px', transition: 'all 0.15s', whiteSpace: 'nowrap',
-                      boxShadow: '0 2px 8px rgba(52,211,153,0.2)',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 12px rgba(52,211,153,0.5)'}
-                    onMouseLeave={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(52,211,153,0.2)'}>
-                    <span style={{ fontSize: '14px' }}>🧪</span>
-                    <span>Item</span>
-                  </button>
                 </div>
               )}
             </div>

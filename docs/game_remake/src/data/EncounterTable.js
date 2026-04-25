@@ -173,20 +173,29 @@ export const ENEMY_TYPES = {
 };
 
 export const ENCOUNTER_TABLE = {
+  // Lv1: tutorial-friendly, mostly 1-2 enemies, occasional 3
   1: [
-    { weight: 100, group: ['warrior'] },            // 原60，现在独占100%
+    { weight: 35, group: ['warrior'] },                          // single
+    { weight: 35, group: ['warrior', 'warrior'] },               // pair
+    { weight: 20, group: ['warrior', 'mage'] },                  // mixed pair
+    { weight: 10, group: ['warrior', 'warrior', 'mage'] },       // trio
   ],
+  // Lv2: mostly 2-3 enemies
   2: [
-    { weight: 50, group: ['warrior', 'mage'] },     // 原warrior+archer改为warrior+mage
-    { weight: 30, group: ['warrior', 'healer'] },   // 原warrior+archer+healer去掉archer
-    { weight: 20, group: ['warrior', 'warrior'] },  // 新增：两个warrior凑数
+    { weight: 30, group: ['warrior', 'mage'] },
+    { weight: 25, group: ['warrior', 'healer'] },
+    { weight: 25, group: ['warrior', 'warrior', 'mage'] },
+    { weight: 15, group: ['warrior', 'mage', 'healer'] },
+    { weight: 5,  group: ['warrior', 'warrior', 'warrior'] },
   ],
+  // Lv3: dangerous, 2-3 enemies, rare elite solo
   3: [
-    { weight: 40, group: ['elite', 'warrior'] },
-    { weight: 35, group: ['elite', 'mage', 'healer'] },
-    { weight: 25, group: ['elite', 'warrior', 'warrior'] },
-    { weight: 15, group: ['stone_golem'] },             // ← 新增
-    { weight: 15, group: ['swift_assassin'] },
+    { weight: 30, group: ['elite', 'warrior'] },
+    { weight: 25, group: ['elite', 'mage', 'healer'] },
+    { weight: 20, group: ['elite', 'warrior', 'warrior'] },
+    { weight: 15, group: ['warrior', 'mage', 'healer'] },
+    { weight: 5,  group: ['stone_golem'] },           // rare solo elite
+    { weight: 5,  group: ['swift_assassin'] },        // rare solo elite
   ],
 };
 
