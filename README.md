@@ -419,7 +419,7 @@ Three evaluators played through the game and assessed it against Nielsen's 10 us
 | Recognition rather than recall | Players had no quick reference for which skills were available based on the currently equipped weapon | 3 | 3 | 2 | 2.67 | A skill panel was added to the bottom of the combat screen, colour-coded by category (ATK, MAG, HEAL, BUFF, DEB), listing all available skills for the active hero |
 | Flexibility and efficiency of use | Ending a turn required a mouse click each time; no keyboard shortcut existed | 2 | 4 | 3 | 3.00 | A Space bar shortcut was added to end the current turn on the map |
 | Help and documentation | No introduction to combat or equipment mechanics was provided before the first encounter | 4 | 2 | 3 | 3.00 | A Novice Village tutorial area was created, where an Elder Guide NPC walks players through each mechanic before they encounter it in the game world |
-| Error prevention | Players could mistakenly equip weapons incompatible with their class, consuming a turn with no benefit | 2 | 2 | 2 | 2.00 | Class-specific weapon restrictions were enforced, preventing incompatible items from being assigned to the wrong character |
+| Error prevention | Players could equip weapons whose stat scaling did not match their hero's primary stat, causing underperformance with no information given upfront | 2 | 2 | 2 | 2.00 | Each weapon's tooltip now displays a descriptive tag on acquisition indicating which hero archetype it best suits, and the Novice Village tutorial was extended to explain how core stats influence weapon performance |
 
 </div>
 
