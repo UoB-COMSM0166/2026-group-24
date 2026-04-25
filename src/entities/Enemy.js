@@ -1,17 +1,22 @@
 // src/entities/Enemy.js
 import { Character } from './Character.js';
 
-/**
- * Enemy core stats scale automatically by level, but can be overridden
- * item by item via statOverrides in the constructor.
+/* Rebalanced for combat pacing (fast TTK, but enemies hit hard):
+ *   HP base   130 + level*50    (Lv1=180 / Lv2=230 / Lv3=280)
+ *   strength   24 + level*6     (buffed — small mobs deal real damage now)
+ *   toughness   8 + level*2
+ *   intellect  18 + level*5     (buffed — Dark Mage is now scary)
+ *   awareness   8 + level*2
+ *   talent      5 + level*1
+ *   agility     8 + level*2
  *
- * Base stats (level=1) have been rebalanced to prevent "unhittable" scenarios:
- * strength   12 -> +4/level
- * toughness   5 -> +1.5/level (Nerfed heavily so players can deal damage)
- * intellect   6 -> +2/level
- * awareness   8 -> +2/level
- * talent      5 -> +1/level
- * agility     8 -> +2/level
+ * Pacing examples:
+ *   Lv1 warrior (HP=180) vs Knight rare (STR=30) Heavy Strike 140%:
+ *     normal → 42 dmg → ~4 hits;  perfect → 84 dmg → ~2 hits.
+ *   Lv1 warrior (STR=24, warcry buff 30) Slash 100% vs Knight (DEF~16):
+ *     normal → 24-16 = 8 dmg; perfect → 48-16 = 32 dmg. 5-7 turns of pressure.
+ *   Lv3 enemy (HP=280) vs Knight epic (STR=48) Dragon Slash 180%:
+ *     normal → 86 dmg → ~3-4 hits; perfect → 172 dmg → ~2 hits.
  */
 export class Enemy extends Character {
   /**
@@ -34,7 +39,7 @@ export class Enemy extends Character {
     const defMulti = difficultyMode === 'hell' ? 1.2 : 0.6;
 
     // Calculate scaled HP
-    const hp = Math.floor((300 + level * 20) * hpMulti);
+    const hp = Math.floor((130 + level * 50) * hpMulti);
     super(name, hp, hp);
 
     this.type = 'enemy';     // Keep consistent with CombatManager checks
@@ -43,11 +48,12 @@ export class Enemy extends Character {
     this.difficulty = difficultyMode; // Save difficulty for rendering
 
     // Apply ATTACK multipliers to offensive stats
-    this.strength = Math.floor((statOverrides.strength ?? (15 + (level - 1) * 4)) * atkMulti);
-    this.intellect = Math.floor((statOverrides.intellect ?? (6 + (level - 1) * 2)) * atkMulti);
+  // Apply ATTACK multipliers to offensive stats
+      this.strength = Math.floor((statOverrides.strength ?? (24 + (level - 1) * 6)) * atkMulti);
+      this.intellect = Math.floor((statOverrides.intellect ?? (18 + (level - 1) * 5)) * atkMulti);
 
     // Apply DEFENSE multipliers to defensive stats (Heavily nerfed base scaling)
-    this.toughness = Math.floor((statOverrides.toughness ?? (5 + (level - 1) * 1.5)) * defMulti);
+    this.toughness = Math.floor((statOverrides.toughness ?? (8 + (level - 1) * 2)) * defMulti);
 
     // Apply Standard multipliers to utility stats
     this.awareness = Math.floor((statOverrides.awareness ?? (8 + (level - 1) * 2)) * hpMulti);
