@@ -376,12 +376,12 @@ To iteratively improve our game's mechanics, difficulty balance, and player enjo
 
 ##### 5.1.1.1 Process
 
-Ten participants were invited to play the game while verbalising their thoughts in real time. Sessions were recorded and reviewed, with particular attention paid to moments of confusion, frustration, or engagement. The recurring themes were then organised into a thematic map (Figure 1), which guided our design iterations.
+Ten participants were invited to play the game while verbalising their thoughts in real time. Sessions were recorded and reviewed, with particular attention paid to moments of confusion, frustration, or engagement. The recurring themes were then organised into a thematic map (Figure 5.1), which guided our design iterations.
 
 <p align="center">
   <img src="./documents/think_aloud_map_figure.png" width="800">
   <br>
-  <em>Figure 1: Thematic Map of Key Think Aloud Evaluation Feedback</em>
+  <em>Figure 5.1: Thematic Map of Key Think Aloud Evaluation Feedback</em>
 </p>
 
 ##### 5.1.1.2 Solutions and Adjustments
@@ -406,9 +406,9 @@ Ten participants were invited to play the game while verbalising their thoughts 
 
 ##### 5.1.2.1 Process
 
-Three evaluators played through the game and assessed it against Nielsen's 10 usability heuristics (Nielsen, 1994). This framework was chosen because our game relies heavily on menu navigation, inventory management, and combat UI — areas where these heuristics are particularly applicable. Each identified violation was rated by the team across three dimensions — impact, frequency, and persistence — to derive a composite severity score (Table 1). All violations were subsequently addressed.
+Three evaluators played through the game and assessed it against Nielsen's 10 usability heuristics (Nielsen, 1994). This framework was chosen because our game relies heavily on menu navigation, inventory management, and combat UI — areas where these heuristics are particularly applicable. Each identified violation was rated by the team across three dimensions — impact, frequency, and persistence — to derive a composite severity score (Table 5.1). All violations were subsequently addressed.
 
-<div align="center"><p><strong>Table 1</strong><br>Heuristic Violations, Severity Ratings, and Solutions</p></div>
+<div align="center"><p><strong>Table 5.1</strong><br>Heuristic Violations, Severity Ratings, and Solutions</p></div>
 
 <div align="center">
 
@@ -438,9 +438,9 @@ Ten participants each played the game in both Easy and Hard difficulty modes (Ko
 
 ##### 5.2.2.1 Subscale Workload Scores
 
-Median scores across all six NASA TLX subscales rose with difficulty (Table 2). The most pronounced increase was in Frustration, climbing from 25 (Easy) to 60 (Hard). Effort and Temporal Demand also showed substantial increases.
+Median scores across all six NASA TLX subscales rose with difficulty (Table 5.2). The most pronounced increase was in Frustration, climbing from 25 (Easy) to 60 (Hard). Effort and Temporal Demand also showed substantial increases.
 
-<div align="center"><p><strong>Table 2</strong><br>NASA TLX Subscale Median Scores (Easy vs Hard)</p></div>
+<div align="center"><p><strong>Table 5.2</strong><br>NASA TLX Subscale Median Scores (Easy vs Hard)</p></div>
 
 <div align="center">
 
@@ -457,19 +457,19 @@ Median scores across all six NASA TLX subscales rose with difficulty (Table 2). 
 
 ##### 5.2.2.2 Overall Perceived Workload Scores
 
-Every participant reported higher perceived workload under the harder difficulty setting (Figure 2). Counterbalancing the test order helped minimise the influence of learning effects on these results.
+Every participant reported higher perceived workload under the harder difficulty setting (Figure 5.2). Counterbalancing the test order helped minimise the influence of learning effects on these results.
 
 <p align="center">
   <img src="./documents/nasatlx_figure.png" width="750">
   <br>
-  <em>Figure 2: Mean NASA TLX Scores for Each Participant (Easy vs Hard)</em>
+  <em>Figure 5.2: Mean NASA TLX Scores for Each Participant (Easy vs Hard)</em>
 </p>
 
 ##### 5.2.2.3 Statistical Analysis
 
-A Wilcoxon Signed-Rank test was applied at both the subscale and overall level to assess the significance of workload differences. As shown in Table 3, the overall workload increase was statistically significant, as were all individual subscales except Physical Demand.
+A Wilcoxon Signed-Rank test was applied at both the subscale and overall level to assess the significance of workload differences. As shown in Table 5.3, the overall workload increase was statistically significant, as were all individual subscales except Physical Demand.
 
-<div align="center"><p><strong>Table 3</strong><br>Wilcoxon Signed-Rank Test Results for NASA TLX</p></div>
+<div align="center"><p><strong>Table 5.3</strong><br>Wilcoxon Signed-Rank Test Results for NASA TLX</p></div>
 
 <div align="center">
 
@@ -501,9 +501,9 @@ Immediately following the NASA TLX, all 10 participants completed the SUS — a 
 
 ##### 5.2.3.2 Raw Data
 
-Individual question responses (on a 1–5 Likert scale) and calculated SUS scores for each participant are presented in Tables 4 and 5 below.
+Individual question responses (on a 1–5 Likert scale) and calculated SUS scores for each participant are presented in Tables 5.4 and 5.5 below.
 
-<div align="center"><p><strong>Table 4</strong><br>Raw SUS Questionnaire Responses (Easy Difficulty)</p></div>
+<div align="center"><p><strong>Table 5.4</strong><br>Raw SUS Questionnaire Responses (Easy Difficulty)</p></div>
 
 <div align="center">
 
@@ -522,7 +522,7 @@ Individual question responses (on a 1–5 Likert scale) and calculated SUS score
 
 </div>
 
-<div align="center"><p><strong>Table 5</strong><br>Raw SUS Questionnaire Responses (Hard Difficulty)</p></div>
+<div align="center"><p><strong>Table 5.5</strong><br>Raw SUS Questionnaire Responses (Hard Difficulty)</p></div>
 
 <div align="center">
 
@@ -545,14 +545,14 @@ Individual question responses (on a 1–5 Likert scale) and calculated SUS score
 
 ##### 5.2.3.3 Results
 
-Individual SUS scores are plotted in Figure 3, with the industry-standard benchmark of 68 shown for reference.
+Individual SUS scores are plotted in Figure 5.3, with the industry-standard benchmark of 68 shown for reference.
 - Mean SUS score (Easy) — **69.25**
 - Mean SUS score (Hard) — **58.25**
 
 <p align="center">
   <img src="./documents/sus_figure.png" width="750">
   <br>
-  <em>Figure 3: SUS Scores for Each Participant (Easy vs Hard)</em>
+  <em>Figure 5.3: SUS Scores for Each Participant (Easy vs Hard)</em>
 </p>
 
 At Easy difficulty, scores broadly clustered around or above the 68 benchmark, indicating acceptable usability. Under Hard difficulty, several participants scored notably lower, suggesting that the increased enemy complexity and tighter turn constraints introduced meaningful usability friction.
