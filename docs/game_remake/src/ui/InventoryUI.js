@@ -83,16 +83,18 @@ export class InventoryUI {
         });
     }
 
-    toggle() {
-        this.isOpen = !this.isOpen;
-        this.panel.style.display = this.isOpen ? "block" : "none";
-        if (this.isOpen) {
-            window._gameController?.tutorial?.complete('opened_inventory');
-            this.render();
-        } else {
-            this._stopAnim();
-        }
-    }
+ toggle() {
+     const inCombat = window._gameController?.fsm?.currentState === 'COMBAT';
+     if (inCombat) return;
+     this.isOpen = !this.isOpen;
+     this.panel.style.display = this.isOpen ? "block" : "none";
+     if (this.isOpen) {
+         window._gameController?.tutorial?.complete('opened_inventory');
+         this.render();
+     } else {
+         this._stopAnim();
+     }
+ }
 
     close() {
         this.isOpen = false;
