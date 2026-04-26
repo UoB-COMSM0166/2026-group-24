@@ -157,7 +157,7 @@ export function rollRandomLoot() {
   return rollRandomWeapon() ?? rollRandomItem();
 }
 
-// ── 金币掉落 ──────────────────────────────────────────────────────
+
 const GOLD_DROP = {
   legendary: [120, 200],
   epic:      [60,  110],
@@ -169,7 +169,7 @@ export function rollGoldDrop(rarity = 'common') {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// ── 商店定价 ──────────────────────────────────────────────────────
+
 const WEAPON_PRICE = {
   legendary: 300,
   epic:      150,
@@ -188,11 +188,11 @@ export function getShopPrice(item) {
   return table[item?.rarity] ?? (isWeapon ? 80 : 45);
 }
 
-// ── 随机生成商店货架 ──────────────────────────────────────────────
+
 export function rollShopInventory() {
   const items = [];
 
-  // 1把随机武器
+
   const weapon = rollRandomWeapon();
   if (weapon) {
     weapon._shopPrice = getShopPrice(weapon);
@@ -200,7 +200,7 @@ export function rollShopInventory() {
     items.push(weapon);
   }
 
-  // 3个随机道具
+
   for (let i = 0; i < 3; i++) {
     const item = rollRandomItem();
     if (item) {
