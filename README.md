@@ -350,7 +350,6 @@ In addition, we optimized the logical rules of the pathfinding system. In the ga
 
 
 ### 4.2 Challenge 2: Multi-Layer Turn-Based Combat State Management System
-Challenge 2: Multi-layer Turn-based Combat State Management System
 
 Another major challenge was implementing a multi-layer turn-based combat state management system, designed to support complex combat interactions between multiple characters and enemies. In the game design, each unit can not only perform attacks and skills but may also be affected by multiple status effects, such as burn, freeze, poison, shield, and attack enhancement. Therefore, the system must be capable of managing multiple status effects simultaneously and executing their logic at the correct timing points.
 
