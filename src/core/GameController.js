@@ -456,12 +456,12 @@ export class GameController {
           'boss',
           level,
           {
-            strength:  Math.floor((15 + (level - 1) * 4)   * 4),
-            intellect: Math.floor((6  + (level - 1) * 2)   * 4),
-            toughness: Math.floor((5  + (level - 1) * 1.5) * 4),
-            awareness: Math.floor((8  + (level - 1) * 2)   * 4),
-            talent:    Math.floor((5  + (level - 1) * 1)   * 4),
-            agility:   Math.floor((8  + (level - 1) * 2)   * 4),
+            strength:  Math.floor((15 + (level - 1) * 4)   * 2),
+            intellect: Math.floor((6  + (level - 1) * 2)   * 2),
+            toughness: Math.floor((5  + (level - 1) * 1.5) * 2),
+            awareness: Math.floor((8  + (level - 1) * 2)   * 2),
+            talent:    Math.floor((5  + (level - 1) * 1)   * 2),
+            agility:   Math.floor((8  + (level - 1) * 2)   * 2),
           }
       );
 
@@ -474,7 +474,7 @@ export class GameController {
       boss.skills = def.skills;
 
       // HP 也翻倍（Enemy 构造时已按 level 算好，再 ×2）
-      boss.maxHp = Math.floor(boss.maxHp * 10);
+      boss.maxHp = Math.floor(boss.maxHp * 6);
       boss.hp    = boss.maxHp;
 
       startCombat([boss]);
