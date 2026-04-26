@@ -433,13 +433,8 @@ export class GameController {
           e.maxHp = Math.floor(e.maxHp * def.hpMulti);
         }
         e.hp = e.maxHp;
-        
-        // 🎮 Dev mode: Set all monster stats to 1 for easy testing
-        if (this.isDevMode) {
-          e.maxHp = 1;
-          e.hp = 1;
-          e.attack = 1;
-        }
+
+
         
         enemies.push(e);
       });
@@ -469,13 +464,8 @@ export class GameController {
             agility:   Math.floor((8  + (level - 1) * 2)   * 4),
           }
       );
-      
-      // 🎮 Dev mode: Set boss stats to 1 for easy testing
-      if (this.isDevMode) {
-        boss.maxHp = 1;
-        boss.hp = 1;
-        boss.attack = 1;
-      }
+
+
       
       boss.id     = 'e1_' + Date.now();
       boss.enemyKey = 'dark_overlord';
@@ -1285,11 +1275,6 @@ export class GameController {
     DataLoader.getAllWeapons().forEach(w => storage.addToStorage({ ...w }));
     ItemDB.forEach(it => storage.addToStorage({ ...it }));
 
-    // Dev 模式：设置英雄攻击力为 999
-    this.selectedHeroes.forEach(hero => {
-      hero.strength = 999;
-      hero._baseStrength = 999;
-      hero.refreshDerivedStats?.();
-    });
+
   }
 }
