@@ -190,7 +190,7 @@ export class InventoryUI {
                             <div class="equipped-weapon" data-slot="${i}" draggable="true"
                                 title="${w.name} (double-click to unequip)"
                                 style="flex:1;display:flex;align-items:center;gap:8px;cursor:grab;padding:6px 8px;border-radius:10px;background:linear-gradient(180deg, rgba(116,78,31,0.22), rgba(35,24,14,0.18));border:1px solid rgba(232,200,134,0.1);">
-                                <canvas class="item-icon" data-icon="sword" width="32" height="32" style="pointer-events:none;"></canvas>
+                              <span style="width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;pointer-events:none;">${_getItemEmoji(w.icon ?? 'sword')}</span>
                                 <div style="pointer-events:none;">
                                     <div style="font-weight:700;font-size:13px;">${w.name}</div>
                                     <div style="opacity:.6;font-size:11px;">${w.rarity ?? ''} — double-click to unequip</div>
@@ -555,7 +555,7 @@ export class InventoryUI {
 }
 
 function _getItemEmoji(iconType) {
-    const img = window.DataLoader?.getImage(iconType);
+const img = window.DataLoader?.getImage('weapon_' + iconType) || window.DataLoader?.getImage(iconType);
     if (img) {
         return `<img src="${img.src}" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;">`;
     }
@@ -597,9 +597,15 @@ function drawItemIconMini(canvas, iconType) {
             }
             break;
         }
-        default:
-            ctx.fillStyle = "#aaa";
-            ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.fill();
+     default: {
+         const img = window.DataLoader?.getImage(iconType);
+         if (img) { ctx.drawImage(img, -16, -16, 32, 32); }
+         else {
+             ctx.fillStyle = "#aaa";
+             ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.fill();
+         }
+         break;
+     }
     }
     ctx.restore();
 }
