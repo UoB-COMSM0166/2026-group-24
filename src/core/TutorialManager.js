@@ -48,6 +48,8 @@ const EVENT_INTRO = {
       'Weapons are class-specific. Each hero only has two weapon slots, and weapons are bound to their owner — a Knight\'s greatsword is useless to a Wizard, and vice versa.',
       'Items are much more flexible — potions and trinkets can be used by any hero, whether Knight, Wizard, Priest, or Ranger!',
       'One more thing — different weapons unlock different skills! Choosing the right gear makes a huge difference in combat.',
+      'Also, each hero has different stat strengths — Knights rely on STR, Wizards on INT, Priests on TAL, and Rangers on AWR and AGI. Gear that boosts those stats will do far more for them than anything else!',
+      'Always check the stat bonus before equipping something. The right item on the wrong hero is just wasted potential.',
       'Alright, enough talk — go open that chest!',
     ],
   },
