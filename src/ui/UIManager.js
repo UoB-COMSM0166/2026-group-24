@@ -31,7 +31,9 @@ export class UIManager {
       storyPage: document.getElementById('story-page'),
     };
     this.onCombatEnd = callbacks.onCombatEnd ?? (() => { });
-    this.inventoryUI = new InventoryUI();
+    this.inventoryUI = new InventoryUI({
+      onEquipmentChange: () => this.updatePartyStatus(this.inventoryUI.heroes),
+    });
     this.characterSelectBackground = new CharacterSelectBackground(this.els.charSelectScreen);
     this.storyDialogueBox = new StoryDialogueBox();
     this.animFrameReq = null;
@@ -89,9 +91,17 @@ export class UIManager {
     this.inventoryUI?.update(heroes);
     if (!this.els.partyStatus) return;
     this.els.partyStatus.style.display = 'flex';
+
+    const expandedHeroKeys = new Set(
+      [...this.els.partyStatus.querySelectorAll('.hero-status-box.expanded')]
+        .map(box => box.dataset.heroKey)
+        .filter(Boolean)
+    );
+
     this.els.partyStatus.innerHTML = '';
 
     heroes.forEach(hero => {
+      const heroKey = hero.id || hero.name;
       const hpPct = Math.max(0, (hero.hp / hero.maxHp) * 100);
       const attributes = [
         ['STR', hero.strength],
@@ -110,6 +120,7 @@ export class UIManager {
 
       const box = document.createElement('div');
       box.className = 'hero-status-box';
+      box.dataset.heroKey = heroKey;
       box.innerHTML = `
         <div class="hero-status-head">
           <div style="font-weight:bold; font-size:13px; text-shadow: 1px 1px 2px black;">${hero.name}</div>
@@ -122,6 +133,11 @@ export class UIManager {
           <div class="hero-detail-grid">${attributeHtml}</div>
         </div>
       `;
+      if (expandedHeroKeys.has(heroKey)) {
+        const detail = box.querySelector('.stat-detail');
+        if (detail) detail.style.display = 'block';
+        box.classList.add('expanded');
+      }
       box.onclick = () => {
         const detail = box.querySelector('.stat-detail');
         const isOpen = detail.style.display !== 'block';

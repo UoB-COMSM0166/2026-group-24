@@ -1,7 +1,8 @@
 // src/ui/InventoryUI.js
 
 export class InventoryUI {
-    constructor() {
+    constructor(callbacks = {}) {
+        this.onEquipmentChange = callbacks.onEquipmentChange ?? (() => {});
         this.sharedStorage = { weapons: [], items: [] };
         this.heroes = [];
         this.activeIndex = 0;
@@ -144,6 +145,10 @@ export class InventoryUI {
         this.heroes = Array.isArray(heroes) ? heroes : [];
         if (this.activeIndex >= this.heroes.length) this.activeIndex = 0;
         if (this.isOpen) this.render();
+    }
+
+    _notifyEquipmentChange() {
+        this.onEquipmentChange?.(this.heroes);
     }
 
     render() {
@@ -358,6 +363,7 @@ export class InventoryUI {
                     if (typeof hero.refreshDerivedStats === "function") hero.refreshDerivedStats();
                 }
                 this.render();
+                this._notifyEquipmentChange();
             });
             el.addEventListener("mouseenter", (e) => {
                 const stype = el.dataset.stype;
@@ -385,6 +391,7 @@ export class InventoryUI {
                 this.sharedStorage.weapons.push(weapon);
                 if (typeof hero.refreshDerivedStats === "function") hero.refreshDerivedStats();
                 this.render();
+                this._notifyEquipmentChange();
             });
             el.addEventListener("mouseenter", (e) => {
                 const w = hero.weaponSlots?.[Number(el.dataset.slot)];
@@ -409,6 +416,7 @@ export class InventoryUI {
                 this.sharedStorage.items.push(item);
                 if (typeof hero.refreshDerivedStats === "function") hero.refreshDerivedStats();
                 this.render();
+                this._notifyEquipmentChange();
             });
             el.addEventListener("mouseenter", (e) => {
                 const it = hero.equipSlots?.[Number(el.dataset.slot)];
@@ -439,6 +447,7 @@ export class InventoryUI {
                 hero.weaponSlots[slotIndex] = weapon;
                 if (typeof hero.refreshDerivedStats === "function") hero.refreshDerivedStats();
                 this.render();
+                this._notifyEquipmentChange();
             });
         });
 
@@ -460,6 +469,7 @@ export class InventoryUI {
                 hero.equipSlots.push(item);
                 if (typeof hero.refreshDerivedStats === "function") hero.refreshDerivedStats();
                 this.render();
+                this._notifyEquipmentChange();
             });
         });
 
@@ -485,6 +495,7 @@ export class InventoryUI {
                     this.sharedStorage.weapons.push(weapon);
                     if (typeof hero.refreshDerivedStats === "function") hero.refreshDerivedStats();
                     this.render();
+                    this._notifyEquipmentChange();
                 } else if (dragFrom === "equipped-item") {
                     const item = hero.equipSlots?.[slotIndex];
                     if (!item) return;
@@ -492,6 +503,7 @@ export class InventoryUI {
                     this.sharedStorage.items.push(item);
                     if (typeof hero.refreshDerivedStats === "function") hero.refreshDerivedStats();
                     this.render();
+                    this._notifyEquipmentChange();
                 }
             });
         }
