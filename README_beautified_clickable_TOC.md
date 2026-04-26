@@ -1,11 +1,4 @@
-# Info
 
-This is the template for your group project repo/report. We'll be setting up your repo and assigning you to it after the group forming activity. You can delete this info section, but please keep the rest of the repo structure intact.
-
-You will be developing your game using [P5.js](https://p5js.org) a javascript library that provides you will all the tools you need to make your game. However, we won't be teaching you javascript, this is a chance for you and your team to learn a (friendly) new language and framework quickly, something you will almost certainly have to do with your summer project and in future. There is a lot of documentation online, you can start with:
-
-- [P5.js tutorials](https://p5js.org/tutorials/) 
-- [Coding Train P5.js](https://thecodingtrain.com/tracks/code-programming-with-p5-js) course - go here for enthusiastic video tutorials from Dan Shiffman (recommended!)
 
 # FOR THE TREASURE
 
@@ -127,8 +120,7 @@ The defining innovation of For The Treasure lies in its deep integration of rogu
 
 ## 2 Requirements
 
-- 15% ~750 words
-- Early stages design. Ideation process. How did you decide as a team what to develop? Use case diagrams, user stories. 
+
 
 ### Ideation
 In the early stages of the project, the team held a series of meetings to discuss the choice of game theme, exploring how to design a game with creative mechanics, rich gameplay, and high replayability. After extensive deliberation, we decided to develop a roguelite game featuring large-scale map exploration combined with turn-based combat. This decision was greatly facilitated by the shared enthusiasm all team members had for the roguelite genre. To refine our vision and seek inspiration, every member of the team played For the King 2, studying its game design in depth. This proved to be a highly valuable exercise, as a significant portion of our design decisions were informed and inspired by that title.
@@ -307,8 +299,7 @@ Overall, the use case diagram helped us define clear system boundaries and prior
 
 ## 3 Design
 
-- 15% ~750 words
-- System architecture. Class diagrams, behavioural diagrams.
+
 
 ### 3.1 Gameplay Flow Overview
 
@@ -673,6 +664,7 @@ For version control, we followed a disciplined Git workflow: pull → edit → c
   <img src="./documents/kanban.png" width="600"/><br/>
   <em>Figure 7.2: Kanban Board</em>
 </p>
+
 ### 7.2 Offline Collaboration
 
 Beyond our digital tools, we made full use of our scheduled in-person class time. Each week, team members brought their own laptops to the classroom, where we could discuss technical challenges face-to-face and practise pair programming on the spot. In these sessions, one member took the role of the helm — actively writing code at the keyboard — while the other acted as the tactician, reviewing logic in real time, anticipating edge cases, and suggesting refactoring opportunities. This meant all code was reviewed as it was written, supporting the principle of collective code ownership: any team member could read and contribute to any part of the codebase. This real-time, side-by-side collaboration proved especially effective for solving complex problems that were difficult to articulate through text or voice alone. Being physically present together created an energy and immediacy that online tools simply could not replicate.
