@@ -310,6 +310,22 @@ Overall, the use case diagram helped us define clear system boundaries and prior
 
 ## 3 Design
 
+**Core Gameplay Loop**
+
+```mermaid
+flowchart LR
+    A["Character Selection"] --> B["Hex Map Exploration"]
+    B --> C{"Tile Event"}
+    C --> D["Treasure / Shop / Altar"]
+    C --> E["Enemy Encounter"]
+    E --> F["Turn-Based Combat"]
+    F --> G{"Battle Result"}
+    G -->|"Victory"| H["Loot and Upgrade"]
+    G -->|"Defeat"| I["Run Ends"]
+    H --> B
+    B --> J["Boss Challenge"]
+```
+
 ### 3.1 Gameplay Flow Overview
 
 <p align="center">
@@ -682,6 +698,19 @@ Particular focus was given to edge cases in combat, such as simultaneous status 
 Our team adopted an Agile development methodology, which prioritises working software, customer collaboration, and the ability to respond to change over rigid upfront planning. This approach allowed us to iteratively refine the game across multiple short development cycles, incorporating feedback at each stage rather than locking in a fixed design from the outset.
 
 We also adopted a hybrid collaboration model combining both online and offline working modes. This proved to be flexible and helped us identify and resolve issues in a timely manner throughout the development process.
+
+**Team Workflow**
+
+```mermaid
+flowchart LR
+    A["Sprint Planning"] --> B["Jira Task Breakdown"]
+    B --> C["Feature Branch Development"]
+    C --> D["Pair Programming / Peer Review"]
+    D --> E["Testing on develop"]
+    E --> F["Merge to main"]
+    F --> G["Sprint Review and Retrospective"]
+    G --> A
+```
 
 ### 7.1 Online Collaboration
 
