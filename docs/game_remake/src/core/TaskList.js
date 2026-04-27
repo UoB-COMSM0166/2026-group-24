@@ -257,7 +257,7 @@ export class TaskList {
     // 调试按钮：一键完成所有任务（仅在新手村显示）
     if (this._showDebugBtn) {
       const debugBtn = document.createElement('button');
-     debugBtn.textContent = '🔧 Complete all tasks';
+      debugBtn.textContent = '⏩ Skip Tutorial';
       debugBtn.style.cssText = `
         position: fixed;
         bottom: 70px;
@@ -277,6 +277,13 @@ export class TaskList {
       });
       document.body.appendChild(debugBtn);
       this._debugBtn = debugBtn;
+
+      const syncDebugBtn = () => {
+        const inCombat = window._gameController?.fsm?.currentState === 'COMBAT';
+        debugBtn.style.display = inCombat ? 'none' : 'block';
+      };
+      syncDebugBtn();
+      this._debugBtnInterval = setInterval(syncDebugBtn, 300);
     }
     
     document.body.appendChild(el);
@@ -359,5 +366,6 @@ export class TaskList {
       setTimeout(() => this._hudEl?.remove(), 900);
     }
     if (this._debugBtn) this._debugBtn.remove();
+    if (this._debugBtnInterval) clearInterval(this._debugBtnInterval);
   }
 }
