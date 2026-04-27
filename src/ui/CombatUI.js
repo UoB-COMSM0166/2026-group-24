@@ -1139,16 +1139,17 @@ const CombatApp = ({ state, callbacks }) => {
             }}>
               <DiceSVG value={diceValue} rolling={phase === 'ROLLING'} />
               <div style={{
-                color: '#fbbf24', fontSize: '11px', fontWeight: 'bold', marginTop: '6px',
-                animation: 'hp-pulse 0.8s ease-in-out infinite', letterSpacing: '0.08em'
-              }}>
-                {phase === 'ROLLING' ? 'ROLLING…'
-                  : diceValue <= 2 ? '💨 WEAK ×0.5'
-                    : diceValue <= 4 ? '⚔ HIT ×1.0'
-                      : diceValue === 5 ? '💥 HEAVY ×1.2'
-                        : '⚡ CRIT! ×1.5'}
-              </div>
-              <div style={{ color: '#57534e', fontSize: '9px', fontFamily: "'Press Start 2P', monospace", marginTop: '2px' }}>[ {diceValue} ]</div>
+                              color: '#fbbf24', fontSize: '11px', fontWeight: 'bold', marginTop: '6px',
+                              animation: 'hp-pulse 0.8s ease-in-out infinite', letterSpacing: '0.08em'
+                            }}>
+                              {phase === 'ROLLING' ? 'ROLLING…'
+                                : diceValue <= 1 ? '💨 GRAZE ×0.5'
+                                  : diceValue <= 2 ? '🗡 WEAK ×0.8'
+                                    : diceValue <= 3 ? '⚔ HIT ×1.0'
+                                      : diceValue <= 4 ? '⚔ SOLID ×1.2'
+                                        : diceValue === 5 ? '💥 HEAVY ×1.6'
+                                          : '⚡ CRIT! ×1.8'}
+                            </div>
             </div>
           )}
 
