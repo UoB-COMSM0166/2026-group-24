@@ -696,9 +696,9 @@ Looking back, the early turbulence with version control was genuinely challengin
 
 ## 8 Sustainability, ethics and accessability
 
-### Sustainability
+### 8.1 Sustainability
 Both the development and operation of a browser-based game consume electrical energy. The game's core update-and-render loop runs continuously while active, requiring sustained CPU and GPU processing. Left unaddressed, this would represent an avoidable energy overhead — particularly significant if the game were to attract a large user base. To mitigate this, we implemented the browser's requestAnimationFrame API to synchronise rendering with the display refresh cycle, avoiding redundant computation between frames. A resource preloading system further reduces runtime overhead by loading all image and audio assets once at startup rather than on demand, thereby decreasing repeated file I/O and processing cost during play. Considering the chain of effects from widespread use: if thousands of players were to run the game simultaneously, aggregate energy consumption across devices could become non-trivial. Future optimisations — such as pausing the render loop when the browser tab is inactive, or reducing asset resolution for low-power devices — would be worthwhile steps toward a lower carbon footprint at scale. A secondary environmental consideration is that *For the Treasure* is a digital replacement for a traditional board game. Physical equivalents require paper maps, plastic tokens, printed cards, and character sheets — materials that consume natural resources in production and generate packaging and transportation emissions. By storing all game data in JSON and rendering maps and characters digitally on screen, the game eliminates these material costs entirely and allows the game to be updated or expanded without any reprinting or physical distribution.
-#### 8.1
+
 
 <p align="center">
   <img src="./documents/zhuoyou.jpg" width="650">
@@ -707,20 +707,15 @@ Both the development and operation of a browser-based game consume electrical en
 </p>
 
 
-### Social Dimension
+### 8.2 Social Dimension
 
 At the level of direct use, *For the Treasure* is a single-player game, which limits the social interactions it directly mediates. However, its social impact should be considered in the broader context of how games shape behaviour and community. The roguelite genre, with its permadeath and randomised runs, encourages repeated engagement and a culture of challenge-sharing among players — fostering informal social communities around strategy discussion and run comparison. A potential negative social chain-of-effect concerns time displacement. If the game becomes highly engaging — which our NASA TLX and SUS results suggest it does at Easy difficulty — players may spend extended periods in play, potentially at the expense of social interaction, physical activity, or academic work. This is a known concern with game design generally. We have partially addressed this through a natural session structure: each run has a defined turn limit, creating a clear endpoint rather than an open-ended loop that encourages indefinite play. Difficulty settings also allow players to calibrate the intensity of their engagement.
-#### 8.2
 
-<p align="center">
-  <img src="./documents/huanjing.jpg" width="650">
-  <br>
-  <em>Figure 8.2: Game Engine Architecture</em>
-</p>
 
-### Individual Impact
+### 8.3 Individual Impact
 
 *For the Treasure* is designed to deliver cognitive and emotional value to individual players. The core gameplay loop — planning movement routes, managing a limited action budget, selecting skills in combat, and adapting strategies in response to random events — exercises logical thinking, forward planning, and probabilistic reasoning under uncertainty. These are transferable cognitive skills that extend beyond the game context. The game also provides positive emotional feedback through its reward systems: item drops, treasure discoveries, level-ups, and successful combat outcomes each deliver a moment of achievement. Our evaluation results support this: think-aloud participants reported enjoyment and engagement, and SUS scores at Easy difficulty averaged 69.25, above the usability benchmark of 68. The Novice Village tutorial and Elder Guide NPC were specifically designed to reduce onboarding frustration, ensuring that players derive satisfaction rather than stress from early interactions with the system. The chain-of-effects risk at the individual level mirrors the social concern above: a highly rewarding game loop, particularly one with permadeath and randomised content, can create compulsive replaying behaviour. The roguelite structure is specifically optimised for replayability. We consider this an honest trade-off inherent to the genre, and we mitigate it through the bounded run length. We also note that providing a Hard difficulty mode allows experienced players to find genuine challenge rather than artificially extending play time through repetition.
+
 ---
 
 ## 9 Conclusion
