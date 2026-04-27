@@ -31,17 +31,20 @@ export function roll(statValue, maxPoints, options = {}) {
     sigmaDivisor = 5
   } = options;
 
-  // 1. 模拟槽位：将 maxPoints 映射为槽位数量 (例如 20面骰对应 3-5 槽)
-  // 你也可以固定为 3，或者根据 maxPoints 动态算
-  const slots = maxPoints <= 20 ? 3 : 5;
+  // 1. 模拟槽位：根据 maxPoints 决定槽数
+    //    maxPoints === 6 (战斗骰子)：5 槽，hits 0-5 直接映射到点数 1-6
+    //    其他场景 (陷阱 maxPoints=20 等)：保持 3 槽
+    const slots = maxPoints === 6 ? 5 : (maxPoints <= 20 ? 3 : 5);
 
-  // 2. 计算成功率 (基于属性对抗模型)
-  // A / (A + D)，这里 D 由 maxPoints 和 difficulty 共同决定
-  const defenderPower = maxPoints * difficulty;
+// 2. 计算成功率 (基于属性对抗模型)
+  // A / (A + D)，D 为难度基准
+  //   战斗骰子 (maxPoints === 6)：固定难度基准 25，让中等属性玩家有 ~55% 单槽成功率
+  //   其他场景：沿用 maxPoints * difficulty
+  const defenderPower = maxPoints === 6 ? 25 : (maxPoints * difficulty);
   let p = statValue / (statValue + defenderPower);
 
-  // 叠加 bias 并限制范围
-  p = Math.min(0.95, Math.max(0.05, p + bias));
+  // 叠加 bias 并限制范围 (上限 0.88，让满属性玩家出 6 概率约 53%)
+  p = Math.min(0.88, Math.max(0.05, p + bias));
 
   // 3. 执行多次判定 (Binomial Roll)
   let hits = 0;
@@ -49,9 +52,11 @@ export function roll(statValue, maxPoints, options = {}) {
     if (Math.random() < p) hits++;
   }
 
-  // 4. 将命中数映射回 [0, maxPoints] 的 sampleRoll 字段，确保返回结构一致
-  const hitRatio = hits / slots;
-  const sampleRoll = hitRatio * maxPoints;
+  // 4. 将命中数映射到 sampleRoll
+    //    maxPoints === 6 (战斗骰子)：hits 0-5 直接对应点数 1-6 (hits + 1)，确保 6 个点数都能产生
+    //    其他场景：保持原比例映射逻辑
+    const hitRatio = hits / slots;
+    const sampleRoll = maxPoints === 6 ? (hits + 1) : (hitRatio * maxPoints);
 
   // 5. 确定等级 (Grade)
   let segIndex;
