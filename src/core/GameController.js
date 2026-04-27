@@ -337,7 +337,23 @@ export class GameController {
                           const hero = this.selectedHeroes?.[heroIndex];
                           if (!hero) return;
                           if (action === 'put') hero.inventory.push(loot);
-                          else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                          else if (action === 'equip') {
+                            const isWeapon = Array.isArray(loot.skills) && loot.skills.length > 0;
+                            if (isWeapon) {
+                              const emptySlot = (hero.weaponSlots ?? [null, null]).findIndex(w => w === null);
+                              if (emptySlot !== -1) {
+                                hero.weaponSlots[emptySlot] = loot;
+                              } else {
+                                const displaced = hero.weaponSlots[0];
+                                hero.weaponSlots[0] = loot;
+                                if (displaced) hero.inventory.push(displaced);
+                              }
+                            } else {
+                              hero.equipSlots = (hero.equipSlots ?? []).filter(i => i != null);
+                              hero.equipSlots.push(loot);
+                            }
+                            hero.refreshDerivedStats?.();
+                          }
                           this.ui.updatePartyStatus(this.selectedHeroes);
                         });
                       }, 100);
@@ -372,7 +388,23 @@ export class GameController {
                               const hero = this.selectedHeroes?.[heroIndex];
                               if (!hero) return;
                               if (action === 'put') hero.inventory.push(loot);
-                              else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                             else if (action === 'equip') {
+                               const isWeapon = Array.isArray(loot.skills) && loot.skills.length > 0;
+                               if (isWeapon) {
+                                 const emptySlot = (hero.weaponSlots ?? [null, null]).findIndex(w => w === null);
+                                 if (emptySlot !== -1) {
+                                   hero.weaponSlots[emptySlot] = loot;
+                                 } else {
+                                   const displaced = hero.weaponSlots[0];
+                                   hero.weaponSlots[0] = loot;
+                                   if (displaced) hero.inventory.push(displaced);
+                                 }
+                               } else {
+                                 hero.equipSlots = (hero.equipSlots ?? []).filter(i => i != null);
+                                 hero.equipSlots.push(loot);
+                               }
+                               hero.refreshDerivedStats?.();
+                             }
                               this.ui.updatePartyStatus(this.selectedHeroes);
                             });
                           }, 100);
@@ -394,7 +426,23 @@ export class GameController {
                     const hero = this.selectedHeroes?.[heroIndex];
                     if (!hero) return;
                     if (action === 'put') hero.inventory.push(loot);
-                    else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                  else if (action === 'equip') {
+                    const isWeapon = Array.isArray(loot.skills) && loot.skills.length > 0;
+                    if (isWeapon) {
+                      const emptySlot = (hero.weaponSlots ?? [null, null]).findIndex(w => w === null);
+                      if (emptySlot !== -1) {
+                        hero.weaponSlots[emptySlot] = loot;
+                      } else {
+                        const displaced = hero.weaponSlots[0];
+                        hero.weaponSlots[0] = loot;
+                        if (displaced) hero.inventory.push(displaced);
+                      }
+                    } else {
+                      hero.equipSlots = (hero.equipSlots ?? []).filter(i => i != null);
+                      hero.equipSlots.push(loot);
+                    }
+                    hero.refreshDerivedStats?.();
+                  }
                     this.ui.updatePartyStatus(this.selectedHeroes);
                   });
                 }, 100);
