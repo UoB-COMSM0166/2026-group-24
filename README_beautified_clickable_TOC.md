@@ -37,11 +37,11 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 
 - [1 Introduction](#1-introduction)
 - [2 Requirements](#2-requirements)
-  - [Ideation](#ideation)
-  - [Stakeholder Analysis (Onion Model)](#stakeholder-analysis-onion-model)
-  - [Feasibility Studies](#feasibility-studies)
-  - [Identifying Top-Level Needs with User Stories](#identifying-top-level-needs-with-user-stories)
-  - [Use-Case Breakdown](#use-case-breakdown)
+  - [2.1 Ideation](#ideation)
+  - [2.2 Stakeholder Analysis (Onion Model)](#stakeholder-analysis-onion-model)
+  - [2.3 Feasibility Studies](#feasibility-studies)
+  - [2.4 Identifying Top-Level Needs with User Stories](#identifying-top-level-needs-with-user-stories)
+  - [2.5 Use-Case Breakdown](#use-case-breakdown)
 - [3 Design](#3-design)
   - [3.1 Gameplay Flow Overview](#31-gameplay-flow-overview)
   - [3.2 Refined System Architecture](#32-refined-system-architecture)
@@ -124,7 +124,7 @@ At the map level, the game employs a random seed system that sequentially constr
 
 ## 2 Requirements
 
-### Ideation
+### 2.1 Ideation
 
 In the early stages of the project, the team held a series of meetings to discuss the choice of game theme, exploring how to design a game with creative mechanics, rich gameplay, and high replayability. After extensive deliberation, we decided to develop a roguelite game featuring large-scale map exploration combined with turn-based combat.
 
@@ -138,7 +138,7 @@ In the subsequent laboratory workshop sessions, we applied the knowledge and met
   <em>Figure 2.1: Paper Prototype Demonstration</em>
 </p>
 
-### Stakeholder Analysis (Onion Model)
+### 2.2 Stakeholder Analysis (Onion Model)
 
 
 <p align="center">
@@ -165,7 +165,7 @@ Furthermore, we identify **negative stakeholders**, such as players who may perc
 Overall, the Onion Model provides a structured framework for understanding stakeholder relationships, ensuring that both direct and indirect influences are considered within the requirements engineering process.
 
 
-### Feasibility Studies
+### 2.3 Feasibility Studies
 
 After a period of discussion and testing, we ultimately validated the feasibility of the core mechanics and gameplay of the game.
 
@@ -177,7 +177,7 @@ By implementing a central state machine to manage the interaction system between
   <em>Figure 2.3: Early Map Demo</em>
 </p>
 
-### Identifying Top-Level Needs with User Stories
+### 2.4 Identifying Top-Level Needs with User Stories
 
 **Epics, User Stories & Acceptance Criteria**
 
@@ -287,7 +287,7 @@ Through the study conducted in both laboratory workshops and lecture sessions, w
 </table>
 
 
-### Use-Case Breakdown
+### 2.5 Use-Case Breakdown
 
 <p align="center">
   <img src="./documents/usecase.png" width="650">
