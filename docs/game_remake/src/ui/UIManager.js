@@ -234,7 +234,17 @@ export class UIManager {
     document.getElementById('top-progress').style.display = 'flex';
     if(this.els.partyStatus) this.els.partyStatus.style.display = 'flex';
   }
-  updateMovementUI(points) { this.els.movementEl.textContent = `Action Points: ${points}`; }
+  updateMovementUI(points) {
+    this.els.movementEl.textContent = `Action Points: ${points}`;
+    const endTurnBtn = document.getElementById('end-turn-btn');
+    if (endTurnBtn) {
+      if (points === 0) {
+        endTurnBtn.classList.add('blink');
+      } else {
+        endTurnBtn.classList.remove('blink');
+      }
+    }
+  }
   updateProgressBar(turn, maxTurns) {
     const bar = document.getElementById('turn-progress-bar');
     const text = document.getElementById('turn-progress-text');
