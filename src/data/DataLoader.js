@@ -264,8 +264,8 @@ export class DataLoader {
         heal: 'Attack/heal/heal.png'
       },
       warrior: { idle: 'Idle/Idle.png', hit: 'Hit/Take Hit.png', death: 'Death/Death.png', run: 'Run/Walk.png', attack: 'Attack/Attack.png' },
-      swift_assassin: { idle: 'Idle/Idle.png', hit: 'Hit/Take hit.png', death: 'Death/Death.png', run: 'Run/Run.png', attack: 'Attack/Attack2.png' },
-      mage: { idle: 'Idle/Idle.png', hit: 'Hit/Take Hit.png', death: 'Death/Death.png', run: 'Run/Run.png', attack: 'Attack/Attack.png' }
+      swift_assassin: { idle: 'Idle/Idle.png', hit: 'Hit/Take Hit.png', death: 'Death/Death.png', run: 'Run/Run.png', attack: 'Attack/Attack.png' },
+      mage: { idle: 'Idle/Idle.png', hit: 'Hit/Take hit.png', death: 'Death/Death.png', run: 'Run/Run.png', attack: 'Attack/Attack2.png' }
     };
 
     Object.entries(enemySpriteConfig).forEach(([enemy, actions]) => {

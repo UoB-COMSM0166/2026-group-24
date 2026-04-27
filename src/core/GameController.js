@@ -38,6 +38,8 @@ export class GameController {
     this.bossModePenaltyActive = false;
     this.bossModePenaltyWarned = false;
     this.merchantEncountered = false;
+    this.villageQuestAccepted = false;  // ── 追踪村庄任务是否已被接受 ──
+    this.villageRestUsed = false;  // ── 追踪村庄Rest是否已被使用 ──
     this._isMoving = false;
     this.isDevMode = false;
     this.rangeHighlight = null;
@@ -46,6 +48,9 @@ export class GameController {
     this.pendingPath = null;      // A* 算出的待确认路径
     this.pendingTarget = null;    // 待确认目标格 {q, r}
     this.pathHighlight = null;    // 路径格 Set<"q,r">，供 Renderer 绘制
+    // ─────────────────────────────────────────────────────────────
+    // ── 固定事件触发跟踪：防止重复触发 ────────────────────────────────
+    this.triggeredFixedEvents = new Set();  // 存储已触发过的固定事件坐标，格式："q,r"
     // ─────────────────────────────────────────────────────────────
     this.gameStory = new GameStory(ui);
     this.fsm = new StateMachine(GameState.INITIALIZING);
@@ -136,6 +141,9 @@ export class GameController {
             }
             // 🎮 强制覆盖已有的随机事件
             tile.content = content;
+            // ── 启用闪烁效果 ────────────────────────────────────────
+            tile.isBlinking = true;
+            tile.blinkStartTime = performance.now();
           }
         }
 
@@ -147,6 +155,9 @@ export class GameController {
             tile.isFixedEvent = true;  // 先标记为固定事件
             // 🎮 强制覆盖已有的随机事件
             tile.content = makeVillage(village.name);
+            // ── 启用闪烁效果 ────────────────────────────────────────
+            tile.isBlinking = true;
+            tile.blinkStartTime = performance.now();
           }
         }
 
@@ -158,6 +169,9 @@ export class GameController {
             tile.isFixedEvent = true;  // 先标记为固定事件
             // 🎮 强制覆盖已有的随机事件
             tile.content = makeMerchant(merchant.name);
+            // ── 启用闪烁效果 ────────────────────────────────────────
+            tile.isBlinking = true;
+            tile.blinkStartTime = performance.now();
           }
         }
 
@@ -179,6 +193,9 @@ export class GameController {
             }
             // 🎮 强制覆盖已有的随机事件
             tile.content = content;  // 直接覆盖，而不是用 placeContent
+            // ── 启用闪烁效果 ────────────────────────────────────────
+            tile.isBlinking = true;
+            tile.blinkStartTime = performance.now();
           }
         }
 
@@ -190,6 +207,7 @@ export class GameController {
             tile.isFixedEvent = true;  // 先标记为固定事件
             // 🎮 强制覆盖已有的随机事件
             tile.content = makeCorruptedDeer(deer.name, deer.monsterType);
+            // ── 腐化鹿事件不闪烁 ────────────────────────────────────
           }
         }
 
@@ -224,6 +242,7 @@ export class GameController {
             tile.type = TileType.GRASS;
             tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war until explored
             this.noviceVillage.placeContent(ev.q, ev.r, makeDungeon(ev.name, ev.level, ev.difficulty), 0);
+            // ── 新手村事件不闪烁 ────────────────────────────────────
           }
         }
         // ── Place Novice Village Treasures ──────────────────────────────────
@@ -233,6 +252,7 @@ export class GameController {
             tile.type = TileType.GRASS;
             tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war until explored
             this.noviceVillage.placeContent(ev.q, ev.r, makeTreasure(ev.lootTier), 0);
+            // ── 新手村事件不闪烁 ────────────────────────────────────
           }
         }
         // ── Place Novice Village Altars ──────────────────────────────────
@@ -242,6 +262,7 @@ export class GameController {
             tile.type = TileType.GRASS;
             tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war until explored
             this.noviceVillage.placeContent(ev.q, ev.r, makeAltar(), 0);
+            // ── 新手村事件不闪烁 ────────────────────────────────────
           }
         }
         // ── Place Novice Village Shops ──────────────────────────────────
@@ -251,6 +272,7 @@ export class GameController {
             tile.type = TileType.GRASS;
             tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war until explored
             this.noviceVillage.placeContent(ev.q, ev.r, makeShop(), 0);
+            // ── 新手村事件不闪烁 ────────────────────────────────────
           }
         }
         // ── Place Main Map Shops ──────────────────────────────────
@@ -260,6 +282,7 @@ export class GameController {
             tile.type = TileType.GRASS;
             tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war (only works when approaching the shop)
             this.map.placeContent(ev.q, ev.r, makeShop(), 0);
+            // ── 主地图商店事件不闪烁 ────────────────────────────────────────
           }
         }
 
@@ -275,9 +298,14 @@ export class GameController {
 
     this.fsm.addState(GameState.MAP_EXPLORATION, {
       enter: () => {
-        // ── 使用 TurnManager 重置回合 ──────────────────────────────────────────────
-        this.turnManager.resetTurnCount();
         this.ui.showMapUI();
+        
+        // ── 只在首次进入地图或明确需要时才重置回合 ──────────────────────────
+        // 从 COMBAT 返回时不应该重置（保持战前的回合数）
+        const prevState = this.fsm._previousState;
+        if (prevState !== GameState.COMBAT) {
+          this.turnManager.resetTurnCount();
+        }
         
         // 根据当前地图设置进度条标题
         // ── 如果有当前任务，不要重置标题 ──────────────────────────────
@@ -332,7 +360,23 @@ export class GameController {
                           const hero = this.selectedHeroes?.[heroIndex];
                           if (!hero) return;
                           if (action === 'put') hero.inventory.push(loot);
-                          else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                          else if (action === 'equip') {
+                            const isWeapon = Array.isArray(loot.skills) && loot.skills.length > 0;
+                            if (isWeapon) {
+                              const emptySlot = (hero.weaponSlots ?? [null, null]).findIndex(w => w === null);
+                              if (emptySlot !== -1) {
+                                hero.weaponSlots[emptySlot] = loot;
+                              } else {
+                                const displaced = hero.weaponSlots[0];
+                                hero.weaponSlots[0] = loot;
+                                if (displaced) hero.inventory.push(displaced);
+                              }
+                            } else {
+                              hero.equipSlots = (hero.equipSlots ?? []).filter(i => i != null);
+                              hero.equipSlots.push(loot);
+                            }
+                            hero.refreshDerivedStats?.();
+                          }
                           this.ui.updatePartyStatus(this.selectedHeroes);
                         });
                       }, 100);
@@ -367,7 +411,23 @@ export class GameController {
                               const hero = this.selectedHeroes?.[heroIndex];
                               if (!hero) return;
                               if (action === 'put') hero.inventory.push(loot);
-                              else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                             else if (action === 'equip') {
+                               const isWeapon = Array.isArray(loot.skills) && loot.skills.length > 0;
+                               if (isWeapon) {
+                                 const emptySlot = (hero.weaponSlots ?? [null, null]).findIndex(w => w === null);
+                                 if (emptySlot !== -1) {
+                                   hero.weaponSlots[emptySlot] = loot;
+                                 } else {
+                                   const displaced = hero.weaponSlots[0];
+                                   hero.weaponSlots[0] = loot;
+                                   if (displaced) hero.inventory.push(displaced);
+                                 }
+                               } else {
+                                 hero.equipSlots = (hero.equipSlots ?? []).filter(i => i != null);
+                                 hero.equipSlots.push(loot);
+                               }
+                               hero.refreshDerivedStats?.();
+                             }
                               this.ui.updatePartyStatus(this.selectedHeroes);
                             });
                           }, 100);
@@ -389,7 +449,23 @@ export class GameController {
                     const hero = this.selectedHeroes?.[heroIndex];
                     if (!hero) return;
                     if (action === 'put') hero.inventory.push(loot);
-                    else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
+                  else if (action === 'equip') {
+                    const isWeapon = Array.isArray(loot.skills) && loot.skills.length > 0;
+                    if (isWeapon) {
+                      const emptySlot = (hero.weaponSlots ?? [null, null]).findIndex(w => w === null);
+                      if (emptySlot !== -1) {
+                        hero.weaponSlots[emptySlot] = loot;
+                      } else {
+                        const displaced = hero.weaponSlots[0];
+                        hero.weaponSlots[0] = loot;
+                        if (displaced) hero.inventory.push(displaced);
+                      }
+                    } else {
+                      hero.equipSlots = (hero.equipSlots ?? []).filter(i => i != null);
+                      hero.equipSlots.push(loot);
+                    }
+                    hero.refreshDerivedStats?.();
+                  }
                     this.ui.updatePartyStatus(this.selectedHeroes);
                   });
                 }, 100);
@@ -733,6 +809,12 @@ export class GameController {
     this.pendingTarget = null;
     this.pathHighlight = null;
     
+    // 移除End Turn按钮的闪烁效果
+    const endTurnBtn = document.getElementById('end-turn-btn');
+    if (endTurnBtn) {
+      endTurnBtn.classList.remove('blink');
+    }
+    
     // 直接处理 turnCount 增加
     this.turnManager.turnCount = this.turnManager.turnCount + 1;
     this.turnManager._updateProgressBar();
@@ -925,8 +1007,18 @@ export class GameController {
   // ── Tile 事件处理 ────────────────────────────────────────────────
 
   _handleTileContent(tile) {
-    // 特殊坐标：主世界(-8, 7)自动切换为寻找村庄
-    if (this.currentMapName !== 'Novice Village' && tile.q === -8 && tile.r === 7) {
+    // ── 检查是否为固定事件且已触发过 ───────────────────────────────
+    const eventKey = `${tile.q},${tile.r}`;
+    // ── 注意：村庄（VILLAGE）类型事件不受一次触发限制，可以重复访问 ──
+    const isFixedEventAlreadyTriggered = tile.isFixedEvent && tile.content?.type !== TileContentType.VILLAGE && this.triggeredFixedEvents.has(eventKey);
+    
+    // 如果是固定事件且已触发过，则不处理任何事件
+    if (isFixedEventAlreadyTriggered) {
+      return;
+    }
+    
+    // 特殊坐标：主世界(-8, 7)自动切换为寻找村庄（只在首次触发时）
+    if (this.currentMapName !== 'Novice Village' && tile.q === -8 && tile.r === 7 && !isFixedEventAlreadyTriggered) {
       this.ui.updateProgressBarTitle(PROGRESS_BAR_TEXTS.FIND_VILLAGE);
     }
 
@@ -937,6 +1029,14 @@ export class GameController {
       }
       return;
     }
+    
+    // ── 标记固定事件为已触发（村庄除外，可重复访问） ──────────────────
+    if (tile.isFixedEvent && tile.content.type !== TileContentType.VILLAGE) {
+      this.triggeredFixedEvents.add(eventKey);
+      // ── 触发后禁用闪烁效果 ────────────────────────────────────────
+      tile.isBlinking = false;
+    }
+    
     const c = tile.content;
     if (c.type === TileContentType.DUNGEON || c.type === TileContentType.BOSS) {
       EventTable.handleCombat(this, tile, c);
@@ -997,6 +1097,7 @@ export class GameController {
     this.turnManager.startMission(missionName, maxTurns);
     this.bossModePenaltyActive = false;
     this.bossModePenaltyWarned = false;
+    this.turnManager.clearBossPenalty(this);  // ── 额外确保清除 ──
     document.body.classList.remove('screen-flare');
     this.turnManager.setNormal();
   }
@@ -1020,11 +1121,12 @@ export class GameController {
   }
 
   _revealDirection(dirQ, dirR) {
+    const currentMap = this.currentMapName === 'Novice Village' ? this.noviceVillage : this.map;
     const radius = 6;
     for (let dq = -radius; dq <= radius; dq++) {
       for (let dr = -radius; dr <= radius; dr++) {
         if (Math.max(Math.abs(dq), Math.abs(dr), Math.abs(dq + dr)) > radius) continue;
-        const tile = this.map.getTile(this.player.q + dq, this.player.r + dr);
+        const tile = currentMap.getTile(this.player.q + dq, this.player.r + dr);
         if (tile && (
           (dirQ === 1 && dirR === -1 && dq > 0 && dr < 0) ||
           (dirQ === 1 && dirR === 1 && dq > 0 && dr > 0) ||
@@ -1165,10 +1267,10 @@ export class GameController {
         };
 
         localStorage.setItem('for_the_treasure_save', JSON.stringify(data));
-        alert("游戏保存成功！(Game Saved Successfully!)");
+        alert("Game Saved Successfully!");
     } catch (e) {
         console.error("Save error:", e);
-        alert("保存失败！(Failed to save game.)");
+        alert("Failed to save game.");
     }
   }
 

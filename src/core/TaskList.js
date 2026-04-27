@@ -27,7 +27,7 @@ const MISSION_TASKS = {
   'Main Map - Rescue Villagers': {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
-    nextMission: 'Rescue the Caravan',  // Auto-switch to next mission on completion
+    nextMission: 'Find the village',  // Auto-switch to next mission on completion
     tasks: {
       rescue_villagers: { 
         done: false, 
@@ -36,6 +36,15 @@ const MISSION_TASKS = {
         targetQ: -8,                  // Target coordinate Q
         targetR: 7,                   // Target coordinate R
       },
+    }
+  },
+  // Find the village Tasks
+  'Find the village': {
+    showDebugBtn: false,
+    autoCleanupOnComplete: false,
+    nextMission: 'Rescue the Caravan',  // Auto-switch to next mission on completion
+    maxTurns: 10,  // ── 任务时间限制 ──
+    tasks: {
       find_village: { 
         done: false, 
         label: '🏘️  Find village',
