@@ -275,9 +275,14 @@ export class GameController {
 
     this.fsm.addState(GameState.MAP_EXPLORATION, {
       enter: () => {
-        // ── 使用 TurnManager 重置回合 ──────────────────────────────────────────────
-        this.turnManager.resetTurnCount();
         this.ui.showMapUI();
+        
+        // ── 只在首次进入地图或明确需要时才重置回合 ──────────────────────────
+        // 从 COMBAT 返回时不应该重置（保持战前的回合数）
+        const prevState = this.fsm._previousState;
+        if (prevState !== GameState.COMBAT) {
+          this.turnManager.resetTurnCount();
+        }
         
         // 根据当前地图设置进度条标题
         // ── 如果有当前任务，不要重置标题 ──────────────────────────────
@@ -1020,11 +1025,12 @@ export class GameController {
   }
 
   _revealDirection(dirQ, dirR) {
+    const currentMap = this.currentMapName === 'Novice Village' ? this.noviceVillage : this.map;
     const radius = 6;
     for (let dq = -radius; dq <= radius; dq++) {
       for (let dr = -radius; dr <= radius; dr++) {
         if (Math.max(Math.abs(dq), Math.abs(dr), Math.abs(dq + dr)) > radius) continue;
-        const tile = this.map.getTile(this.player.q + dq, this.player.r + dr);
+        const tile = currentMap.getTile(this.player.q + dq, this.player.r + dr);
         if (tile && (
           (dirQ === 1 && dirR === -1 && dq > 0 && dr < 0) ||
           (dirQ === 1 && dirR === 1 && dq > 0 && dr > 0) ||

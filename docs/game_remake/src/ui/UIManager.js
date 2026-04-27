@@ -294,6 +294,7 @@ export class UIManager {
 
     const titleEl = document.getElementById('event-title');
     const descEl = document.getElementById('event-desc');
+    const hintEl = document.getElementById('event-hint');
     const nameEl = document.getElementById('event-name');
     const avatarEl = document.getElementById('event-avatar');
     const pageEl = document.getElementById('event-page');
@@ -305,6 +306,17 @@ export class UIManager {
     eventUI.style.display = 'flex';
     if (titleEl) titleEl.textContent = title;
     if (descEl) descEl.textContent = desc;
+    
+    // 设置提示文本
+    if (hintEl) {
+      if (config.hint) {
+        hintEl.textContent = config.hint;
+        hintEl.style.display = 'block';
+      } else {
+        hintEl.style.display = 'none';
+      }
+    }
+    
     if (pageEl) pageEl.textContent = ''; // 单页事件不显示页码
 
     eventButtons.innerHTML = '';
