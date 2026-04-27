@@ -60,27 +60,6 @@ export class InputHandler {
       e.preventDefault(); // 阻止浏览器按下空格时默认向下滚动网页的行为
       this._onEndTurn();  // 直接调用现成的结束回合方法
     }
-    if (e.code === 'Escape') {
-      e.preventDefault();
-
-      // 如果背包面板开着，优先让背包自己的 ESC 逻辑关掉它，不开暂停菜单
-      const inventoryPanel = document.getElementById('inventory-panel');
-      if (inventoryPanel && inventoryPanel.style.display !== 'none') return;
-
-      const overlay = document.getElementById('pause-overlay');
-      if (!overlay) return;
-
-      if (overlay.classList.contains('open')) {
-        // 已开 → 关闭
-        overlay.classList.remove('open');
-      } else {
-        // 未开 → 只在游戏进行中（HUD 可见）才打开
-        const hud = document.getElementById('hud');
-        if (hud && hud.style.display !== 'none') {
-          overlay.classList.add('open');
-        }
-      }
-    }
   }
 
   _onMouseDown(e) {

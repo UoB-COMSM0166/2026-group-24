@@ -2,7 +2,6 @@
 export class StateMachine {
   constructor(initialState) {
     this.currentState = initialState;
-    this._previousState = null;  // ← 记录前一个状态
     this.states = {};
   }
 
@@ -16,7 +15,6 @@ export class StateMachine {
     }
 
     console.log(`State Transition: ${this.currentState} -> ${newState}`);
-    this._previousState = this.currentState;  // ← 保存前一个状态
     this.currentState = newState;
 
     if (this.states[newState] && this.states[newState].enter) {

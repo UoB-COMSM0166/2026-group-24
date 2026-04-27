@@ -275,14 +275,9 @@ export class GameController {
 
     this.fsm.addState(GameState.MAP_EXPLORATION, {
       enter: () => {
+        // ── 使用 TurnManager 重置回合 ──────────────────────────────────────────────
+        this.turnManager.resetTurnCount();
         this.ui.showMapUI();
-        
-        // ── 只在首次进入地图或明确需要时才重置回合 ──────────────────────────
-        // 从 COMBAT 返回时不应该重置（保持战前的回合数）
-        const prevState = this.fsm._previousState;
-        if (prevState !== GameState.COMBAT) {
-          this.turnManager.resetTurnCount();
-        }
         
         // 根据当前地图设置进度条标题
         // ── 如果有当前任务，不要重置标题 ──────────────────────────────
@@ -337,23 +332,7 @@ export class GameController {
                           const hero = this.selectedHeroes?.[heroIndex];
                           if (!hero) return;
                           if (action === 'put') hero.inventory.push(loot);
-                          else if (action === 'equip') {
-                            const isWeapon = Array.isArray(loot.skills) && loot.skills.length > 0;
-                            if (isWeapon) {
-                              const emptySlot = (hero.weaponSlots ?? [null, null]).findIndex(w => w === null);
-                              if (emptySlot !== -1) {
-                                hero.weaponSlots[emptySlot] = loot;
-                              } else {
-                                const displaced = hero.weaponSlots[0];
-                                hero.weaponSlots[0] = loot;
-                                if (displaced) hero.inventory.push(displaced);
-                              }
-                            } else {
-                              hero.equipSlots = (hero.equipSlots ?? []).filter(i => i != null);
-                              hero.equipSlots.push(loot);
-                            }
-                            hero.refreshDerivedStats?.();
-                          }
+                          else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
                           this.ui.updatePartyStatus(this.selectedHeroes);
                         });
                       }, 100);
@@ -388,23 +367,7 @@ export class GameController {
                               const hero = this.selectedHeroes?.[heroIndex];
                               if (!hero) return;
                               if (action === 'put') hero.inventory.push(loot);
-                             else if (action === 'equip') {
-                               const isWeapon = Array.isArray(loot.skills) && loot.skills.length > 0;
-                               if (isWeapon) {
-                                 const emptySlot = (hero.weaponSlots ?? [null, null]).findIndex(w => w === null);
-                                 if (emptySlot !== -1) {
-                                   hero.weaponSlots[emptySlot] = loot;
-                                 } else {
-                                   const displaced = hero.weaponSlots[0];
-                                   hero.weaponSlots[0] = loot;
-                                   if (displaced) hero.inventory.push(displaced);
-                                 }
-                               } else {
-                                 hero.equipSlots = (hero.equipSlots ?? []).filter(i => i != null);
-                                 hero.equipSlots.push(loot);
-                               }
-                               hero.refreshDerivedStats?.();
-                             }
+                              else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
                               this.ui.updatePartyStatus(this.selectedHeroes);
                             });
                           }, 100);
@@ -426,23 +389,7 @@ export class GameController {
                     const hero = this.selectedHeroes?.[heroIndex];
                     if (!hero) return;
                     if (action === 'put') hero.inventory.push(loot);
-                  else if (action === 'equip') {
-                    const isWeapon = Array.isArray(loot.skills) && loot.skills.length > 0;
-                    if (isWeapon) {
-                      const emptySlot = (hero.weaponSlots ?? [null, null]).findIndex(w => w === null);
-                      if (emptySlot !== -1) {
-                        hero.weaponSlots[emptySlot] = loot;
-                      } else {
-                        const displaced = hero.weaponSlots[0];
-                        hero.weaponSlots[0] = loot;
-                        if (displaced) hero.inventory.push(displaced);
-                      }
-                    } else {
-                      hero.equipSlots = (hero.equipSlots ?? []).filter(i => i != null);
-                      hero.equipSlots.push(loot);
-                    }
-                    hero.refreshDerivedStats?.();
-                  }
+                    else if (action === 'equip') { hero.equip?.(loot, Math.max(0, Math.min(1, loot.slot ?? 0))); hero.refreshDerivedStats?.(); }
                     this.ui.updatePartyStatus(this.selectedHeroes);
                   });
                 }, 100);
@@ -786,12 +733,6 @@ export class GameController {
     this.pendingTarget = null;
     this.pathHighlight = null;
     
-    // 移除End Turn按钮的闪烁效果
-    const endTurnBtn = document.getElementById('end-turn-btn');
-    if (endTurnBtn) {
-      endTurnBtn.classList.remove('blink');
-    }
-    
     // 直接处理 turnCount 增加
     this.turnManager.turnCount = this.turnManager.turnCount + 1;
     this.turnManager._updateProgressBar();
@@ -1056,7 +997,6 @@ export class GameController {
     this.turnManager.startMission(missionName, maxTurns);
     this.bossModePenaltyActive = false;
     this.bossModePenaltyWarned = false;
-    this.turnManager.clearBossPenalty(this);  // ── 额外确保清除 ──
     document.body.classList.remove('screen-flare');
     this.turnManager.setNormal();
   }
@@ -1080,12 +1020,11 @@ export class GameController {
   }
 
   _revealDirection(dirQ, dirR) {
-    const currentMap = this.currentMapName === 'Novice Village' ? this.noviceVillage : this.map;
     const radius = 6;
     for (let dq = -radius; dq <= radius; dq++) {
       for (let dr = -radius; dr <= radius; dr++) {
         if (Math.max(Math.abs(dq), Math.abs(dr), Math.abs(dq + dr)) > radius) continue;
-        const tile = currentMap.getTile(this.player.q + dq, this.player.r + dr);
+        const tile = this.map.getTile(this.player.q + dq, this.player.r + dr);
         if (tile && (
           (dirQ === 1 && dirR === -1 && dq > 0 && dr < 0) ||
           (dirQ === 1 && dirR === 1 && dq > 0 && dr > 0) ||
@@ -1226,10 +1165,10 @@ export class GameController {
         };
 
         localStorage.setItem('for_the_treasure_save', JSON.stringify(data));
-        alert("Game Saved Successfully!");
+        alert("游戏保存成功！(Game Saved Successfully!)");
     } catch (e) {
         console.error("Save error:", e);
-        alert("Failed to save game.");
+        alert("保存失败！(Failed to save game.)");
     }
   }
 

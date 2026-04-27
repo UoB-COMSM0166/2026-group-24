@@ -2,7 +2,7 @@
 
 export const ENEMY_TYPES = {
   warrior: {
-    name: 'Skeleton Soldier',
+    name: 'Goblin Warrior',
     type: 'dungeon',
     statMod: { strength: 1.2 },
     desc: 'Melee fighter, high STR',
@@ -24,7 +24,7 @@ export const ENEMY_TYPES = {
     ],
   },
   healer: {
-    name: 'Azure Healer',
+    name: 'Goblin Shaman',
     type: 'dungeon',
     statMod: { talent: 1.2 },
     desc: 'Support: heals allies, grants warcry',
@@ -35,14 +35,14 @@ export const ENEMY_TYPES = {
     ],
   },
   elite: {
-    name: 'Barbarian Warrior',
+    name: 'Orc Elite',
     type: 'dungeon',
     statMod: { strength: 1.5, vitality: 1.4 },
     desc: 'Tank, high STR and VIT',
     skills: [],
   },
   stone_golem: {
-    name: 'Infernal Demon',
+    name: 'Stone Golem',
     type: 'dungeon',
     statMod: {
       toughness: 28,   // 远高于普通值5，防御极高
@@ -122,7 +122,7 @@ export const ENEMY_TYPES = {
     ],
   },
   dark_overlord: {
-    name: 'Corfus, the Fallen Paladin',
+    name: 'Corfus, Legendary Knight of the Royal City',
     type: 'boss',
     hpMulti: 2.0,
     desc: 'Boss: overwhelming power, multi-status attacks, self-empowerment',

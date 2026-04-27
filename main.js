@@ -169,42 +169,7 @@ function startGame(isLoad = false, isDevMode = false) {
             gameController.saveGame();
         });
     }
-    const pauseOverlay   = document.getElementById('pause-overlay');
-    const pmSaveBtn      = document.getElementById('pm-save-btn');
-    const pmResumeBtn    = document.getElementById('pm-resume-btn');
-    const pmTitleBtn     = document.getElementById('pm-title-btn');
-    const pauseVolSlider = document.getElementById('pause-vol-slider');
 
-    const closePauseMenu = () => pauseOverlay?.classList.remove('open');
-
-// 同步音量滑条初始值
-    if (pauseVolSlider && window.BGMPlayer) {
-        pauseVolSlider.value = window.BGMPlayer.globalVolume ?? 0.5;
-    }
-// 实时调节音量
-    pauseVolSlider?.addEventListener('input', (e) => {
-        const v = parseFloat(e.target.value);
-        if (window.BGMPlayer) {
-            window.BGMPlayer.globalVolume = v;
-            if (window.BGMPlayer.current) window.BGMPlayer.current.volume = v;
-        }
-    });
-// 菜单内 Save
-    pmSaveBtn?.addEventListener('click', () => {
-        gameController.saveGame();
-    });
-// Resume / 点击遮罩空白处关闭
-    pmResumeBtn?.addEventListener('click', closePauseMenu);
-    pauseOverlay?.addEventListener('click', (e) => {
-        if (e.target === pauseOverlay) closePauseMenu();
-    });
-// 返回主标题
-    pmTitleBtn?.addEventListener('click', () => {
-        if (!confirm('Return to main menu? Unsaved progress will be lost.')) return;
-        closePauseMenu();
-        window.BGMPlayer?.stop();
-        location.reload();
-    });
     // 调试模式按钮
     const debugBtn = document.getElementById('debug-toggle-btn');
     debugBtn.addEventListener('click', () => {

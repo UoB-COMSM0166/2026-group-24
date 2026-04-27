@@ -351,19 +351,19 @@ const ENEMY_ANIM_CONFIG = {
     attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.85, ty: 130, faceLeftFlip: true },
   },
   mage: {
-      idle: { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
-      hit: { frames: 3, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
-      death: { frames: 7, interval: 110, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
-      run: { frames: 8, interval: 70, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
-      attack: { frames: 8, interval: 60, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
-    },
-    swift_assassin: {
-      idle: { frames: 4, interval: 150, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
-      hit: { frames: 4, interval: 90, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
-      death: { frames: 4, interval: 120, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
-      run: { frames: 8, interval: 75, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
-      attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
-    },
+    idle: { frames: 4, interval: 150, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    hit: { frames: 4, interval: 90, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    death: { frames: 4, interval: 120, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    run: { frames: 8, interval: 75, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+  },
+  swift_assassin: {
+    idle: { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+    hit: { frames: 3, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+    death: { frames: 7, interval: 110, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+    run: { frames: 8, interval: 70, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+    attack: { frames: 8, interval: 60, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+  },
 };
 
 const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX = false }) => {
@@ -1139,17 +1139,16 @@ const CombatApp = ({ state, callbacks }) => {
             }}>
               <DiceSVG value={diceValue} rolling={phase === 'ROLLING'} />
               <div style={{
-                              color: '#fbbf24', fontSize: '11px', fontWeight: 'bold', marginTop: '6px',
-                              animation: 'hp-pulse 0.8s ease-in-out infinite', letterSpacing: '0.08em'
-                            }}>
-                              {phase === 'ROLLING' ? 'ROLLING…'
-                                : diceValue <= 1 ? '💨 GRAZE ×0.5'
-                                  : diceValue <= 2 ? '🗡 WEAK ×0.8'
-                                    : diceValue <= 3 ? '⚔ HIT ×1.0'
-                                      : diceValue <= 4 ? '⚔ SOLID ×1.2'
-                                        : diceValue === 5 ? '💥 HEAVY ×1.6'
-                                          : '⚡ CRIT! ×1.8'}
-                            </div>
+                color: '#fbbf24', fontSize: '11px', fontWeight: 'bold', marginTop: '6px',
+                animation: 'hp-pulse 0.8s ease-in-out infinite', letterSpacing: '0.08em'
+              }}>
+                {phase === 'ROLLING' ? 'ROLLING…'
+                  : diceValue <= 2 ? '💨 WEAK ×0.5'
+                    : diceValue <= 4 ? '⚔ HIT ×1.0'
+                      : diceValue === 5 ? '💥 HEAVY ×1.2'
+                        : '⚡ CRIT! ×1.5'}
+              </div>
+              <div style={{ color: '#57534e', fontSize: '9px', fontFamily: "'Press Start 2P', monospace", marginTop: '2px' }}>[ {diceValue} ]</div>
             </div>
           )}
 

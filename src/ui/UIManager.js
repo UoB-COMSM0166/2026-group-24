@@ -234,17 +234,7 @@ export class UIManager {
     document.getElementById('top-progress').style.display = 'flex';
     if(this.els.partyStatus) this.els.partyStatus.style.display = 'flex';
   }
-  updateMovementUI(points) {
-    this.els.movementEl.textContent = `Action Points: ${points}`;
-    const endTurnBtn = document.getElementById('end-turn-btn');
-    if (endTurnBtn) {
-      if (points === 0) {
-        endTurnBtn.classList.add('blink');
-      } else {
-        endTurnBtn.classList.remove('blink');
-      }
-    }
-  }
+  updateMovementUI(points) { this.els.movementEl.textContent = `Action Points: ${points}`; }
   updateProgressBar(turn, maxTurns) {
     const bar = document.getElementById('turn-progress-bar');
     const text = document.getElementById('turn-progress-text');
@@ -253,34 +243,11 @@ export class UIManager {
     bar.style.width = `${pct}%`;
     if (text) text.textContent = `${turn}/${maxTurns}`;
     bar.classList.toggle('danger', turn >= maxTurns - 3);
-    
-    // ── 恢复进度条描述为正常状态 ──
-    this.restoreProgressBarDesc();
-  }
-  
-  restoreProgressBarDesc() {
-    const descEl = document.querySelector('#top-progress-header span:last-child');
-    if (descEl) {
-      // 重建正确的结构：Turn <span id="turn-progress-text">X/Y</span>
-      const textSpan = document.getElementById('turn-progress-text');
-      const turnValue = textSpan ? textSpan.textContent : '0/20';
-      
-      descEl.innerHTML = `Turn <span id="turn-progress-text">${turnValue}</span>`;
-      descEl.style.color = '#aaa';  // ── 恢复描述的颜色 ──
-    }
   }
 
   updateProgressBarTitle(title) {
     const titleEl = document.querySelector('#top-progress-header span:first-child');
     if (titleEl) titleEl.textContent = title;
-  }
-  
-  updateProgressBarDesc(desc) {
-    const descEl = document.querySelector('#top-progress-header span:last-child');
-    if (descEl) {
-      descEl.innerHTML = desc;
-      descEl.style.color = '#aaa';  // ── 恢复描述的颜色 ──
-    }
   }
 
   updateBossMode() {
@@ -327,7 +294,6 @@ export class UIManager {
 
     const titleEl = document.getElementById('event-title');
     const descEl = document.getElementById('event-desc');
-    const hintEl = document.getElementById('event-hint');
     const nameEl = document.getElementById('event-name');
     const avatarEl = document.getElementById('event-avatar');
     const pageEl = document.getElementById('event-page');
@@ -339,17 +305,6 @@ export class UIManager {
     eventUI.style.display = 'flex';
     if (titleEl) titleEl.textContent = title;
     if (descEl) descEl.textContent = desc;
-    
-    // 设置提示文本
-    if (hintEl) {
-      if (config.hint) {
-        hintEl.textContent = config.hint;
-        hintEl.style.display = 'block';
-      } else {
-        hintEl.style.display = 'none';
-      }
-    }
-    
     if (pageEl) pageEl.textContent = ''; // 单页事件不显示页码
 
     eventButtons.innerHTML = '';

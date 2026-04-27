@@ -27,7 +27,7 @@ const MISSION_TASKS = {
   'Main Map - Rescue Villagers': {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
-    nextMission: 'Find the village',  // Auto-switch to next mission on completion
+    nextMission: 'Rescue the Caravan',  // Auto-switch to next mission on completion
     tasks: {
       rescue_villagers: { 
         done: false, 
@@ -36,15 +36,6 @@ const MISSION_TASKS = {
         targetQ: -8,                  // Target coordinate Q
         targetR: 7,                   // Target coordinate R
       },
-    }
-  },
-  // Find the village Tasks
-  'Find the village': {
-    showDebugBtn: false,
-    autoCleanupOnComplete: false,
-    nextMission: 'Rescue the Caravan',  // Auto-switch to next mission on completion
-    maxTurns: 10,  // ── 任务时间限制 ──
-    tasks: {
       find_village: { 
         done: false, 
         label: '🏘️  Find village',
@@ -257,7 +248,7 @@ export class TaskList {
     // 调试按钮：一键完成所有任务（仅在新手村显示）
     if (this._showDebugBtn) {
       const debugBtn = document.createElement('button');
-      debugBtn.textContent = '⏩ Skip Tutorial';
+     debugBtn.textContent = '🔧 Complete all tasks';
       debugBtn.style.cssText = `
         position: fixed;
         bottom: 70px;
@@ -277,13 +268,6 @@ export class TaskList {
       });
       document.body.appendChild(debugBtn);
       this._debugBtn = debugBtn;
-
-      const syncDebugBtn = () => {
-        const inCombat = window._gameController?.fsm?.currentState === 'COMBAT';
-        debugBtn.style.display = inCombat ? 'none' : 'block';
-      };
-      syncDebugBtn();
-      this._debugBtnInterval = setInterval(syncDebugBtn, 300);
     }
     
     document.body.appendChild(el);
@@ -366,6 +350,5 @@ export class TaskList {
       setTimeout(() => this._hudEl?.remove(), 900);
     }
     if (this._debugBtn) this._debugBtn.remove();
-    if (this._debugBtnInterval) clearInterval(this._debugBtnInterval);
   }
 }

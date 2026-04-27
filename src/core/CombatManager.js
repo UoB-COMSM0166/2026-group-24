@@ -296,14 +296,13 @@ export class CombatManager {
     let rollVal = Math.max(1, Math.min(6, Math.round(result.sampleRoll)));
 
     // Dice multiplier table
-        let multiplier;
-        let textType;
-        if (rollVal <= 1)      { multiplier = 0.5; textType = 'graze';   }
-        else if (rollVal <= 2) { multiplier = 0.8; textType = 'weak';    }
-        else if (rollVal <= 3) { multiplier = 1.0; textType = 'normal';  }
-        else if (rollVal <= 4) { multiplier = 1.2; textType = 'solid';   }
-        else if (rollVal === 5){ multiplier = 1.6; textType = 'crit';    }
-        else                   { multiplier = 1.8; textType = 'perfect'; }
+    let multiplier;
+    let textType;
+    if (rollVal <= 1)      { multiplier = 0;   textType = 'miss';    }
+    else if (rollVal <= 2) { multiplier = 0.5; textType = 'weak';    }
+    else if (rollVal <= 4) { multiplier = 1.0; textType = 'normal';  }
+    else if (rollVal === 5){ multiplier = 1.5; textType = 'crit';    }
+    else                   { multiplier = 2.0; textType = 'perfect'; }
 
     const isHeal = skill.type === 'heal' || skill.type === 'buff';
     this.currentAction = { ...this.currentAction, multiplier, rollVal, textType, isHeal };
@@ -525,13 +524,12 @@ export class CombatManager {
   }
 
   _rollLabel(textType) {
-      return textType === 'perfect' ? '⚡ PERFECT! ×1.8'
-          : textType === 'crit'    ? '💥 CRIT! ×1.6'
-              : textType === 'solid'   ? '(Solid ×1.2)'
-                  : textType === 'weak'    ? '(Weak ×0.8)'
-                      : textType === 'graze'   ? '💨 GRAZE ×0.5'
-                          : '';
-    }
+    return textType === 'perfect' ? '⚡ PERFECT! ×2.0'
+        : textType === 'crit'    ? '💥 CRIT! ×1.5'
+            : textType === 'weak'    ? '(Weak ×0.5)'
+                : textType === 'miss'    ? '💨 MISS'
+                    : '';
+  }
 
   // ── Enemy AI（采用 hub 完整版，支持 buff/heal/aoe 等多种技能类型）────
   handleAI() {
@@ -722,29 +720,17 @@ export class CombatManager {
       this.notifyUI();
       return;
     }
-    // Weighted random target: front-row (knight) is 3x more likely than back-row.
-        const FRONT_ROW_IDS = ['knight'];
-        const FRONT_WEIGHT = 3;
-        const BACK_WEIGHT = 1;
-        const weighted = aliveHeroes.map(h => ({
-          hero: h,
-          weight: FRONT_ROW_IDS.includes(h.id) ? FRONT_WEIGHT : BACK_WEIGHT,
-        }));
-        const totalWeight = weighted.reduce((sum, w) => sum + w.weight, 0);
-        let roll = Math.random() * totalWeight;
-        let target = aliveHeroes[0];
-        for (const w of weighted) {
-          roll -= w.weight;
-          if (roll <= 0) { target = w.hero; break; }
-        }
+    // ── 攻击（single / aoe）或兜底普攻 ──────────────────────────────
+    const target    = aliveHeroes.sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
     const skillName = skill?.name    || 'Attack';
     const statKey   = skill?.statKey || 'strength';
     const power     = skill?.power   ?? 100;
 
     let result  = rollAttack(this.activeUnit, 0.5, 6);
     let rollVal = Math.max(1, Math.min(6, Math.round(result.sampleRoll)));
-    const multiplier = rollVal <= 1 ? 0.5 : rollVal <= 2 ? 0.8 : rollVal <= 3 ? 1.0 : rollVal <= 4 ? 1.2 : rollVal === 5 ? 1.6 : 1.8;
-    const textType   = rollVal <= 1 ? 'graze' : rollVal <= 2 ? 'weak' : rollVal <= 3 ? 'normal' : rollVal <= 4 ? 'solid' : rollVal === 5 ? 'crit' : 'perfect';
+    const multiplier = rollVal <= 1 ? 0 : rollVal <= 2 ? 0.5 : rollVal <= 4 ? 1.0 : rollVal === 5 ? 1.5 : 2.0;
+    const textType   = rollVal <= 1 ? 'miss' : rollVal <= 2 ? 'weak' : rollVal <= 4 ? 'normal' : rollVal === 5 ? 'crit' : 'perfect';
+
     const resolvedSkill = skill || {
       id: 'enemy_attack',
       name: skillName,

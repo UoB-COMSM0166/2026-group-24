@@ -496,11 +496,6 @@
     .map-ui-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(0,0,0,0.32), 0 0 0 1px rgba(242, 215, 154, 0.1); border-color: rgba(242, 215, 154, 0.42); filter: brightness(1.06); }
     .map-ui-btn:active { transform: translateY(1px); }
     #end-turn-btn { padding: 10px 18px; border-radius: 12px; }
-    #end-turn-btn.blink { animation: endTurnBlink 0.6s infinite; }
-    @keyframes endTurnBlink {
-      0%, 49% { opacity: 1; }
-      50%, 100% { opacity: 0.3; }
-    }
     #save-game-btn { position: fixed !important; right: 22px !important; left: auto !important; bottom: 82px !important; top: auto !important; z-index: 50 !important; background: linear-gradient(180deg, #325d47 0%, #1d3a2f 100%); border: 1px solid rgba(191, 223, 183, 0.2); color: #eef8e7; padding: 12px 20px; border-radius: 14px; box-shadow: 0 14px 30px rgba(0,0,0,0.34); font-family: 'Press Start 2P', monospace; letter-spacing: 0.06em; text-transform: uppercase; }
     #save-game-btn:hover { box-shadow: 0 18px 36px rgba(0,0,0,0.42); border-color: rgba(191, 223, 183, 0.34); }
     #debug-toggle-btn { position: fixed !important; bottom: 22px !important; left: 22px !important; z-index: 15 !important; background: linear-gradient(180deg, #2b3340 0%, #171d26 100%) !important; border: 1px solid rgba(159, 186, 214, 0.24) !important; color: #e5edf7 !important; padding: 10px 16px !important; border-radius: 14px !important; cursor: pointer !important; font-weight: bold !important; font-size: 12px !important; letter-spacing: 0.06em !important; box-shadow: 0 14px 30px rgba(0,0,0,0.32) !important; }
@@ -515,73 +510,6 @@
       #hud { width: calc(100vw - 24px); justify-content: space-between; }
       #movement-points { min-width: 0; flex: 1; }
     }
-    #pause-overlay {
-      display: none; position: fixed; inset: 0; z-index: 900;
-      background: rgba(6,4,2,0.72); backdrop-filter: blur(4px);
-      justify-content: center; align-items: center;
-    }
-    #pause-overlay.open { display: flex; }
-    #pause-menu {
-      width: min(360px, 92vw);
-      background: linear-gradient(180deg, rgba(255,235,190,0.06) 0%, transparent 22%),
-      linear-gradient(160deg, rgba(28,19,12,0.97), rgba(10,14,18,0.98));
-      border: 2px solid rgba(215,179,106,0.32); border-radius: 6px;
-      box-shadow: 0 0 0 3px rgba(9,8,6,0.8), 0 32px 64px rgba(0,0,0,0.7);
-      padding: 34px 30px 28px;
-      font-family: 'Press Start 2P', monospace; color: #f8e8c8;
-      display: flex; flex-direction: column; gap: 18px;
-      animation: pauseIn 0.18s cubic-bezier(0.22,1,0.36,1);
-    }
-    @keyframes pauseIn {
-      from { transform: scale(0.92); opacity: 0; }
-      to   { transform: scale(1);    opacity: 1; }
-    }
-    #pause-menu h2 {
-      margin: 0; font-size: 15px; letter-spacing: 0.12em;
-      color: #f4c96b; text-align: center;
-      text-shadow: 0 0 18px rgba(244,201,107,0.35), 2px 2px 0 #000;
-    }
-    .pause-divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(215,179,106,0.4), transparent);
-    }
-    .pm-vol-label { font-size: 10px; color: #b8a882; letter-spacing: 0.08em; margin-bottom: 8px; }
-    #pause-vol-slider {
-      -webkit-appearance: none; width: 100%; height: 8px;
-      background: rgba(12,17,22,0.9); border: 1px solid rgba(215,179,106,0.22);
-      border-radius: 999px; outline: none; box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
-    }
-    #pause-vol-slider::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #f4c96b, #b8852a);
-      border: 2px solid #000; cursor: pointer; transition: transform 0.1s;
-    }
-    #pause-vol-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
-    #pause-vol-slider::-moz-range-thumb {
-      width: 18px; height: 18px; border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #f4c96b, #b8852a);
-      border: 2px solid #000; cursor: pointer;
-    }
-    .pm-btn {
-      position: relative; overflow: hidden; width: 100%;
-      padding: 13px 16px; border-radius: 3px;
-      border: 2px solid rgba(215,179,106,0.22);
-      background: linear-gradient(180deg, #7d5224 0%, #5e3918 100%);
-      color: #fff4df; font-family: 'Press Start 2P', monospace;
-      font-size: 11px; letter-spacing: 0.08em; cursor: pointer; text-align: center;
-      box-shadow: 0 0 0 2px rgba(20,14,10,0.7), 0 8px 18px rgba(0,0,0,0.3),
-      inset 0 1px 0 rgba(255,255,255,0.08);
-      transition: transform 0.15s, filter 0.15s, border-color 0.15s;
-      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
-    }
-    .pm-btn::before {
-      content:''; position:absolute; inset:0; pointer-events:none;
-      background: linear-gradient(180deg, rgba(255,244,223,0.12), transparent 40%);
-    }
-    .pm-btn:hover { transform: translateY(-2px); filter: brightness(1.08); border-color: rgba(242,215,154,0.42); }
-    .pm-btn:active { transform: translateY(1px); }
-    .pm-btn.pm-save { background: linear-gradient(180deg,#325d47,#1d3a2f); border-color:rgba(191,223,183,0.22); color:#eef8e7; }
-    .pm-btn.pm-title { background: linear-gradient(180deg,#4a2828,#2e1818); border-color:rgba(220,150,150,0.22); color:#fde8e8; }
   </style>
 </head>
 
@@ -665,8 +593,6 @@
       
       <p id="event-desc" style="font-family: 'Press Start 2P', monospace; font-size: 15px; color: #f3f4f6; line-height: 1.85; margin: 0 0 14px 0; min-height: 56px; white-space: pre-wrap;"></p>
       
-      <p id="event-hint" style="font-family: 'Press Start 2P', monospace; font-size: 11px; color: #9ca3af; line-height: 1.6; margin: 0 0 14px 0; display: none;"></p>
-      
       <div style="display: flex; align-items: center; justify-content: space-between;">
         <span id="event-page" style="font-family: 'Press Start 2P', monospace; font-size: 12px; color: #6b7280;"></span>
         <div id="event-buttons" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;"></div>
@@ -674,25 +600,8 @@
     </div>
   </div>
 </div>
-<div id="pause-overlay">
-  <div id="pause-menu">
-    <h2>⏸ PAUSED</h2>
-    <div class="pause-divider"></div>
-    <button id="pm-save-btn" class="pm-btn pm-save">💾 &nbsp;Save Game</button>
-
-    <div>
-      <div class="pm-vol-label">🎵 &nbsp;MUSIC VOLUME</div>
-      <input type="range" id="pause-vol-slider" min="0" max="1" step="0.05" value="0.5">
-    </div>
-
-    <div class="pause-divider"></div>
-
-    <button id="pm-resume-btn" class="pm-btn">▶ &nbsp;Resume</button>
-    <button id="pm-title-btn" class="pm-btn pm-title">🏠 &nbsp;Main Menu</button>
 
 <script type="module" src="./main.js"></script>
-  </div>
-</div>
 <script type="text/babel" src="src/ui/CombatUI.js"></script>
 </body>
 </html>
