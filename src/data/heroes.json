@@ -8,7 +8,7 @@
       "desc": "High HP, melee expert, impenetrable defense",
       "stats": {
         "strength": 24,
-        "vitality": 20,
+        "vitality": 18,
         "intellect": 6,
         "awareness": 8,
         "talent": 8,
@@ -21,8 +21,8 @@
     {
       "id": "wizard",
       "name": "Wizard",
-      "hp": 80,
-      "maxHp": 80,
+      "hp": 95,
+      "maxHp": 95,
       "desc": "Low HP, high magic damage, AOE spells",
       "stats": {
         "strength": 6,
@@ -47,7 +47,7 @@
         "vitality": 14,
         "intellect": 8,
         "awareness": 14,
-        "talent": 22,
+        "talent": 26,
         "agility": 16
       },
       "weaponSlots": ["bare_fist", null],
