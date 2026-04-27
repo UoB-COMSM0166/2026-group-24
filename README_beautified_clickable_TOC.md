@@ -850,7 +850,6 @@ If given the opportunity to develop a sequel or an extended version of this proj
 
 * **Immersive Narrative Systems:** Beyond simple random encounters, we would introduce a **dynamic faction system** or a "living world" concept, where player choices have long-term consequences on the game environment.
 * **Technical Evolution:** We will re-engineer the core architecture to support **network synchronization for cooperative multiplayer**, enabling strategic, team-based gameplay.
-
 ---
 
 ## 10 Contribution Statement
