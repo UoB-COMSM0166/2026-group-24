@@ -742,6 +742,11 @@ In these sessions, one member took the role of the helm — actively writing cod
 
 This real-time, side-by-side collaboration proved especially effective for solving complex problems that were difficult to articulate through text or voice alone. Being physically present together created an energy and immediacy that online tools simply could not replicate.
 
+<p align="center">
+  <img src="./documents/pair_programming.jpg" width="600"/><br/>
+  <em>Figure 7.3: pair programming</em>
+</p>
+
 ### 7.3 Team Roles
 
 Every member of our team was involved in programming work, which reflected the complexity and scope of the game we set out to build. Given the large number of functional modules required, we divided responsibilities roughly along the following lines: inventory system, combat system, map generation, event handling, finite state machine, and item data.
