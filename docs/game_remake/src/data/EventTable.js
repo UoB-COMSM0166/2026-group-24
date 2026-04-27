@@ -269,6 +269,11 @@ export class EventTable {
    * @param {number} currentR
    */
   static handleUnlockChain(gameController, currentQ, currentR) {
+    // ── 解锁链时清除 Boss 模式惩罚状态 ───────────────────────────────
+    gameController.bossModePenaltyActive = false;
+    gameController.bossModePenaltyWarned = false;
+    gameController.turnManager.clearBossPenalty(gameController);
+    
     // 找到当前事件在解锁链中的位置
     const currentIndex = UNLOCK_CHAIN.findIndex(e => e.q === currentQ && e.r === currentR);
     
@@ -610,6 +615,17 @@ export class EventTable {
    * @param {Object} content
    */
   static handleNPC(gameController, tile, content) {
+    // ── NPC事件时完整退出 Boss 模式 ───────────────────────────────────────
+    gameController.bossModePenaltyActive = false;
+    gameController.bossModePenaltyWarned = false;
+    gameController.turnManager.exitBossMode();  // ── 完整退出，包括清零turnCount ──
+    gameController.ui.restoreProgressBarDesc();  // ── 恢复进度条描述文本 ──
+    
+    // ── 如果是INJURED VILLAGER事件，切换到"Find the village"任务 ────
+    if (content.name === 'INJURED VILLAGER' && gameController.tutorial) {
+      gameController.tutorial.taskList.switchToMission('Find the village');
+    }
+    
     gameController.ui.showEvent(
       `👤 ${content.name}`,
       content.dialogue || 'Hello traveler!',

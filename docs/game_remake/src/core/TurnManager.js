@@ -46,6 +46,7 @@ export class TurnManager {
     this.currentMissionName = null;
     this._progressBarTitle = null;
     this.bossMode = false;
+    this._preBossModeTurns = null;  // ── 保存进入Boss模式前的回合上限 ──
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -111,6 +112,7 @@ export class TurnManager {
    * @param {number} maxTurns - Boss 战斗的回合上限（默认 10）
    */
   enterBossMode(maxTurns = 10) {
+    this._preBossModeTurns = this.currentMaxTurns;  // ── 保存Boss模式前的回合上限 ──
     this.bossMode = true;
     this.currentMaxTurns = maxTurns;
     this.turnCount = 0;
@@ -123,7 +125,18 @@ export class TurnManager {
    */
   exitBossMode() {
     this.bossMode = false;
-    this._updateProgressBar();  // ── 更新 UI 状态 ──
+    this.turnCount = 0;  // ── 重置回合计数 ──
+    if (this._preBossModeTurns !== null) {
+      this.currentMaxTurns = this._preBossModeTurns;  // ── 恢复Boss模式前的回合上限 ──
+      this._preBossModeTurns = null;
+    }
+    
+    // ── 确保进度条完全恢复到正常状态 ──
+    this.ui.setProgressBarNormal();  // ── 移除critical样式、闪烁效果、红色背景 ──
+    this._restoreProgressBarTitle();  // ── 恢复原始标题 ──
+    
+    // ── 强制更新进度条显示，包括描述文字 ──
+    this.ui.updateProgressBar(this.turnCount, this.currentMaxTurns);
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -153,6 +166,17 @@ export class TurnManager {
     this.currentMissionName = null;
     this.exitBossMode();  // ── 清除 Boss 模式状态 ──
     this._restoreProgressBarTitle();
+  }
+
+  /**
+   * 清除 Boss 模式相关的所有惩罚状态（需要由 GameController 调用）
+   * @param {GameController} gameController - 游戏控制器引用
+   */
+  clearBossPenalty(gameController) {
+    if (gameController) {
+      gameController.bossModePenaltyActive = false;
+      gameController.bossModePenaltyWarned = false;
+    }
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -248,6 +272,7 @@ export class TurnManager {
       currentMissionName: this.currentMissionName,
       bossMode: this.bossMode,
       _progressBarTitle: this._progressBarTitle,
+      _preBossModeTurns: this._preBossModeTurns,
     };
   }
 
@@ -261,6 +286,7 @@ export class TurnManager {
     if (data.currentMissionName !== undefined) this.currentMissionName = data.currentMissionName;
     if (data.bossMode !== undefined) this.bossMode = data.bossMode;
     if (data._progressBarTitle !== undefined) this._progressBarTitle = data._progressBarTitle;
+    if (data._preBossModeTurns !== undefined) this._preBossModeTurns = data._preBossModeTurns;
     
     // ──刷新UI──
     this._updateProgressBar();
