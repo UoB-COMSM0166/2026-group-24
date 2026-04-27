@@ -640,6 +640,7 @@ Jest unit tests were used to verify the correctness of our game's internal logic
 ### 6.2 Black Box Testing
 
 Extensive black box testing was carried out throughout the development cycle. A dedicated `develop` branch was used to consolidate and test feature merges before they were promoted to the `main` branch. Particular focus was given to edge cases in combat (e.g. simultaneous status effects, zero-HP transitions, boss phase changes) and map generation (verifying that all tile types rendered correctly and that events fired as expected).
+
 ---
 
 ## 7 Process
