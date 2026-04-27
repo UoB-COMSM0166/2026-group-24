@@ -1056,6 +1056,7 @@ export class GameController {
     this.turnManager.startMission(missionName, maxTurns);
     this.bossModePenaltyActive = false;
     this.bossModePenaltyWarned = false;
+    this.turnManager.clearBossPenalty(this);  // ── 额外确保清除 ──
     document.body.classList.remove('screen-flare');
     this.turnManager.setNormal();
   }

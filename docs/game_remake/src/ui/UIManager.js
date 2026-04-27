@@ -253,11 +253,34 @@ export class UIManager {
     bar.style.width = `${pct}%`;
     if (text) text.textContent = `${turn}/${maxTurns}`;
     bar.classList.toggle('danger', turn >= maxTurns - 3);
+    
+    // ── 恢复进度条描述为正常状态 ──
+    this.restoreProgressBarDesc();
+  }
+  
+  restoreProgressBarDesc() {
+    const descEl = document.querySelector('#top-progress-header span:last-child');
+    if (descEl) {
+      // 重建正确的结构：Turn <span id="turn-progress-text">X/Y</span>
+      const textSpan = document.getElementById('turn-progress-text');
+      const turnValue = textSpan ? textSpan.textContent : '0/20';
+      
+      descEl.innerHTML = `Turn <span id="turn-progress-text">${turnValue}</span>`;
+      descEl.style.color = '#aaa';  // ── 恢复描述的颜色 ──
+    }
   }
 
   updateProgressBarTitle(title) {
     const titleEl = document.querySelector('#top-progress-header span:first-child');
     if (titleEl) titleEl.textContent = title;
+  }
+  
+  updateProgressBarDesc(desc) {
+    const descEl = document.querySelector('#top-progress-header span:last-child');
+    if (descEl) {
+      descEl.innerHTML = desc;
+      descEl.style.color = '#aaa';  // ── 恢复描述的颜色 ──
+    }
   }
 
   updateBossMode() {
