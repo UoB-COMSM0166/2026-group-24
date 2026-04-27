@@ -58,12 +58,6 @@ export const MERCHANT_LIST = [
     q: -2,
     r: -5,
     name: 'TRAVELING MERCHANT'
-  },
-  {
-    map: 'main',
-    q: 4,
-    r: 0,
-    name: 'WANDERING MERCHANT'
   }
   // 后续可继续添加更多商人
 ];
@@ -648,63 +642,82 @@ export class EventTable {
    * @param {Object} content
    */
   static handleVillage(gameController, tile, content) {
+    // ── 构建村庄菜单按钮，根据任务接受状态和Rest使用状态动态调整 ──────
+    const buttons = [];
+    
+    // 如果任务还未接受，显示 Quest 按钮
+    if (!gameController.villageQuestAccepted) {
+      buttons.push({
+        text: 'Quests',
+        onClick: () => {
+          gameController.ui.showEvent(
+            '📋 Quests',
+            'Rescue the Caravan\n\nThe village chief urgently tells you:\n"Adventurer, you came just in time."\n"A caravan passing through here, their guards are held up by monsters in the northeast direction of the village."\n"If they die, we will completely lose our supplies."',
+            [
+              {
+                text: 'Accept',
+                onClick: () => {
+                  // ── 标记任务已接受 ────────────────────────────────────
+                  gameController.villageQuestAccepted = true;
+                  
+                  // 切换到救援车队任务集（仅在非 Dev 模式下）
+                  if (gameController.tutorial) {
+                    gameController.tutorial.taskList.switchToMission('Rescue the Caravan');
+                    gameController._startMission('Rescue the Caravan', 10);
+                  }
+                  // 🎮 点击 Accept 后解锁下一个事件
+                  EventTable.handleUnlockChain(gameController, tile.q, tile.r);
+                  gameController.ui.showEvent(
+                    '✓ Quest Accepted',
+                    'You have accepted the quest [Rescue the Caravan]\nPlease head to the northeast direction of the village to rescue the caravan guards.\n\nTurn limit: 5',
+                    [{ text: 'Back', onClick: () => EventTable.handleVillage(gameController, tile, content) }]
+                  );
+                }
+              },
+              {
+                text: 'Back',
+                onClick: () => EventTable.handleVillage(gameController, tile, content)
+              }
+            ]
+          );
+        }
+      });
+    }
+    
+    // ── 如果Rest还未使用，显示 Rest 按钮
+    if (!gameController.villageRestUsed) {
+      buttons.push({
+        text: 'Rest',
+        onClick: () => {
+          // ── 标记Rest已使用 ──────────────────────────────────────────
+          gameController.villageRestUsed = true;
+          
+          const hero = gameController.selectedHeroes[0] || gameController.player;
+          const heal = Math.floor(hero.maxHp * 0.2);
+          hero.hp = Math.min(hero.maxHp, hero.hp + heal);
+          gameController.ui.updatePartyStatus(gameController.selectedHeroes);
+          gameController.ui.showEvent(
+            'Rest',
+            `You rested for a while and recovered ${heal} HP.`,
+            [{ text: 'Back', onClick: () => EventTable.handleVillage(gameController, tile, content) }]
+          );
+        }
+      });
+    }
+    
+    // 添加 Leave 按钮
+    buttons.push({
+      text: 'Leave',
+      onClick: () => {
+        // 村庄只有接受 Quests 才能解锁下一个事件
+        // Leave 后仍然可以再次进入村庄
+      }
+    });
+    
     gameController.ui.showEvent(
       '🏘️ Village',
       'Welcome to the village.',
-      [
-        {
-          text: 'Quests',
-          onClick: () => {
-            gameController.ui.showEvent(
-              '📋 Quests',
-              'Rescue the Caravan\n\nThe village chief urgently tells you:\n"Adventurer, you came just in time."\n"A caravan passing through here, their guards are held up by monsters in the northeast direction of the village."\n"If they die, we will completely lose our supplies."',
-              [
-                {
-                  text: 'Accept',
-                  onClick: () => {
-                    // 切换到救援车队任务集（仅在非 Dev 模式下）
-                    if (gameController.tutorial) {
-                      gameController.tutorial.taskList.switchToMission('Rescue the Caravan');
-                      gameController._startMission('Rescue the Caravan', 10);
-                    }
-                    // 🎮 点击 Accept 后解锁下一个事件
-                    EventTable.handleUnlockChain(gameController, tile.q, tile.r);
-                    gameController.ui.showEvent(
-                      '✓ Quest Accepted',
-                      'You have accepted the quest [Rescue the Caravan]\nPlease head to the northeast direction of the village to rescue the caravan guards.\n\nTurn limit: 5',
-                      [{ text: 'Back', onClick: () => EventTable.handleVillage(gameController, tile, content) }]
-                    );
-                  }
-                },
-                {
-                  text: 'Back',
-                  onClick: () => EventTable.handleVillage(gameController, tile, content)
-                }
-              ]
-            );
-          }
-        },
-        {
-          text: 'Rest',
-          onClick: () => {
-            const hero = gameController.selectedHeroes[0] || gameController.player;
-            const heal = Math.floor(hero.maxHp * 0.2);
-            hero.hp = Math.min(hero.maxHp, hero.hp + heal);
-            gameController.ui.updatePartyStatus(gameController.selectedHeroes);
-            gameController.ui.showEvent(
-              'Rest',
-              `You rested for a while and recovered ${heal} HP.`,
-              [{ text: 'Back', onClick: () => EventTable.handleVillage(gameController, tile, content) }]
-            );
-          }
-        },
-        {
-          text: 'Leave',
-          onClick: () => {
-            // 村庄只有接受 Quests 才能解锁下一个事件
-          }
-        }
-      ]
+      buttons
     );
   }
 
