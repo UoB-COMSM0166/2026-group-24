@@ -1165,10 +1165,10 @@ export class GameController {
         };
 
         localStorage.setItem('for_the_treasure_save', JSON.stringify(data));
-        alert("游戏保存成功！(Game Saved Successfully!)");
+        alert("Game Saved Successfully!");
     } catch (e) {
         console.error("Save error:", e);
-        alert("保存失败！(Failed to save game.)");
+        alert("Failed to save game.");
     }
   }
 
