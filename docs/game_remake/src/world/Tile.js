@@ -145,6 +145,8 @@ export class Tile {
     this.content = null;
     this.isRevealed = false;
     this.isFixedEvent = false;  // 标记：是否为固定特殊事件（如NPC、村庄、商人等）
+    this.isBlinking = false;    // ── 固定事件闪烁状态 ──
+    this.blinkStartTime = 0;    // ── 闪烁开始时间（毫秒）──
     this.variant = rng
       ? Math.floor(rng.next() * 4) + 1
       : Math.floor(Math.random() * 4) + 1;
@@ -213,6 +215,16 @@ export class Tile {
     const shouldShowContent = visState === 'visible' || 
                               (this.isFixedEvent && DebugConfig.showHiddenFixedEvents);
     if (this.content && shouldShowContent) {
+      // ── 计算闪烁效果的透明度 ──────────────────────────────────────
+      let contentAlpha = 0.85;
+      if (this.isBlinking) {
+        // 闪烁效果：平滑淡入淡出，1500ms 周期
+        const elapsedTime = performance.now() - this.blinkStartTime;
+        const cycleTime = (elapsedTime % 1500) / 1500; // 0 到 1，无限循环，周期为 1500ms
+        // 使用 sin 函数创建平滑的淡入淡出：最亮 1.0 到最暗 0.3
+        contentAlpha = 0.65 + 0.35 * Math.sin(cycleTime * Math.PI * 2);
+      }
+      
       const { iconType } = this.content;
       if (iconType) {
         const color = Tile.CIRCLE_COLOR_MAP[iconType];
@@ -221,7 +233,7 @@ export class Tile {
           ctx.beginPath();
           ctx.arc(x, y, size * 0.55, 0, Math.PI * 2);
           ctx.fillStyle = color;
-          ctx.globalAlpha = 0.85;
+          ctx.globalAlpha = contentAlpha;
           ctx.shadowColor = '#fff';
           ctx.shadowBlur = 8;
           ctx.fill();
@@ -240,7 +252,10 @@ export class Tile {
           const scale = 0.98;
           const iw = size * 2 * scale;
           const ih = size * Math.SQRT3 * scale;
+          ctx.save();
+          ctx.globalAlpha = contentAlpha;
           ctx.drawImage(contentImg, x - iw / 2, y - ih / 2, iw, ih);
+          ctx.restore();
         }
       }
     }

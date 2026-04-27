@@ -38,6 +38,8 @@ export class GameController {
     this.bossModePenaltyActive = false;
     this.bossModePenaltyWarned = false;
     this.merchantEncountered = false;
+    this.villageQuestAccepted = false;  // ── 追踪村庄任务是否已被接受 ──
+    this.villageRestUsed = false;  // ── 追踪村庄Rest是否已被使用 ──
     this._isMoving = false;
     this.isDevMode = false;
     this.rangeHighlight = null;
@@ -46,6 +48,9 @@ export class GameController {
     this.pendingPath = null;      // A* 算出的待确认路径
     this.pendingTarget = null;    // 待确认目标格 {q, r}
     this.pathHighlight = null;    // 路径格 Set<"q,r">，供 Renderer 绘制
+    // ─────────────────────────────────────────────────────────────
+    // ── 固定事件触发跟踪：防止重复触发 ────────────────────────────────
+    this.triggeredFixedEvents = new Set();  // 存储已触发过的固定事件坐标，格式："q,r"
     // ─────────────────────────────────────────────────────────────
     this.gameStory = new GameStory(ui);
     this.fsm = new StateMachine(GameState.INITIALIZING);
@@ -136,6 +141,9 @@ export class GameController {
             }
             // 🎮 强制覆盖已有的随机事件
             tile.content = content;
+            // ── 启用闪烁效果 ────────────────────────────────────────
+            tile.isBlinking = true;
+            tile.blinkStartTime = performance.now();
           }
         }
 
@@ -147,6 +155,9 @@ export class GameController {
             tile.isFixedEvent = true;  // 先标记为固定事件
             // 🎮 强制覆盖已有的随机事件
             tile.content = makeVillage(village.name);
+            // ── 启用闪烁效果 ────────────────────────────────────────
+            tile.isBlinking = true;
+            tile.blinkStartTime = performance.now();
           }
         }
 
@@ -158,6 +169,9 @@ export class GameController {
             tile.isFixedEvent = true;  // 先标记为固定事件
             // 🎮 强制覆盖已有的随机事件
             tile.content = makeMerchant(merchant.name);
+            // ── 启用闪烁效果 ────────────────────────────────────────
+            tile.isBlinking = true;
+            tile.blinkStartTime = performance.now();
           }
         }
 
@@ -179,6 +193,9 @@ export class GameController {
             }
             // 🎮 强制覆盖已有的随机事件
             tile.content = content;  // 直接覆盖，而不是用 placeContent
+            // ── 启用闪烁效果 ────────────────────────────────────────
+            tile.isBlinking = true;
+            tile.blinkStartTime = performance.now();
           }
         }
 
@@ -190,6 +207,7 @@ export class GameController {
             tile.isFixedEvent = true;  // 先标记为固定事件
             // 🎮 强制覆盖已有的随机事件
             tile.content = makeCorruptedDeer(deer.name, deer.monsterType);
+            // ── 腐化鹿事件不闪烁 ────────────────────────────────────
           }
         }
 
@@ -224,6 +242,7 @@ export class GameController {
             tile.type = TileType.GRASS;
             tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war until explored
             this.noviceVillage.placeContent(ev.q, ev.r, makeDungeon(ev.name, ev.level, ev.difficulty), 0);
+            // ── 新手村事件不闪烁 ────────────────────────────────────
           }
         }
         // ── Place Novice Village Treasures ──────────────────────────────────
@@ -233,6 +252,7 @@ export class GameController {
             tile.type = TileType.GRASS;
             tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war until explored
             this.noviceVillage.placeContent(ev.q, ev.r, makeTreasure(ev.lootTier), 0);
+            // ── 新手村事件不闪烁 ────────────────────────────────────
           }
         }
         // ── Place Novice Village Altars ──────────────────────────────────
@@ -242,6 +262,7 @@ export class GameController {
             tile.type = TileType.GRASS;
             tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war until explored
             this.noviceVillage.placeContent(ev.q, ev.r, makeAltar(), 0);
+            // ── 新手村事件不闪烁 ────────────────────────────────────
           }
         }
         // ── Place Novice Village Shops ──────────────────────────────────
@@ -251,6 +272,7 @@ export class GameController {
             tile.type = TileType.GRASS;
             tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war until explored
             this.noviceVillage.placeContent(ev.q, ev.r, makeShop(), 0);
+            // ── 新手村事件不闪烁 ────────────────────────────────────
           }
         }
         // ── Place Main Map Shops ──────────────────────────────────
@@ -260,6 +282,7 @@ export class GameController {
             tile.type = TileType.GRASS;
             tile.isFixedEvent = true;  // Mark as fixed event to keep fog of war (only works when approaching the shop)
             this.map.placeContent(ev.q, ev.r, makeShop(), 0);
+            // ── 主地图商店事件不闪烁 ────────────────────────────────────────
           }
         }
 
@@ -984,8 +1007,18 @@ export class GameController {
   // ── Tile 事件处理 ────────────────────────────────────────────────
 
   _handleTileContent(tile) {
-    // 特殊坐标：主世界(-8, 7)自动切换为寻找村庄
-    if (this.currentMapName !== 'Novice Village' && tile.q === -8 && tile.r === 7) {
+    // ── 检查是否为固定事件且已触发过 ───────────────────────────────
+    const eventKey = `${tile.q},${tile.r}`;
+    // ── 注意：村庄（VILLAGE）类型事件不受一次触发限制，可以重复访问 ──
+    const isFixedEventAlreadyTriggered = tile.isFixedEvent && tile.content?.type !== TileContentType.VILLAGE && this.triggeredFixedEvents.has(eventKey);
+    
+    // 如果是固定事件且已触发过，则不处理任何事件
+    if (isFixedEventAlreadyTriggered) {
+      return;
+    }
+    
+    // 特殊坐标：主世界(-8, 7)自动切换为寻找村庄（只在首次触发时）
+    if (this.currentMapName !== 'Novice Village' && tile.q === -8 && tile.r === 7 && !isFixedEventAlreadyTriggered) {
       this.ui.updateProgressBarTitle(PROGRESS_BAR_TEXTS.FIND_VILLAGE);
     }
 
@@ -996,6 +1029,14 @@ export class GameController {
       }
       return;
     }
+    
+    // ── 标记固定事件为已触发（村庄除外，可重复访问） ──────────────────
+    if (tile.isFixedEvent && tile.content.type !== TileContentType.VILLAGE) {
+      this.triggeredFixedEvents.add(eventKey);
+      // ── 触发后禁用闪烁效果 ────────────────────────────────────────
+      tile.isBlinking = false;
+    }
+    
     const c = tile.content;
     if (c.type === TileContentType.DUNGEON || c.type === TileContentType.BOSS) {
       EventTable.handleCombat(this, tile, c);

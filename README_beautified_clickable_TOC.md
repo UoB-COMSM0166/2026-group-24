@@ -37,11 +37,11 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 
 - [1 Introduction](#1-introduction)
 - [2 Requirements](#2-requirements)
-  - [2.1 Ideation](#ideation)
-  - [2.2 Stakeholder Analysis (Onion Model)](#stakeholder-analysis-onion-model)
-  - [2.3 Feasibility Studies](#feasibility-studies)
-  - [2.4 Identifying Top-Level Needs with User Stories](#identifying-top-level-needs-with-user-stories)
-  - [2.5 Use-Case Breakdown](#use-case-breakdown)
+  - [2.1 Ideation](#21-ideation)
+  - [2.2 Stakeholder Analysis (Onion Model)](#22-stakeholder-analysis-onion-model)
+  - [2.3 Feasibility Studies](#23-feasibility-studies)
+  - [2.4 Identifying Top-Level Needs with User Stories](#24-identifying-top-level-needs-with-user-stories)
+  - [2.5 Use-Case Breakdown](#25-use-case-breakdown)
 - [3 Design](#3-design)
   - [3.1 Gameplay Flow Overview](#31-gameplay-flow-overview)
   - [3.2 Refined System Architecture](#32-refined-system-architecture)
@@ -309,6 +309,22 @@ Overall, the use case diagram helped us define clear system boundaries and prior
 ---
 
 ## 3 Design
+
+**Core Gameplay Loop**
+
+```mermaid
+flowchart LR
+    A["Character Selection"] --> B["Hex Map Exploration"]
+    B --> C{"Tile Event"}
+    C --> D["Treasure / Shop / Altar"]
+    C --> E["Enemy Encounter"]
+    E --> F["Turn-Based Combat"]
+    F --> G{"Battle Result"}
+    G -->|"Victory"| H["Loot and Upgrade"]
+    G -->|"Defeat"| I["Run Ends"]
+    H --> B
+    B --> J["Boss Challenge"]
+```
 
 ### 3.1 Gameplay Flow Overview
 
@@ -683,6 +699,19 @@ Our team adopted an Agile development methodology, which prioritises working sof
 
 We also adopted a hybrid collaboration model combining both online and offline working modes. This proved to be flexible and helped us identify and resolve issues in a timely manner throughout the development process.
 
+**Team Workflow**
+
+```mermaid
+flowchart LR
+    A["Sprint Planning"] --> B["Jira Task Breakdown"]
+    B --> C["Feature Branch Development"]
+    C --> D["Pair Programming / Peer Review"]
+    D --> E["Testing on develop"]
+    E --> F["Merge to main"]
+    F --> G["Sprint Review and Retrospective"]
+    G --> A
+```
+
 ### 7.1 Online Collaboration
 
 Our development was structured around weekly sprints. Each sprint began with a planning session where tasks were drawn from the product backlog on our Jira Kanban board and assigned to team members.
@@ -821,7 +850,6 @@ If given the opportunity to develop a sequel or an extended version of this proj
 
 * **Immersive Narrative Systems:** Beyond simple random encounters, we would introduce a **dynamic faction system** or a "living world" concept, where player choices have long-term consequences on the game environment.
 * **Technical Evolution:** We will re-engineer the core architecture to support **network synchronization for cooperative multiplayer**, enabling strategic, team-based gameplay.
-
 ---
 
 ## 10 Contribution Statement
