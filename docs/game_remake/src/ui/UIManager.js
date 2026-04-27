@@ -514,8 +514,9 @@ export class UIManager {
       const isLastPageInSegment = currentPageInSegment === totalPagesInSegment - 1;
       const isLastSegment = currentSegment === segments.length - 1;
       
-      pageEl.textContent = `${currentSegment + 1}-${currentPageInSegment + 1} / ${segments.length}-${totalPagesInSegment}`;
-      
+pageEl.textContent = `${currentSegment + 1} / ${segments.length}`;
+
+
       // 更新按钮文字（注：btnEl 在这之后才被定义，所以这里不能直接使用）
       // 将在 btnEl 创建时进行处理
     };
