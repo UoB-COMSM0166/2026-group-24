@@ -28,9 +28,18 @@ function getItemIcon(item) {
   return isWeapon ? '⚔️' : '💍';
 }
 
+function getItemImage(item) {
+  const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
+  const iconKey = isWeapon ? 'weapon_' + item.icon : item.icon;
+  const img = window.DataLoader?.getImage(iconKey) || window.DataLoader?.getImage(item?.icon);
+  if (img) {
+    return '<img src="' + img.src + '" style="width:28px;height:28px;object-fit:contain;">';
+  }
+  return getItemIcon(item);
+}
+
 function buildItemCard(item, index, gold, purchased) {
   const r = getRarity(item);
-  const icon = getItemIcon(item);
   const canAfford = gold >= item._shopPrice;
   const isBought = purchased.has(index);
   const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
@@ -59,7 +68,7 @@ function buildItemCard(item, index, gold, purchased) {
       ${isBought ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(0,0,0,0.3);font-size:12px;color:#64748b;z-index:2;">Sold</div>` : ''}
 
       <div style="display:flex;align-items:center;gap:9px;">
-        <div style="width:40px;height:40px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,0.04);border:0.5px solid ${r.color}33;display:flex;align-items:center;justify-content:center;font-size:18px;">${icon}</div>
+        <div style="width:40px;height:40px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,0.04);border:0.5px solid ${r.color}33;display:flex;align-items:center;justify-content:center;font-size:18px;">${getItemImage(item)}</div>
         <div style="flex:1;min-width:0;">
           <div style="font-size:12px;font-weight:500;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.name}</div>
           <div style="font-size:10px;color:${r.color};letter-spacing:0.05em;">${r.label}${ownerTag}</div>
@@ -231,7 +240,6 @@ export class ShopUI {
           if (btn.dataset.refresh) {
             if (!refreshItem || currentGold < refreshItem._shopPrice) return;
             const newGold = onBuy(refreshItem, -2);
-            // 关闭后重新打开（由 EventTable 的 openShop 处理）
             overlay.style.opacity = '0';
             overlay.style.transition = 'opacity 0.15s';
             setTimeout(() => { overlay.remove(); }, 150);
