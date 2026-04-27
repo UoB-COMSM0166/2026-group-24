@@ -738,6 +738,12 @@ export class GameController {
     this.pendingTarget = null;
     this.pathHighlight = null;
     
+    // 移除End Turn按钮的闪烁效果
+    const endTurnBtn = document.getElementById('end-turn-btn');
+    if (endTurnBtn) {
+      endTurnBtn.classList.remove('blink');
+    }
+    
     // 直接处理 turnCount 增加
     this.turnManager.turnCount = this.turnManager.turnCount + 1;
     this.turnManager._updateProgressBar();
