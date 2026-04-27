@@ -351,19 +351,19 @@ const ENEMY_ANIM_CONFIG = {
     attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.85, ty: 130, faceLeftFlip: true },
   },
   mage: {
-    idle: { frames: 4, interval: 150, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
-    hit: { frames: 4, interval: 90, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
-    death: { frames: 4, interval: 120, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
-    run: { frames: 8, interval: 75, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
-    attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
-  },
-  swift_assassin: {
-    idle: { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
-    hit: { frames: 3, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
-    death: { frames: 7, interval: 110, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
-    run: { frames: 8, interval: 70, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
-    attack: { frames: 8, interval: 60, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
-  },
+      idle: { frames: 8, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+      hit: { frames: 3, interval: 95, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+      death: { frames: 7, interval: 110, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+      run: { frames: 8, interval: 70, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+      attack: { frames: 8, interval: 60, mode: 'sheet', scale: 1.8, ty: 130, tx: 80, faceLeftFlip: true },
+    },
+    swift_assassin: {
+      idle: { frames: 4, interval: 150, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+      hit: { frames: 4, interval: 90, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+      death: { frames: 4, interval: 120, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+      run: { frames: 8, interval: 75, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+      attack: { frames: 8, interval: 65, mode: 'sheet', scale: 2.75, ty: 130, faceLeftFlip: true },
+    },
 };
 
 const EnemyAnimatedSprite = ({ unit, action = 'idle', onComplete = null, flipX = false }) => {
