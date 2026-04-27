@@ -834,12 +834,12 @@ The table below summarises the main contribution areas recorded for each team me
 
 | Team Member | Contribution |
 |---|---|
-| Junjie Peng | |
-| Songyun Han | Game architecture design, State machine implementation, Map system, War fog, Auto-pathfinding & movable range display, Camera controls (drag & zoom), Randomised dice function, UI asset editing (assistance) |
-| Jian Ye | |
-| Junjian Cao | |
-| Xiaoyu Zhao | |
-| Shangqing Li | |
+| Junjie Peng | 1|
+| Songyun Han | 1 |
+| Jian Ye | 1|
+| Junjian Cao |1 |
+| Xiaoyu Zhao | 1|
+| Shangqing Li | 1|
 
 </div> 
 
