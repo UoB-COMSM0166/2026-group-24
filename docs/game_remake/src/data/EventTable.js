@@ -445,7 +445,8 @@ export class EventTable {
             gameController.ui.updateMovementUI(0);
           }
         }
-      ]
+      ],
+      { hint: '※ Retreating will consume all action points.' }
     );
   }
 
