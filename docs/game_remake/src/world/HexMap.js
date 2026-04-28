@@ -202,6 +202,42 @@ export class HexMap {
       }
     }
 
+    // ── 在所有格子上方绘制光晕效果 ────────────────────────────────
+    for (let q = qMin; q <= qMax; q++) {
+      for (let r = rMin; r <= rMax; r++) {
+        if (Math.abs(q) > this.radius ||
+          Math.abs(r) > this.radius ||
+          Math.abs(q + r) > this.radius) continue;
+
+        const tile = this.getTile(q, r);
+        if (!tile || !tile.isBlinking || !tile.content) continue;
+
+        const visState = this._visStateOf(tile);
+        if (visState !== 'visible') continue;
+
+        // 绘制黄色光晕
+        const { x, y } = tile.getCanvasPos(size);
+        const hexPath = Tile.getHexPath(size);
+        
+        const elapsedTime = performance.now() - tile.blinkStartTime;
+        const cycleTime = (elapsedTime % 1500) / 1500;
+        const glowIntensity = 0.2 + 0.3 * Math.sin(cycleTime * Math.PI * 2);
+        const glowBlur = 32 + 32 * Math.sin(cycleTime * Math.PI * 2);
+        
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.strokeStyle = `rgba(255, 0, 0, ${glowIntensity * 0.7})`;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = `rgba(255, 0, 0, ${glowIntensity * 0.7})`;
+        ctx.shadowBlur = glowBlur;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.stroke(hexPath);
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+    }
+
     ctx.restore();
   }
 

@@ -143,6 +143,25 @@ export const CORRUPTED_DEER_LIST = [
 
 ];
 
+// ── 主世界固定地牢列表 ────────────────────────────────────────────────
+export const MAIN_DUNGEON_LIST = [
+  { q: -9, r: 2, name: 'Haunted Forest', level: 1, difficulty: 'EASY' },
+  { q: -7, r: 5, name: 'Shadow Cavern', level: 1, difficulty: 'NORMAL' },
+  { q: -6, r: 5, name: 'Crystal Cavern', level: 2, difficulty: 'NORMAL' },
+  { q: -4, r: 6, name: 'Cursed Tomb', level: 2, difficulty: 'NORMAL' },
+  { q: -3, r: -2, name: 'Goblin Warren', level: 1, difficulty: 'EASY' },
+  { q: -1, r: 3, name: 'Skeleton Vault', level: 2, difficulty: 'NORMAL' },
+  { q: 0, r: 0, name: 'Underground Passage', level: 2, difficulty: 'NORMAL' },
+  { q: 1, r: 2, name: 'Spider Nest', level: 2, difficulty: 'NORMAL' },
+  { q: 2, r: -1, name: 'Dark Grotto', level: 3, difficulty: 'HARD' },
+  { q: 3, r: 1, name: 'Beast Lair', level: 2, difficulty: 'NORMAL' },
+  { q: 4, r: -2, name: 'Forsaken Crypt', level: 3, difficulty: 'HARD' },
+  { q: 5, r: 2, name: 'Dragon\'s Hoard', level: 3, difficulty: 'HARD' },
+  { q: 7, r: 2, name: 'Infernal Furnace', level: 4, difficulty: 'HARD' },
+  { q: 7, r: 3, name: 'Obsidian Cavern', level: 4, difficulty: 'HARD' },
+  { q: 8, r: -3, name: 'Abyssal Den', level: 4, difficulty: 'HARD' },
+];
+
 // 新手村固定事件列表
 export const NOVICE_DUNGEON_LIST = [
   { q: 1, r: -2, name: 'Lost Goblin', level: 1, difficulty: 'EASY' },
@@ -931,7 +950,6 @@ static handleShop(gameController, tile, content) {
           onClick: () => {
             gameController.player.movementPoints = 0;
             gameController.ui.updateMovementUI(0);
-            EventTable.handleUnlockChain(gameController, tile.q, tile.r);
           }
         }
       ]
@@ -990,7 +1008,6 @@ static handleShop(gameController, tile, content) {
           onClick: () => {
             gameController.player.movementPoints = 0;
             gameController.ui.updateMovementUI(0);
-            EventTable.handleUnlockChain(gameController, tile.q, tile.r);
           }
         }
       ]
