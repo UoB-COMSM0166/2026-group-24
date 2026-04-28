@@ -930,20 +930,27 @@ export class GameController {
    * 寻路规则：
    *   - moveCost = Infinity 的地形（森林/山脉/屏障）不可通行
    *   - 带事件内容的格子不能作为途经点，只能作为终点
-   *   - 总路径代价不能超过当前移动力
+   *   - 总路径代价不能超过当前移动力const isFixedEventAlreadyTriggered = tile.isFixedEvent && tile.content?.type !== TileContentType.VILLAGE && tile.content?.type !== TileContentType.RUIN && this.triggeredFixedEvents.has(eventKey);
    */
   movePlayer(q, r) {
     if (this.fsm.currentState !== GameState.MAP_EXPLORATION) return;
     if (this._isMoving) return;
 
     // 点击自身格：取消路径预览
-    if (q === this.player.q && r === this.player.r) {
-      this.pendingPath = null;
-      this.pendingTarget = null;
-      this.pathHighlight = null;
-      this.rangeHighlight = null;
-      return;
+if (q === this.player.q && r === this.player.r) {
+    const curMap = this.currentMapName === 'Novice Village'
+        ? this.noviceVillage : this.map;
+    const tile = curMap.getTile(q, r);
+    if (tile?.content) {
+        this._handleTileContent(tile);
+        return;
     }
+    this.pendingPath = null;
+    this.pendingTarget = null;
+    this.pathHighlight = null;
+    this.rangeHighlight = null;
+    return;
+}
 
     const curMap = this.currentMapName === 'Novice Village'
       ? this.noviceVillage : this.map;
@@ -1074,7 +1081,7 @@ export class GameController {
     // ── 检查是否为固定事件且已触发过 ───────────────────────────────
     const eventKey = `${tile.q},${tile.r}`;
     // ── 注意：村庄（VILLAGE）和遗迹（RUIN）类型事件不受一次触发限制，可以重复访问 ──
-    const isFixedEventAlreadyTriggered = tile.isFixedEvent && tile.content?.type !== TileContentType.VILLAGE && tile.content?.type !== TileContentType.RUIN && this.triggeredFixedEvents.has(eventKey);
+const isFixedEventAlreadyTriggered = tile.isFixedEvent && tile.content?.type !== TileContentType.VILLAGE && tile.content?.type !== TileContentType.RUIN && tile.content?.type !== TileContentType.SHOP && this.triggeredFixedEvents.has(eventKey);
     
     // 如果是固定事件且已触发过，则不处理任何事件
     if (isFixedEventAlreadyTriggered) {
@@ -1095,7 +1102,7 @@ export class GameController {
     }
     
     // ── 标记固定事件为已触发（村庄和遗迹除外，可重复访问） ──────────────────
-    if (tile.isFixedEvent && tile.content.type !== TileContentType.VILLAGE && tile.content.type !== TileContentType.RUIN) {
+if (tile.isFixedEvent && tile.content.type !== TileContentType.VILLAGE && tile.content.type !== TileContentType.RUIN && tile.content.type !== TileContentType.SHOP) {
       this.triggeredFixedEvents.add(eventKey);
       // ── 触发后禁用闪烁效果 ────────────────────────────────────────
       tile.isBlinking = false;
