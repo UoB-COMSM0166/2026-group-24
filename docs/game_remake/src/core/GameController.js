@@ -2,7 +2,7 @@
 import { GameState, MapConfig, TurnConfig, MapPresets } from './Constants.js';
 import { HexMap, createMapByPreset } from '../world/HexMap.js';
 import { Tile, TileContentType, makePortal, hexToPixel, makeBoss, TileType, makeNPC, makeVillage, makeMerchant, makeRuin, makeCorruptedDeer, makeInjuredVillager } from '../world/Tile.js';
-import { NPC_LIST, VILLAGE_LIST, MERCHANT_LIST, RUIN_LIST, CORRUPTED_DEER_LIST, UNLOCK_CHAIN } from '../data/EventTable.js';
+import { NPC_LIST, VILLAGE_LIST, MERCHANT_LIST, RUIN_LIST, CORRUPTED_DEER_LIST, UNLOCK_CHAIN, MAIN_DUNGEON_LIST } from '../data/EventTable.js';
 import { StateMachine } from './StateMachine.js';
 import { CombatManager } from './CombatManager.js';
 import { Enemy } from '../entities/Enemy.js';
@@ -51,6 +51,8 @@ export class GameController {
     // ─────────────────────────────────────────────────────────────
     // ── 固定事件触发跟踪：防止重复触发 ────────────────────────────────
     this.triggeredFixedEvents = new Set();  // 存储已触发过的固定事件坐标，格式："q,r"
+    // ── 特殊事件怪物战斗跟踪 ──────────────────────────────────────────
+    this.hasDefeatedSpecialEventMonster = false;  // 是否击败过特殊事件怪物
     // ─────────────────────────────────────────────────────────────
     this.gameStory = new GameStory(ui);
     this.fsm = new StateMachine(GameState.INITIALIZING);
@@ -211,6 +213,17 @@ export class GameController {
           }
         }
 
+        // 批量放置主世界地牢（确保地牢数量不少于10个）
+        for (const dungeon of MAIN_DUNGEON_LIST) {
+          const tile = this.map.getTile(dungeon.q, dungeon.r);
+          if (tile && tile.type === TileType.GRASS) {
+            tile.isFixedEvent = true;  // 先标记为固定事件
+            // 🎮 强制覆盖已有的随机事件
+            tile.content = makeDungeon(dungeon.name, dungeon.level, dungeon.difficulty);
+            // ── 地牢事件不闪烁 ────────────────────────────────────
+          }
+        }
+
         // 🎮 锁定解锁链中的格子（除了第一个） - 在所有内容放置后进行此操作
         for (let i = 1; i < UNLOCK_CHAIN.length; i++) {
           const event = UNLOCK_CHAIN[i];
@@ -327,6 +340,19 @@ export class GameController {
         this._exitCombat();
         this.ui.updatePartyStatus(this.selectedHeroes);
         if (won) {
+          // ── 检查是否在特殊事件坐标击败怪物 ────────────────────────────
+          const SPECIAL_EVENT_COORDS = [
+            { q: 6, r: 0 },
+            { q: 6, r: 1 },
+            { q: 5, r: -6 }
+          ];
+          const isSpecialEventCoord = SPECIAL_EVENT_COORDS.some(
+            coord => coord.q === this.combatLocationQ && coord.r === this.combatLocationR
+          );
+          if (isSpecialEventCoord) {
+            this.hasDefeatedSpecialEventMonster = true;
+          }
+          
           const loot = rollRandomLoot();
           const goldGained = rollGoldDrop(loot?.rarity ?? 'common');
           this.gold = (this.gold ?? 0) + goldGained;
@@ -972,6 +998,10 @@ export class GameController {
     this.pendingPath = null;
     this.pendingTarget = null;
     this.pathHighlight = null;
+    
+    // ── 记录玩家离开前所在的格子 ────────────────────────────────────
+    const prevTile = curMap.getTile(this.player.q, this.player.r);
+    
     let stepIndex = 0;
 
     const doStep = () => {
@@ -995,6 +1025,26 @@ export class GameController {
       const isLast = stepIndex >= path.length;
       if (isLast) {
         this._isMoving = false;
+        
+        // ── 离开特定坐标的事件后，取消闪烁 ───────────────────────────
+        const SPECIAL_EVENT_COORDS = [
+          { q: 6, r: 0 },
+          { q: 6, r: 1 },
+          { q: 5, r: -6 }
+        ];
+        
+        for (const coord of SPECIAL_EVENT_COORDS) {
+          if (prevTile && prevTile.q === coord.q && prevTile.r === coord.r) {
+            prevTile.isBlinking = false;
+            break;
+          }
+        }
+        
+        // ── 离开村庄事件后，取消闪烁 ───────────────────────────────
+        if (prevTile && prevTile.isFixedEvent && prevTile.content?.type === TileContentType.VILLAGE) {
+          prevTile.isBlinking = false;
+        }
+        
         this._handleTileContent(tile);
       } else {
         setTimeout(doStep, 150);
@@ -1009,8 +1059,8 @@ export class GameController {
   _handleTileContent(tile) {
     // ── 检查是否为固定事件且已触发过 ───────────────────────────────
     const eventKey = `${tile.q},${tile.r}`;
-    // ── 注意：村庄（VILLAGE）类型事件不受一次触发限制，可以重复访问 ──
-    const isFixedEventAlreadyTriggered = tile.isFixedEvent && tile.content?.type !== TileContentType.VILLAGE && this.triggeredFixedEvents.has(eventKey);
+    // ── 注意：村庄（VILLAGE）和遗迹（RUIN）类型事件不受一次触发限制，可以重复访问 ──
+    const isFixedEventAlreadyTriggered = tile.isFixedEvent && tile.content?.type !== TileContentType.VILLAGE && tile.content?.type !== TileContentType.RUIN && this.triggeredFixedEvents.has(eventKey);
     
     // 如果是固定事件且已触发过，则不处理任何事件
     if (isFixedEventAlreadyTriggered) {
@@ -1030,8 +1080,8 @@ export class GameController {
       return;
     }
     
-    // ── 标记固定事件为已触发（村庄除外，可重复访问） ──────────────────
-    if (tile.isFixedEvent && tile.content.type !== TileContentType.VILLAGE) {
+    // ── 标记固定事件为已触发（村庄和遗迹除外，可重复访问） ──────────────────
+    if (tile.isFixedEvent && tile.content.type !== TileContentType.VILLAGE && tile.content.type !== TileContentType.RUIN) {
       this.triggeredFixedEvents.add(eventKey);
       // ── 触发后禁用闪烁效果 ────────────────────────────────────────
       tile.isBlinking = false;

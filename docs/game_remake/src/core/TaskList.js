@@ -76,6 +76,7 @@ const MISSION_TASKS = {
     autoCleanupOnComplete: false,
     nextMission: 'Head south to seek the true treasure',
     maxTurns: 10,  // ── 任务时间限制 ──
+    requiresSpecialEventCombat: true,  // ── 需要击败特殊事件怪物才能切换任务 ──
     tasks: {
       search_ruins: {
         done: false,
@@ -110,9 +111,17 @@ export class TaskList {
     this._showDebugBtn = true;
     this._autoCleanupOnComplete = true;  // Auto-cleanup current mission set on completion
     this.tasks = {};
+    this.gameController = null;  // ── GameController 引用 ──
     
     // Initialize Novice Village tasks
     this._initializeTasks('Novice Village');
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  // 设置 GameController 引用
+  // ══════════════════════════════════════════════════════════════════
+  setGameController(gameController) {
+    this.gameController = gameController;
   }
 
   // ══════════════════════════════════════════════════════════════════
@@ -247,8 +256,8 @@ export class TaskList {
       padding: 14px 16px;
       color: white;
       font-family: 'Press Start 2P', monospace;
-      font-size: 12px; /* 字体稍微调大一点点更清晰 */
-      min-width: 180px;
+      font-size: 12px;
+      width: 320px;    /* 固定宽度 */
       z-index: 50;
       backdrop-filter: blur(8px);
       box-shadow: 0 4px 24px rgba(0,0,0,0.6);
@@ -303,14 +312,16 @@ export class TaskList {
 
     const rows = entries.map(t => `
       <div style="
-        display:flex;align-items:center;gap:8px;margin-bottom:5px;
+        display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;
+        flex-wrap:wrap;
         opacity:${t.done ? '0.45' : '1'};
         text-decoration:${t.done ? 'line-through' : 'none'};
         color:${t.done ? '#9ca3af' : '#f3f4f6'};
         transition:all 0.3s;
+        word-break:break-word;
       ">
-        <span>${t.done ? '✅' : '⭕'}</span>
-        <span>${t.label}</span>
+        <span style="flex-shrink:0;margin-top:2px;">${t.done ? '✅' : '⭕'}</span>
+        <span style="flex:1;">${t.label}</span>
       </div>
     `).join('');
 
@@ -332,8 +343,16 @@ export class TaskList {
   _checkAllDone() {
     if (!Object.values(this.tasks).every(t => t.done)) return;
     
-    // 检查是否有下一个任务集
+    // 检查是否需要击败特殊事件怪物
     const currentMissionConfig = MISSION_TASKS[this._currentMission];
+    if (currentMissionConfig?.requiresSpecialEventCombat && this.gameController) {
+      if (!this.gameController.hasDefeatedSpecialEventMonster) {
+        // 还未击败特殊事件怪物，不进行任务切换
+        return;
+      }
+    }
+    
+    // 检查是否有下一个任务集
     if (currentMissionConfig && currentMissionConfig.nextMission) {
       // ── 清除 Boss 模式状态（任务切换时） ──────────────────────────
       // 注意：GameController 的引用在这里不可用，所以在外部处理

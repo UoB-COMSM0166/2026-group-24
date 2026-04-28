@@ -88,6 +88,7 @@ export class TutorialManager {
       () => this._onAllTasksComplete(),
       (missionName) => this._onMissionSwitch(missionName)  // ── 任务切换回调 ──
     );
+    this.taskList.setGameController(this.gc);  // ── 设置 GameController 引用 ──
 
     // Track which event types have already been introduced
     this._introducedEvents = new Set();
