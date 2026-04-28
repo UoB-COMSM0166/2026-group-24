@@ -2,10 +2,12 @@
 
 export const ENEMY_TYPES = {
   warrior: {
-    name: 'Skeleton Soldier',
-    type: 'dungeon',
-    statMod: { strength: 1.2 },
-    desc: 'Melee fighter, high STR',
+      name: 'Skeleton Soldier',
+      type: 'dungeon',
+      // statMod uses absolute values (overrides Enemy.js base formula).
+      // Default base: STR = 24 + (level-1)*6  → Lv1=18, slightly nerfed for pacing
+      statMod: { strength: 18 },
+      desc: 'Melee fighter, high STR',
     skills: [
       { id: 'warrior_slash',  name: 'Slash',      type: 'attack', target: 'single', power: 100, statKey: 'strength' },
       { id: 'warrior_shield', name: 'Iron Guard', type: 'buff',   target: 'self',   statusEffect: 'rock_shield' },
@@ -13,10 +15,11 @@ export const ENEMY_TYPES = {
   },
 
   mage: {
-    name: 'Dark Mage',
-    type: 'dungeon',
-    statMod: { intellect: 1.4 },
-    desc: 'Magic attacker, high INT',
+      name: 'Dark Mage',
+      type: 'dungeon',
+      // INT base = 22 → Dark Blast 110% vs Knight (DEF≈6): normal 18, perfect 38
+      statMod: { intellect: 22 },
+      desc: 'Magic attacker, high INT',
     skills: [
       { id: 'mage_blast',    name: 'Dark Blast', type: 'attack', target: 'single', power: 110, statKey: 'intellect' },
       { id: 'mage_hellfire', name: 'Hellfire',   type: 'attack', target: 'aoe',    power: 80,  statKey: 'intellect', statusEffect: 'burn',   statusChance: 0.4 },
@@ -24,10 +27,11 @@ export const ENEMY_TYPES = {
     ],
   },
   healer: {
-    name: 'Azure Healer',
-    type: 'dungeon',
-    statMod: { talent: 1.2 },
-    desc: 'Support: heals allies, grants warcry',
+      name: 'Azure Healer',
+      type: 'dungeon',
+      // TAL base = 16 → modest damage; her real threat is heal+warcry support
+      statMod: { talent: 16 },
+      desc: 'Support: heals allies, grants warcry',
     skills: [
       { id: 'shaman_strike', name: 'Spirit Strike', type: 'attack',    target: 'single', power: 80, statKey: 'talent' },
       { id: 'shaman_heal',   name: 'Mending Hex',   type: 'ally_heal', target: 'ally',   healAmount: 15 },
@@ -35,10 +39,11 @@ export const ENEMY_TYPES = {
     ],
   },
   elite: {
-    name: 'Barbarian Warrior',
-    type: 'dungeon',
-    statMod: { strength: 1.5, vitality: 1.4 },
-    desc: 'Tank, high STR and VIT',
+      name: 'Barbarian Warrior',
+      type: 'dungeon',
+      // STR=28 (heavy hitter), toughness=14 (real defense — vitality is not read by Enemy.js)
+      statMod: { strength: 28, toughness: 14 },
+      desc: 'Tank, high STR and high DEF',
     skills: [],
   },
   stone_golem: {
