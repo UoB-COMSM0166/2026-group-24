@@ -688,7 +688,7 @@ export class EventTable {
                   EventTable.handleUnlockChain(gameController, tile.q, tile.r);
                   gameController.ui.showEvent(
                     '✓ Quest Accepted',
-                    'You have accepted the quest [Rescue the Caravan]\nPlease head to the northeast direction of the village to rescue the caravan guards.\n\nTurn limit: 5',
+                    'You have accepted the quest [Rescue the Caravan]\nPlease head to the northeast direction of the village to rescue the caravan guards.\n\nTurn limit: 10 turns',
                     [{ text: 'Back', onClick: () => EventTable.handleVillage(gameController, tile, content) }]
                   );
                 }
