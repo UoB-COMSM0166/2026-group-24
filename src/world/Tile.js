@@ -215,15 +215,7 @@ export class Tile {
     const shouldShowContent = visState === 'visible' || 
                               (this.isFixedEvent && DebugConfig.showHiddenFixedEvents);
     if (this.content && shouldShowContent) {
-      // ── 计算闪烁效果的透明度 ──────────────────────────────────────
-      let contentAlpha = 0.85;
-      if (this.isBlinking) {
-        // 闪烁效果：平滑淡入淡出，1500ms 周期
-        const elapsedTime = performance.now() - this.blinkStartTime;
-        const cycleTime = (elapsedTime % 1500) / 1500; // 0 到 1，无限循环，周期为 1500ms
-        // 使用 sin 函数创建平滑的淡入淡出：最亮 1.0 到最暗 0.3
-        contentAlpha = 0.65 + 0.35 * Math.sin(cycleTime * Math.PI * 2);
-      }
+      const contentAlpha = 0.85;
       
       const { iconType } = this.content;
       if (iconType) {
