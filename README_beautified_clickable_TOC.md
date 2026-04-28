@@ -466,12 +466,12 @@ Finally, the overall turn flow is controlled through `nextTurn()`, which rotates
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/84a1bb46-c112-40ce-a810-19ba2b779717" width="25%" /><br/>
-  <em>Figure 4.3: For the King</em>
+  <em>Figure 4.3: Multiple-layer buff</em>
 </p>
 
 <p align="center">
    <img src="./documents/combat.gif"width="600"/><br/>
-  <em>Figure 4.4: Pokémon</em>
+  <em>Figure 4.4: Battle system</em>
 </p>
 
 ---
