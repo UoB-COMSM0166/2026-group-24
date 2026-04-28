@@ -531,11 +531,23 @@ export class GameController {
         e.monsterType = typeKey;
         e.skills = def.skills || [];
         if (typeKey === 'dark_overlord') {
-          e.maxHp = Math.floor(e.maxHp * 10);
-        } else if (def.hpMulti && def.hpMulti !== 1) {
-          e.maxHp = Math.floor(e.maxHp * def.hpMulti);
-        }
-        e.hp = e.maxHp;
+                  e.maxHp = Math.floor(e.maxHp * 10);
+                } else if (def.hpMulti && def.hpMulti !== 1) {
+                  e.maxHp = Math.floor(e.maxHp * def.hpMulti);
+                }
+                // Elite buff: extra HP + ATK on top of base (boss path above is untouched)
+                const eliteBonus = {
+                  elite:          { hp: 1.8, atk: 1.8 },
+                  stone_golem:    { hp: 2.5, atk: 3.4 },
+                  swift_assassin: { hp: 1.5, atk: 1.8 },
+                }[typeKey];
+                if (eliteBonus) {
+                  e.maxHp = Math.floor(e.maxHp * eliteBonus.hp);
+                  e.strength = Math.floor(e.strength * eliteBonus.atk);
+                  e.intellect = Math.floor(e.intellect * eliteBonus.atk);
+                  e.refreshDerivedStats();
+                }
+                e.hp = e.maxHp;
 
 
         
