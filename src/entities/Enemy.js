@@ -29,13 +29,8 @@ export class Enemy extends Character {
   constructor(name, type, level, statOverrides = {}, difficultyMode = 'normal') {
 
     // --- 🔴 Dynamic Rebalanced Multipliers ---
-    // HP: Standard boost for difficulty
-    const hpMulti = difficultyMode === 'hell' ? 1.8 : 1.0;
-
-    // ATTACK: Massive boost in hell mode to make them deadly
-    const atkMulti = difficultyMode === 'hell' ? 2.5 : 1.0;
-
-    // DEFENSE: Nerfed significantly! Hell mode slightly buffs it (1.2), Normal mode nerfs it (0.6)
+    const hpMulti = difficultyMode === 'hell' ? 1.4 : 1.0;
+    const atkMulti = difficultyMode === 'hell' ? 1.5 : 1.0;
     const defMulti = difficultyMode === 'hell' ? 1.2 : 0.6;
 
     // Calculate scaled HP
@@ -65,7 +60,7 @@ export class Enemy extends Character {
 
     // 🔴 FATAL ATTACK BOOST (Make them hit harder)
     if (this.difficulty === 'hell') {
-        this.attack = Math.floor((this.attack || 15) * 1.5);
+        this.attack = Math.floor((this.attack || 15) * 1.2);
     }
 
     // 🔴 GUARANTEED DEFENSE SQUISH (Make them vulnerable)

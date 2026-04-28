@@ -78,6 +78,7 @@ export class GameController {
     this.fsm.addState(GameState.CHARACTER_SELECT, {
       enter: () => this.ui.showCharacterSelect((heroes, difficulty) => {
         this.selectedHeroes = heroes.map(d => this._createHeroFromData(d));
+        this.difficulty = (difficulty || 'normal').toLowerCase();
         // 开发者模式跳过剧情，直接进地图生成
         if (this.isDevMode) {
           this.fsm.transition(GameState.MAP_GENERATION);
@@ -523,7 +524,7 @@ export class GameController {
       const enemies = [];
       typeKeys.forEach((typeKey, i) => {
         const def = ENEMY_TYPES[typeKey];
-        const e = new Enemy(def.name, def.type, level, def.statMod);
+        const e = new Enemy(def.name, def.type, level, def.statMod, this.difficulty);
         e.id = `e${i + 1}_` + Date.now() + i;
         e.enemyKey = typeKey;
         e.enemyCategory = def.type;
@@ -564,7 +565,8 @@ export class GameController {
             awareness: Math.floor((8  + (level - 1) * 2)   * 2),
             talent:    Math.floor((5  + (level - 1) * 1)   * 2),
             agility:   Math.floor((8  + (level - 1) * 2)   * 2),
-          }
+          },
+          this.difficulty
       );
 
 
