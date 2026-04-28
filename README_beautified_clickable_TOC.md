@@ -23,7 +23,7 @@ VIDEO. Include a demo video of your game here (you don't have to wait until the 
 | Name | Username | Email | Role |
 |------|----------|-------|------|
 | Junjie Peng | JAY-bru | sg25291@bristol.ac.uk | Role |
-| Songyun Han |  zhishihsy | bo24091@bristol.ac.uk | Developer, Architect |
+| Songyun Han |  zhishihsy | bo24091@bristol.ac.uk | Developer, System Designer |
 | Jian Ye | yejian414-tech | ok25241@bristol.ac.uk | Role |
 | Junjian Cao | JulianC-2778 | nh25975@bristol.ac.uk | Developer , QA Engineer |
 | Xiaoyu Zhao | zongshifei | rc25481@bristol.ac.uk | Role |
