@@ -1,5 +1,11 @@
 # FOR THE TREASURE
 
+
+<p align="center">
+  <img src="./documents/demo_video.gif" width="600" height="337">
+  <br>
+</p>
+
 STRAPLINE. Add an exciting one sentence description of your game here.
 
 IMAGE. Add an image of your game here, keep this updated with a snapshot of your latest development.
@@ -457,10 +463,15 @@ By making the order explicit, we reduced unexpected interactions between buffs, 
 
 Finally, the overall turn flow is controlled through `nextTurn()`, which rotates the active unit, checks whether the unit is alive, processes start-of-turn effects, skips disabled units when necessary, and then hands control to either player input or enemy AI. This structure allowed the combat system to stay modular while still supporting layered mechanics. As a result, new skills, items, enemies, and status effects can be added without rewriting the core battle loop.
 
+
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/84a1bb46-c112-40ce-a810-19ba2b779717" style="width: 25%; height: auto;" />
-  <br>
-  <em>Figure 4.3: Combat Status Effect Display</em>
+  <img src="https://github.com/user-attachments/assets/84a1bb46-c112-40ce-a810-19ba2b779717" width="25%" /><br/>
+  <em>Figure 4.3: For the King</em>
+</p>
+
+<p align="center">
+   <img src="./documents/combat.gif"width="600"/><br/>
+  <em>Figure 4.4: Pokémon</em>
 </p>
 
 ---
