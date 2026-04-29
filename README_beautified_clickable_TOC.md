@@ -702,11 +702,11 @@ Particular focus was given to edge cases in combat, such as simultaneous status 
 
 [Kanban board](https://caojunjian2025.atlassian.net/jira/software/projects/KAN/boards/1)
 
-Our team adopted an Agile development methodology, which prioritises working software, customer collaboration, and the ability to respond to change over rigid upfront planning. This approach allowed us to iteratively refine the game across multiple short development cycles, incorporating feedback at each stage rather than locking in a fixed design from the outset.We established a three-sprint development plan, clearly defining the goals and tasks for each phase from the very beginning.
+Our team adopted an Agile development methodology, which prioritises working software, customer collaboration, and the ability to respond to change over rigid upfront planning. This approach allowed us to iteratively refine the game across multiple short development cycles, incorporating feedback at each stage rather than locking in a fixed design from the outset.We established a three-sprint development plan, outlining the design direction for each phase.
 
 <p align="center">
   <img src="./documents/weekly_sprint.png" width="600"/><br/>
-  <em>Figure 7.1: Voice Channel</em>
+  <em> Weekly Sprint</em>
 </p>
 
 We also adopted a hybrid collaboration model combining both online and offline working modes. This proved to be flexible and helped us identify and resolve issues in a timely manner throughout the development process.
