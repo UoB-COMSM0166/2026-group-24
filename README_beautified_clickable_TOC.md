@@ -700,7 +700,6 @@ Particular focus was given to edge cases in combat, such as simultaneous status 
 
 ## 7 Process
 
-[Kanban board](https://caojunjian2025.atlassian.net/jira/software/projects/KAN/boards/1)
 
 Our team adopted an Agile development methodology, which prioritises working software, customer collaboration, and the ability to respond to change over rigid upfront planning. This approach allowed us to iteratively refine the game across multiple short development cycles, incorporating feedback at each stage rather than locking in a fixed design from the outset.We established a three-sprint development plan, outlining the design direction for each phase.
 
@@ -745,6 +744,7 @@ In line with test-driven development (TDD) principles, unit tests were written a
   <img src="./documents/kanban.png" width="600"/><br/>
   <em>Figure 7.2: Kanban Board</em>
 </p>
+[here is our Kanban board](https://caojunjian2025.atlassian.net/jira/software/projects/KAN/boards/1)
 
 ### 7.2 Offline Collaboration
 
