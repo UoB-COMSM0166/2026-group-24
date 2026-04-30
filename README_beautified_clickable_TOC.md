@@ -1,12 +1,11 @@
 
-</style>
 
 </head>
 
 <body>
 
 <div class="header">
-  <h1>University of Bristol</h1>
+  <h1>FOR THE TREASURE</h1>
   <h2>Software Engineering - Group 15 (2026)</h2>
   <hr>
 </div>
