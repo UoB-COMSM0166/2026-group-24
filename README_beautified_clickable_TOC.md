@@ -8,11 +8,11 @@
 
 STRAPLINE. Add an exciting one sentence description of your game here.
 
-IMAGE. Add an image of your game here, keep this updated with a snapshot of your latest development.
 
-LINK. GAME LINK: [Play For The Treasure](https://uob-comsm0166.github.io/2026-group-24/)
+[![Play For The Treasure](./documents/newgame.png)](https://uob-comsm0166.github.io/2026-group-24/)
 
-VIDEO. Include a demo video of your game here (you don't have to wait until the end, you can insert a work in progress video)
+[![Watch video](./documents/watch_video.png)](https://m.youtube.com/watch?v=w6Jw0cgaRZs&pp=0gcJCVACo7VqN5tD)
+
 
 # Your Group
 
