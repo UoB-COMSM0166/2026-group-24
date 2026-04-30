@@ -15,14 +15,16 @@
 </html>
 
 <p style="text-align: center;">
-  Master the tiles, brave the unknown, and let the dice decide your fate in this procedurally generated treasure hunt.
+
 </p>
 <p align="center">
   <img src="./documents/demo_video.gif" width="720" height="405">
   <br>
 </p>
-
-
+<div align="center">
+  Master the tiles, brave the unknown, and let the dice decide your fate in this procedurally generated treasure hunt.
+</div>
+<br>
 
 <div align="center">
   <a href="https://uob-comsm0166.github.io/2026-group-24/">
