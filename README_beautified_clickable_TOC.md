@@ -37,7 +37,7 @@ STRAPLINE. Add an exciting one sentence description of your game here.
 |------|----------|-------|------|
 | Junjie Peng | JAY-bru | sg25291@bristol.ac.uk | Developer,Scrum Master,UX Researcher |
 | Songyun Han |  zhishihsy | bo24091@bristol.ac.uk | Developer, System Designer |
-| Jian Ye | yejian414-tech | ok25241@bristol.ac.uk | Developr  Product Owner |
+| Jian Ye | yejian414-tech | ok25241@bristol.ac.uk | Developer, Product Owner,UI Developer |
 | Junjian Cao | JulianC-2778 | nh25975@bristol.ac.uk | Developer , QA Engineer |
 | Xiaoyu Zhao | zongshifei | rc25481@bristol.ac.uk | Lead Developer |
 | Shangqing Li | shangqinglee123-create | pd25964@bristol.ac.uk | Developer , Scrum Master，Requirements Analyst |
