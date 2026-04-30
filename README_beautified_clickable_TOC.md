@@ -11,7 +11,7 @@ STRAPLINE. Add an exciting one sentence description of your game here.
 
 <div align="center">
 
-[![Watch video](./documents/watch_video.png)](https://m.youtube.com/watch?v=w6Jw0cgaRZs&pp=0gcJCVACo7VqN5tD)
+[![Watch video](./documents/newgame.png)](https://m.youtube.com/watch?v=w6Jw0cgaRZs&pp=0gcJCVACo7VqN5tD)
 
 </div>
 
