@@ -1,9 +1,49 @@
 
-<div style="width: 300px; margin: 0 auto;">
-  2026-group-24
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<style>
+body {
+  background-color: #f2f2f2;   
+  font-family: Arial, sans-serif;
+  margin: 40px;
+}
+
+.header {
+  text-align: center;
+}
+
+.header h1 {
+  margin-bottom: 5px;
+  font-size: 36px;
+}
+
+/* 第二行标题 */
+.header h2 {
+  margin-top: 0;
+  font-size: 32px;
+  font-weight: normal;
+}
+.header hr {
+  width: 80%;
+  margin: 20px auto;  
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+  <h1>University of Bristol</h1>
+  <h2>Software Engineering - Group 15 (2026)</h2>
+  <hr>
 </div>
 
-## FOR THE TREASURE
+</body>
+</html>
 
 
 <p align="center">
