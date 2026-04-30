@@ -25,9 +25,9 @@
 
 
 <div align="center">
-
-[![New game](./documents/playgame.png{width=200px})](https://uob-comsm0166.github.io/2026-group-24/)
-
+  <a href="https://uob-comsm0166.github.io/2026-group-24/">
+    <img src="./documents/playgame.png" alt="New game" width="300">
+  </a>
 </div>
 
 <div align="center">
