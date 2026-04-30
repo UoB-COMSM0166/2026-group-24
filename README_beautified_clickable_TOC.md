@@ -16,7 +16,7 @@ Master the tiles, brave the unknown, and let the dice decide your fate in thispr
 
 <div align="center">
 
-[![Watch video](./documents/newgame.png)](https://m.youtube.com/watch?v=w6Jw0cgaRZs&pp=0gcJCVACo7VqN5tD)
+[![New game](./documents/newgame.png)](https://uob-comsm0166.github.io/2026-group-24/)
 
 </div>
 
