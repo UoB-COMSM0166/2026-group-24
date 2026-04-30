@@ -9,10 +9,17 @@
 STRAPLINE. Add an exciting one sentence description of your game here.
 
 
-[![Play For The Treasure](./documents/newgame.png)](https://uob-comsm0166.github.io/2026-group-24/)
+<div align="center">
 
 [![Watch video](./documents/watch_video.png)](https://m.youtube.com/watch?v=w6Jw0cgaRZs&pp=0gcJCVACo7VqN5tD)
 
+</div>
+
+<div align="center">
+
+[![Watch video](./documents/watch_video.png)](https://m.youtube.com/watch?v=w6Jw0cgaRZs&pp=0gcJCVACo7VqN5tD)
+
+</div>
 
 # Your Group
 
