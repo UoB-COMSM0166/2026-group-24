@@ -26,13 +26,13 @@
 
 <div align="center">
 
-[![New game](./documents/newgame.png)](https://uob-comsm0166.github.io/2026-group-24/)
+[![New game](./documents/playgame.png)](https://uob-comsm0166.github.io/2026-group-24/)
 
 </div>
 
 <div align="center">
 
-[![Watch video](./documents/watch_video.png)](https://m.youtube.com/watch?v=w6Jw0cgaRZs&pp=0gcJCVACo7VqN5tD)
+[![Watch video](./documents/watchvideo.png)](https://m.youtube.com/watch?v=w6Jw0cgaRZs&pp=0gcJCVACo7VqN5tD)
 
 </div>
 
