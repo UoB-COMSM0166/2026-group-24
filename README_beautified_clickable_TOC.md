@@ -3,23 +3,25 @@
 </head>
 
 <body>
-
+  
+<p style="text-align: center;">
 <div class="header">
   <h1>FOR THE TREASURE</h1>
-  <h2>Software Engineering - Group 15 (2026)</h2>
-  <hr>
+  <h2>Software Engineering - Group 24 (2026)</h2>
 </div>
+</p>
 
 </body>
 </html>
 
-
+<p style="text-align: center;">
+  Master the tiles, brave the unknown, and let the dice decide your fate in this procedurally generated treasure hunt.
+</p>
 <p align="center">
   <img src="./documents/demo_video.gif" width="720" height="405">
   <br>
 </p>
 
-Master the tiles, brave the unknown, and let the dice decide your fate in thisprocedurally generated treasure hunt.
 
 
 <div align="center">
