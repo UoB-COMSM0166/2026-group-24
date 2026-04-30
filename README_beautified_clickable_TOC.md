@@ -1,35 +1,4 @@
 
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-
-<style>
-body {
-  background-color: #f2f2f2;   
-  font-family: Arial, sans-serif;
-  margin: 40px;
-}
-
-.header {
-  text-align: center;
-}
-
-.header h1 {
-  margin-bottom: 5px;
-  font-size: 36px;
-}
-
-/* 第二行标题 */
-.header h2 {
-  margin-top: 0;
-  font-size: 32px;
-  font-weight: normal;
-}
-.header hr {
-  width: 80%;
-  margin: 20px auto;  
-}
 </style>
 
 </head>
