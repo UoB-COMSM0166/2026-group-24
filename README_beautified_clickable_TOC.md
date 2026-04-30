@@ -11,7 +11,7 @@
   <br>
 </p>
 
-STRAPLINE. Add an exciting one sentence description of your game here.
+Master the tiles, brave the unknown, and let the dice decide your fate in thisprocedurally generated treasure hunt.
 
 
 <div align="center">
