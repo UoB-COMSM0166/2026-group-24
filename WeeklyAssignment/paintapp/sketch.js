@@ -95,15 +95,15 @@ function draw() {
   }
 }
 
-// --- 鼠标滚轮调节笔触大小 ---
+// --- Mouse wheel adjusts brush size ---
 function mouseWheel(event) {
   if (mouseInCanvas()) {
     let currentVal = brushSizeSlider.value();
-    // 向上滚动 event.delta 为负，减小数值；向下为正，增加数值
-    // 我们将其反转以符合直觉：向上推滚轮变大
+    // Scroll up event.delta is negative, decrease value; scroll down is positive, increase value
+    // We reverse it to match intuition: scroll up to make it bigger
     let newVal = currentVal - (event.delta / 10);
     brushSizeSlider.value(constrain(newVal, 1, 100));
-    return false; // 防止页面跟随滚动
+    return false; // Prevent page from scrolling
   }
 }
 

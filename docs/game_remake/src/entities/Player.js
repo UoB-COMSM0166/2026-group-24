@@ -168,20 +168,20 @@ export class Player extends Character {
       ctx.save();
       const heroImg = DataLoader.getImage('hero');
 
-      // 1. 创建呼吸灯动画因子 (基于时间)
-      // 产生一个在 0.8 到 1.2 之间循环的数值
+      // 1. Create a breathing light animation factor (based on time)
+      // Generate a value that cycles between 0.8 and 1.2
       const time = Date.now() / 300;
       const pulse = Math.sin(time) * 0.2 + 1.0;
 
-      // 2. 绘制脚底强化光环 (Aura)
-      // 在绘制图像之前画，确保光环在人物“脚下”
+      // 2. Draw the enhanced aura under the feet (Aura)
+      // Draw before the character image to ensure the aura is "under" the character
       const auraRadius = size * 1 * pulse; // 光环半径随呼吸灯变化
       const gradient = ctx.createRadialGradient(
           this.x, this.y, 0,           // 内圈中心
           this.x, this.y, auraRadius   // 外圈边缘
       );
 
-      // 金色渐变：中心较实，边缘透明
+      // Golden gradient: more solid in the center, transparent at the edge
       gradient.addColorStop(0, 'rgba(0, 191, 255, 0.7)');   // 中心：深天蓝 (DeepSkyBlue)
       gradient.addColorStop(0.5, 'rgba(0, 191, 255, 0.3)'); // 中间过渡
       gradient.addColorStop(1, 'rgba(0, 191, 255, 0)');
@@ -191,8 +191,8 @@ export class Player extends Character {
       ctx.arc(this.x, this.y, auraRadius, 0, Math.PI * 2);
       ctx.fill();
 
-      // 3. 绘制角色图像
-      // 保留基本的 shadowBlur 增加人物厚度感
+      // 3. Draw the character image
+      // Keep the basic shadowBlur to increase the sense of thickness
       ctx.shadowBlur = 15;
       ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
 
@@ -200,28 +200,28 @@ export class Player extends Character {
           const drawW = size * 0.9;
           const drawH = (heroImg.height / heroImg.width) * drawW;
 
-          // 人物绘制
+          // Draw the character
           ctx.drawImage(heroImg, this.x - drawW / 2, this.y - drawH * 0.8, drawW, drawH);
 
-          // 4. 绘制文字 (Leader) - 位置进一步下移并强化样式
-          ctx.shadowBlur = 0; // 关闭文字阴影防止模糊
+          // 4. Draw the text (Leader) - move the position further down and enhance the style
+          ctx.shadowBlur = 0; // Turn off text shadow to prevent blurring
 
-          const textY = this.y + 25; // 坐标进一步下移
+          const textY = this.y + 25; // Move the coordinate further down
 
           ctx.font = 'bold 13px "Press Start 2P", monospace';
           ctx.textAlign = 'center';
 
-          // 绘制加粗描边，增加对比度
+          // Draw bold stroke to increase contrast
           ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
           ctx.lineWidth = 4;
           ctx.strokeText(this.name, this.x, textY);
 
-          // 填充颜色
+          // Fill color
           ctx.fillStyle = '#f1c40f'; // 使用醒目的明黄色
           ctx.fillText(this.name, this.x, textY);
 
       } else {
-          // 兜底逻辑
+          // Fallback logic
           ctx.fillStyle = '#f1c40f';
           ctx.beginPath();
           ctx.arc(this.x, this.y, 10, 0, Math.PI*2);

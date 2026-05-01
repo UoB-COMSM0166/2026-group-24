@@ -54,7 +54,6 @@ export class Character {
 
 updateGold(amount) {
   this.gold = amount;
-  // 如果背包已打开，直接更新金币显示，不用整体重渲染
   const goldEl = this.panel.querySelector('#inv-gold-display');
   if (goldEl) goldEl.textContent = `💰 Gold: ${amount}`;
 }

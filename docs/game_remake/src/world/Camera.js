@@ -11,20 +11,20 @@ export class Camera {
     this.isDragging = false;
     this.lastMousePos = { x: 0, y: 0 };
 
-    // 可选边界（世界坐标），由 setBounds() 设置
+    // Optional bounds (world coordinates), set by setBounds()
     this._bounds = null;
     this._canvasW = canvasWidth;
     this._canvasH = canvasHeight;
   }
 
   /**
-   * 设置相机可移动的世界坐标边界。
-   * HexMap 生成后调用一次即可。
+   * Set the world coordinate bounds the camera can move within.
+   * Call once after HexMap is generated.
    *
-   * @param {number} minX  世界左边界
-   * @param {number} minY  世界上边界
-   * @param {number} maxX  世界右边界
-   * @param {number} maxY  世界下边界
+   * @param {number} minX  World left bound
+   * @param {number} minY  World top bound
+   * @param {number} maxX  World right bound
+   * @param {number} maxY  World bottom bound
    */
   setBounds(minX, minY, maxX, maxY) {
     this._bounds = { minX, minY, maxX, maxY };
@@ -51,10 +51,10 @@ export class Camera {
   }
 
   /**
-   * 以鼠标位置为锚点缩放。
-   * @param {number} pivotX  屏幕锚点 X（通常为鼠标 X）
-   * @param {number} pivotY  屏幕锚点 Y（通常为鼠标 Y）
-   * @param {number} delta   正值放大，负值缩小
+   * Zoom with the mouse position as the anchor.
+   * @param {number} pivotX  Screen anchor X (usually mouse X)
+   * @param {number} pivotY  Screen anchor Y (usually mouse Y)
+   * @param {number} delta   Positive to zoom in, negative to zoom out
    */
   zoomAt(pivotX, pivotY, delta) {
     const factor = delta > 0 ? 1.1 : 0.9;
@@ -68,7 +68,7 @@ export class Camera {
     this._clamp();
   }
 
-  /** 屏幕坐标 → 世界坐标（考虑平移 + 缩放） */
+  /** Screen coordinates → world coordinates (considering translation + zoom) */
   screenToWorld(screenX, screenY) {
     return {
       x: (screenX - this.x) / this.zoom,
@@ -76,7 +76,7 @@ export class Camera {
     };
   }
 
-  /** 世界坐标 → 屏幕坐标 */
+  /** World coordinates → screen coordinates */
   worldToScreen(worldX, worldY) {
     return {
       x: worldX * this.zoom + this.x,
@@ -84,7 +84,7 @@ export class Camera {
     };
   }
 
-  // ── 内部：将相机位置钳位在边界内 ─────────────────────────────────
+  // ── Internal: clamp camera position within bounds ────────────────
   _clamp() {
     if (!this._bounds) return;
     const { minX, minY, maxX, maxY } = this._bounds;
@@ -92,14 +92,14 @@ export class Camera {
     const w = this._canvasW;
     const h = this._canvasH;
 
-    // 相机 x 使得世界 [minX, maxX] 始终覆盖屏幕
+    // Camera x ensures world [minX, maxX] always covers the screen
     // screen = world * zoom + camera  =>  camera = screen - world * zoom
-    const xMax = -minX * z + w * 0.15;          // 左边不露出边界
-    const xMin = -maxX * z + w * 0.85;          // 右边不露出边界
+    const xMax = -minX * z + w * 0.15;          // Left edge does not expose boundary
+    const xMin = -maxX * z + w * 0.85;          // Right edge does not expose boundary
     const yMax = -minY * z + h * 0.15;
     const yMin = -maxY * z + h * 0.85;
 
-    // 只有边界有意义时才钳位（地图比屏幕小则不限制）
+    // Only clamp when bounds make sense (if map is smaller than screen, do not restrict)
     if (xMin < xMax) this.x = Math.min(xMax, Math.max(xMin, this.x));
     if (yMin < yMax) this.y = Math.min(yMax, Math.max(yMin, this.y));
   }

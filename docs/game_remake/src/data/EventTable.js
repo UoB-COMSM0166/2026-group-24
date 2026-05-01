@@ -1,6 +1,4 @@
 // src/data/EventTable.js
-// 事件表管理 - 集中所有事件定义与事件处理逻辑
-// 注意：地块生成相关逻辑（概率表、createContent、getDedupeKey）已迁移至 MapGenerator
 
 import {
   TileType, TileContentType,
@@ -11,11 +9,9 @@ import {
 import { PROGRESS_BAR_TEXTS } from '../core/TurnManager.js';
 import { GameState } from '../core/Constants.js';
 import { rollSpeed } from '../core/Dice.js';
-import { rollRandomItem, rollRandomLoot, rollGoldDrop, rollShopInventory } from './items.js';// ★ 新增 rollRandomLoot ★
+import { rollRandomItem, rollRandomLoot, rollGoldDrop, rollShopInventory } from './items.js';
 import { ShopUI } from '../ui/ShopUI.js';
 
-// ── 解锁链配置 ────────────────────────────────────────────────────
-// 🎮 定义事件解锁的线性链
 export const UNLOCK_CHAIN = [
   { q: -8, r: 7, name: 'INJURED VILLAGER', type: 'npc', unlocksNext: true },
   { q: -6, r: 2, name: 'FOREST VILLAGE', type: 'village', unlocksNext: true },
@@ -25,9 +21,7 @@ export const UNLOCK_CHAIN = [
   { q: 6, r: 1, name: 'ANCIENT RUINS ENTRANCE', type: 'ruin', unlocksNext: false },
 ];
 
-// ── 静态配置列表 ────────────────────────────────────────────────────
 
-// 集中管理所有 NPC 配置
 export const NPC_LIST = [
   {
     map: 'main',
@@ -37,10 +31,8 @@ export const NPC_LIST = [
     dialogue: ' Please help me……The forest has changed……the trees are bleeding……Monsters are crawling out of the ground.\nPlease take me to the village in the north.',
     iconType: 'redCircle'
   }
-  // 后续可继续添加更多 NPC
 ];
 
-// 集中管理所有村庄配置
 export const VILLAGE_LIST = [
   {
     map: 'main',
@@ -48,10 +40,8 @@ export const VILLAGE_LIST = [
     r: 2,
     name: 'FOREST VILLAGE'
   }
-  // 后续可继续添加更多村庄
 ];
 
-// 集中管理所有商人配置
 export const MERCHANT_LIST = [
   {
     map: 'main',
@@ -59,20 +49,15 @@ export const MERCHANT_LIST = [
     r: -5,
     name: 'TRAVELING MERCHANT'
   }
-  // 后续可继续添加更多商人
 ];
 
-// 集中管理所有遗迹配置
 export const RUIN_LIST = [
   {
     map: 'main',
     q: 6,
     r: 1,
     name: 'ANCIENT RUINS ENTRANCE',
-    monsterType: 'dark_overlord',  // 🎮 Boss: Dark Overlord
     enemyName: 'CORFUS',
-    contentImageType: 'boss',  // 🎮 使用 boss 贴图显示
-    isEndGame: true,  // 🎮 故事对话后需要返回主界面
     description: 'A massive stone gate stands in the forest.\n\nAncient runes carved into the door pulse with dark energy.\n\nSuddenly, a legendary knight emerges from the shadows, his armor gleaming menacingly...',
     postCombatMessage: {
       type: 'storyDialogue',
@@ -119,17 +104,14 @@ export const RUIN_LIST = [
     description: 'An ancient plaza lies before the ruined relic.\n\nCracked stone tiles and broken pillars surround the silent square.\n\nSuddenly, a shadow flickers, and a swift figure appears—ready to strike...',
     postCombatMessage: 'The assassin falls, their swift form finally stilled.\n\nThe plaza falls silent once more, the ancient stones beginning to glow with a faint blue light.'
   }
-  // 后续可继续添加更多遗迹
 ];
 
-// 集中管理所有被腐化的鹿配置
 export const CORRUPTED_DEER_LIST = [
   {
     map: 'main',
     q: 7,
     r: -7,
     name: 'CORRUPTED DEER',
-    monsterType: 'elite'  // ← Orc Elite
   },
   {
     map: 'main',
@@ -138,12 +120,10 @@ export const CORRUPTED_DEER_LIST = [
     name: 'CORRUPTED DEER',
     monsterType: 'elite'  // ← Orc Elite
   }
-  // 后续可继续添加更多被腐化的鹿
 
 
 ];
 
-// ── 主世界固定地牢列表 ────────────────────────────────────────────────
 export const MAIN_DUNGEON_LIST = [
   { q: -9, r: 2, name: 'Haunted Forest', level: 1, difficulty: 'EASY' },
   { q: -7, r: 5, name: 'Shadow Cavern', level: 1, difficulty: 'NORMAL' },
@@ -162,7 +142,6 @@ export const MAIN_DUNGEON_LIST = [
   { q: 8, r: -3, name: 'Abyssal Den', level: 4, difficulty: 'HARD' },
 ];
 
-// 新手村固定事件列表
 export const NOVICE_DUNGEON_LIST = [
   { q: 1, r: -2, name: 'Lost Goblin', level: 1, difficulty: 'EASY' },
 ];
@@ -186,11 +165,9 @@ export const MAIN_SHOP_LIST = [
   { map: 'main', q: -3, r: 3 },
   { map: 'main', q: 5,  r: -3 },
 ];
-// ── EventTable 类 ───────────────────────────────────────────────────
 
 export class EventTable {
 
-  // ── 事件类型定义 ─────────────────────────────────────────────────
   static EVENTS = {
     TRAP: {
       id: 'trap',

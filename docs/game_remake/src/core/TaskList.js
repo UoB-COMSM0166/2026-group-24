@@ -43,7 +43,7 @@ const MISSION_TASKS = {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
     nextMission: 'Rescue the Caravan',  // Auto-switch to next mission on completion
-    maxTurns: 10,  // ── 任务时间限制 ──
+    maxTurns: 10,  // ── Mission time limit ──
     tasks: {
       find_village: { 
         done: false, 
@@ -59,7 +59,7 @@ const MISSION_TASKS = {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
     nextMission: 'Search Ruins',  // Auto-switch to next mission on completion
-    maxTurns: 10,  // ── 任务时间限制 ──
+    maxTurns: 10,  // ── Mission time limit ──
     tasks: {
       rescue_caravan: {
         done: false,
@@ -75,8 +75,8 @@ const MISSION_TASKS = {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
     nextMission: 'Head south to seek the true treasure',
-    maxTurns: 10,  // ── 任务时间限制 ──
-    requiresSpecialEventCombat: true,  // ── 需要击败特殊事件怪物才能切换任务 ──
+    maxTurns: 10,  // ── Mission time limit ──
+    requiresSpecialEventCombat: true,  // ── Must defeat special event monster to switch mission ──
     tasks: {
       search_ruins: {
         done: false,
@@ -91,7 +91,7 @@ const MISSION_TASKS = {
   'Head south to seek the true treasure': {
     showDebugBtn: false,
     autoCleanupOnComplete: false,
-    maxTurns: 15,  // ── 任务时间限制 ──
+    maxTurns: 15,  // ── Mission time limit ──
     tasks: {
       seek_treasure: {
         done: false,
@@ -106,26 +106,26 @@ export class TaskList {
     this._hudEl = null;
     this._debugBtn = null;
     this._onAllTasksComplete = onAllTasksComplete;
-    this._onMissionSwitch = onMissionSwitch;  // ── 任务切换回调 ──
+    this._onMissionSwitch = onMissionSwitch;  // ── Mission switch callback ──
     this._currentMission = 'Novice Village';
     this._showDebugBtn = true;
     this._autoCleanupOnComplete = true;  // Auto-cleanup current mission set on completion
     this.tasks = {};
-    this.gameController = null;  // ── GameController 引用 ──
+    this.gameController = null;  // ── GameController reference ──
     
     // Initialize Novice Village tasks
     this._initializeTasks('Novice Village');
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 设置 GameController 引用
+  // Set GameController reference
   // ══════════════════════════════════════════════════════════════════
   setGameController(gameController) {
     this.gameController = gameController;
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 初始化特定任务集
+  // Initialize specific mission set
   // ══════════════════════════════════════════════════════════════════
   _initializeTasks(missionName) {
     const mission = MISSION_TASKS[missionName];
@@ -137,11 +137,11 @@ export class TaskList {
     this._currentMission = missionName;
     this._showDebugBtn = mission.showDebugBtn || false;
     this._autoCleanupOnComplete = mission.autoCleanupOnComplete !== false;  // 默认 true
-    this.tasks = JSON.parse(JSON.stringify(mission.tasks));  // 深拷贝，避免污染原定义
+    this.tasks = JSON.parse(JSON.stringify(mission.tasks));  // Deep copy to avoid polluting the original definition
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 注册新任务集（允许动态添加）
+  // Register new mission set (allow dynamic addition)
   // ══════════════════════════════════════════════════════════════════
   registerMission(missionName, taskDefinition, showDebugBtn = false) {
     MISSION_TASKS[missionName] = {
@@ -151,19 +151,19 @@ export class TaskList {
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 切换任务集
+  // Switch mission set
   // ══════════════════════════════════════════════════════════════════
   switchToMission(missionName) {
     if (this._currentMission === missionName) return;
     
     this._initializeTasks(missionName);
     
-    // ── 调用任务切换回调 ──────────────────────────────────────
+    // ── Call mission switch callback ──────────────────────────────────────
     if (this._onMissionSwitch) {
       this._onMissionSwitch(missionName);
     }
     
-    // 清理旧 HUD
+    // Clean up old HUD
     if (this._hudEl) {
       this._hudEl.style.transition = 'opacity 0.2s ease';
       this._hudEl.style.opacity = '0';
@@ -176,14 +176,14 @@ export class TaskList {
       this._debugBtn = null;
     }
     
-    // 延迟创建新 HUD，确保旧 HUD 完全清理
+    // Delay creating new HUD to ensure old HUD is fully cleaned up
     setTimeout(() => {
       this.initHUD();
     }, 300);
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 公开：标记任务完成
+  // Public: Mark task as complete
   // ══════════════════════════════════════════════════════════════════
   complete(key) {
     if (!this.tasks[key] || this.tasks[key].done) return;
@@ -193,7 +193,7 @@ export class TaskList {
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 公开：从任务列表中移除一条任务
+  // Public: Remove a task from the task list
   // ══════════════════════════════════════════════════════════════════
   removeTask(key) {
     if (!this.tasks[key]) return;
@@ -203,14 +203,14 @@ export class TaskList {
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 公开：检查玩家位置，自动完成"到达坐标"的任务
+  // Public: Check player position and auto-complete "reach coordinate" tasks
   // ══════════════════════════════════════════════════════════════════
   checkPlayerPosition(playerQ, playerR) {
     Object.keys(this.tasks).forEach(key => {
       const task = this.tasks[key];
-      // 检查是否是"到达坐标"类型的任务且未完成
+      // Check if it is a "reach coordinate" type task and not completed
       if (task.completeWhen === 'reachCoord' && !task.done) {
-        // 如果玩家到达目标坐标，移除这个任务
+        // If the player reaches the target coordinate, remove this task
         if (playerQ === task.targetQ && playerR === task.targetR) {
           this.removeTask(key);
         }
@@ -219,29 +219,29 @@ export class TaskList {
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 获取当前任务集名称
+  // Get current mission set name
   // ══════════════════════════════════════════════════════════════════
   getCurrentMission() {
     return this._currentMission;
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 获取当前任务集的回合限制
+  // Get turn limit for current mission set
   // ══════════════════════════════════════════════════════════════════
   getMissionMaxTurns() {
     const mission = MISSION_TASKS[this._currentMission];
-    return mission?.maxTurns || 10;  // 默认 10 回合
+    return mission?.maxTurns || 10;  // Default 10 turns
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 检查是否所有任务都已完成
+  // Check if all tasks are completed
   // ══════════════════════════════════════════════════════════════════
   isAllTasksDone() {
     return Object.values(this.tasks).every(t => t.done);
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 初始化 HUD 任务进度面板
+  // Initialize HUD task progress panel
   // ══════════════════════════════════════════════════════════════════
   initHUD() {
     const el = document.createElement('div');
@@ -263,7 +263,7 @@ export class TaskList {
       box-shadow: 0 4px 24px rgba(0,0,0,0.6);
     `;
     
-    // 调试按钮：一键完成所有任务（仅在新手村显示）
+    // Debug button: complete all tasks with one click (only shown in Novice Village)
     if (this._showDebugBtn) {
       const debugBtn = document.createElement('button');
       debugBtn.textContent = '⏩ Skip Tutorial';
@@ -301,7 +301,7 @@ export class TaskList {
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 更新 HUD 显示
+  // Update HUD display
   // ══════════════════════════════════════════════════════════════════
   _updateHUD() {
     if (!this._hudEl) return;
@@ -338,36 +338,36 @@ export class TaskList {
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 全部完成检查
+  // Check all tasks completed
   // ══════════════════════════════════════════════════════════════════
   _checkAllDone() {
     if (!Object.values(this.tasks).every(t => t.done)) return;
     
-    // 检查是否需要击败特殊事件怪物
+    // Check if special event monster needs to be defeated
     const currentMissionConfig = MISSION_TASKS[this._currentMission];
     if (currentMissionConfig?.requiresSpecialEventCombat && this.gameController) {
       if (!this.gameController.hasDefeatedSpecialEventMonster) {
-        // 还未击败特殊事件怪物，不进行任务切换
+        // Special event monster not yet defeated, do not switch mission
         return;
       }
     }
     
-    // 检查是否有下一个任务集
+    // Check if there is a next mission set
     if (currentMissionConfig && currentMissionConfig.nextMission) {
-      // ── 清除 Boss 模式状态（任务切换时） ──────────────────────────
-      // 注意：GameController 的引用在这里不可用，所以在外部处理
+      // ── Clear Boss mode state (when switching missions) ──────────────────────────
+      // Note: GameController reference is not available here, so handle externally
       
-      // 延迟切换到下一个任务集，确保当前任务完全清理
+      // Delay switching to the next mission set to ensure current mission is fully cleaned up
       setTimeout(() => {
         this.switchToMission(currentMissionConfig.nextMission);
       }, 800);
-      return;  // 提前返回，不触发完成回调
+      return;  // Return early, do not trigger completion callback
     }
     
     if (this._onAllTasksComplete) {
       this._onAllTasksComplete();
     }
-    // 如果当前任务集设置了自动清理，则在完成后清理
+    // If the current mission set is set to auto-cleanup, clean up after completion
     if (this._autoCleanupOnComplete) {
       setTimeout(() => {
         this.cleanup();
@@ -376,7 +376,7 @@ export class TaskList {
   }
 
   // ══════════════════════════════════════════════════════════════════
-  // 清理 HUD（任务完成后调用）
+  // Clean up HUD (called after task completion)
   // ══════════════════════════════════════════════════════════════════
   cleanup() {
     if (this._hudEl) {

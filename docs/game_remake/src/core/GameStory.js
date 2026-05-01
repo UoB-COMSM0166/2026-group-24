@@ -1,8 +1,8 @@
 // src/core/GameStory.js
-// 游戏剧情管理模块
+// Game story management module
 
 export class GameStory {
-  // 故事内容定义
+  // Story content definition
   static STORIES = {
     INTRO: {
       title: 'Elder Guide',
@@ -27,9 +27,9 @@ export class GameStory {
   }
 
   /**
-   * 显示故事
-   * @param {string} storyKey - 故事键名
-   * @param {Function} onNext - 故事完成的回调
+   * Show story
+   * @param {string} storyKey - Story key
+   * @param {Function} onNext - Callback when story is finished
    */
   showStory(storyKey = 'INTRO', onNext = null) {
     const story = GameStory.STORIES[storyKey];
@@ -41,7 +41,7 @@ export class GameStory {
 
     this.currentStory = storyKey;
     
-    // 支持分段故事
+    // Support segmented stories
     if (story.type === 'segmented' && story.segments) {
       this.ui.showSegmentedStory(story.title, story.segments, onNext, story.avatar);
     } else {
@@ -50,7 +50,7 @@ export class GameStory {
   }
 
   /**
-   * 隐藏故事
+   * Hide story
    */
   hideStory() {
     this.ui.hideStoryScreen();
@@ -58,17 +58,17 @@ export class GameStory {
   }
 
   /**
-   * 添加新的故事
-   * @param {string} key - 故事键名
-   * @param {string} title - 故事标题
-   * @param {string} text - 故事内容
+   * Add a new story
+   * @param {string} key - Story key
+   * @param {string} title - Story title
+   * @param {string} text - Story content
    */
   static addStory(key, title, text) {
     GameStory.STORIES[key] = { title, text };
   }
 
   /**
-   * 获取所有可用的故事
+   * Get all available stories
    */
   static getAvailableStories() {
     return Object.keys(GameStory.STORIES);

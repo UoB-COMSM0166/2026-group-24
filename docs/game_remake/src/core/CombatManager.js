@@ -89,7 +89,7 @@ export class CombatManager {
         unit.statusEffects.heal_aura = 3;
         this.addLog(`💚 ${unit.name} channels Heal Aura! Regen 8% HP/turn (3 turns)`);
         break;
-        // ── hub新增：禁疗 ────────────────────────────────────────────
+        // ── newly added by hub: anti-heal ────────────────────────────────────────────
       case 'anti_heal':
         unit.statusEffects.anti_heal = 2;
         this.addLog(`🚫 ${unit.name} is Wounded! Cannot recover HP! (2 turns)`);

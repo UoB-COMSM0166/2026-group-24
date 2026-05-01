@@ -1358,10 +1358,10 @@ const CombatApp = ({ state, callbacks }) => {
               <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', overflow: 'visible' }}>
                 {isPlayerTurn && activeHero ? (
 
-                  /* 强制凑够 4 个元素，有技能渲染技能，没有则渲染灰暗的空槽 */
+
                   [...activeSkills, ...Array(Math.max(0, 4 - activeSkills.length)).fill(null)].slice(0, 4).map((skill, idx) => {
 
-                    // 如果没有技能（空槽位）
+
                     if (!skill) {
                       return (
                         <div key={'empty' + idx} style={{
@@ -1376,7 +1376,6 @@ const CombatApp = ({ state, callbacks }) => {
                       );
                     }
 
-                    // 如果有技能（正常渲染我们调好尺寸的按钮）
                     const sc = SKILL_COLOR[skill.type] || SKILL_COLOR.attack;
                     return (
                       <button key={skill.id || idx} onClick={() => onSkillSelect(skill)}

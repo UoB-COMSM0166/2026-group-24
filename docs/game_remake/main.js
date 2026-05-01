@@ -153,7 +153,7 @@ function startGame(isLoad = false, isDevMode = false) {
         return origTransition(state, ...args);
     };
 
-    // 输入处理
+    // Input handling
     const inputHandler = new InputHandler(
         canvas,
         camera,
@@ -162,7 +162,7 @@ function startGame(isLoad = false, isDevMode = false) {
     );
     inputHandler.bind(document.getElementById('end-turn-btn'));
 
-    // --- 在此处新增 Save 按钮的绑定逻辑 ---
+    // --- Add Save button binding logic here ---
     const saveBtn = document.getElementById('save-game-btn');
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
@@ -177,11 +177,11 @@ function startGame(isLoad = false, isDevMode = false) {
 
     const closePauseMenu = () => pauseOverlay?.classList.remove('open');
 
-// 同步音量滑条初始值
+// Sync initial value of volume slider
     if (pauseVolSlider && window.BGMPlayer) {
         pauseVolSlider.value = window.BGMPlayer.globalVolume ?? 0.5;
     }
-// 实时调节音量
+// Adjust volume in real time
     pauseVolSlider?.addEventListener('input', (e) => {
         const v = parseFloat(e.target.value);
         if (window.BGMPlayer) {
@@ -189,38 +189,38 @@ function startGame(isLoad = false, isDevMode = false) {
             if (window.BGMPlayer.current) window.BGMPlayer.current.volume = v;
         }
     });
-// 菜单内 Save
+// Save in menu
     pmSaveBtn?.addEventListener('click', () => {
         gameController.saveGame();
     });
-// Resume / 点击遮罩空白处关闭
+// Resume / Click blank area of overlay to close
     pmResumeBtn?.addEventListener('click', closePauseMenu);
     pauseOverlay?.addEventListener('click', (e) => {
         if (e.target === pauseOverlay) closePauseMenu();
     });
-// 返回主标题
+// Return to main title
     pmTitleBtn?.addEventListener('click', () => {
         if (!confirm('Return to main menu? Unsaved progress will be lost.')) return;
         closePauseMenu();
         window.BGMPlayer?.stop();
         location.reload();
     });
-    // 调试模式按钮
+    // Debug mode button
     const debugBtn = document.getElementById('debug-toggle-btn');
     debugBtn.addEventListener('click', () => {
         Renderer.debugMode = !Renderer.debugMode;
-        DebugConfig.showHiddenFixedEvents = Renderer.debugMode;  // 在debug模式下显示隐藏的特殊事件
+        DebugConfig.showHiddenFixedEvents = Renderer.debugMode;  // Show hidden special events in debug mode
         debugBtn.textContent = Renderer.debugMode ? '🐛 Debug: ON' : '🐛 Debug: OFF';
         debugBtn.style.background = Renderer.debugMode ? '#27ae60' : '#e67e22';
     });
 
-    // 启动状态机进入角色选择
+    // Start state machine and enter character selection
     if (isLoad) {
         if (gameController.loadGame()) {
-             // 读档成功，直接播放地图BGM进入游戏
+             // Load successful, directly play map BGM and enter game
              window.BGMPlayer.play('resource/music/map.mp3');
         } else {
-             alert("读取存档文件失败/损坏！");
+             alert("Failed to load save file or file is corrupted!");
              gameController.fsm.transition(GameState.CHARACTER_SELECT);
         }
     } else if (isDevMode) {
@@ -229,7 +229,7 @@ function startGame(isLoad = false, isDevMode = false) {
         gameController.fsm.transition(GameState.CHARACTER_SELECT);
     }
 
-    // 启动游戏主循环
+    // Start main game loop
     new GameLoop(
         dt => gameController.update(dt),
         () => gameController.render(ctx, camera)

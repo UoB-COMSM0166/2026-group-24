@@ -1,8 +1,8 @@
 // src/ui/StoryDialogueBox.js
 // ══════════════════════════════════════════════════════════════════════
 // Story Dialogue Box with Image Support
-// 用于显示包含图片和多行文字的故事对话
-// 用法：
+// Used to display story dialogues with images and multiple lines of text
+// Usage:
 //   const box = new StoryDialogueBox();
 //   box.show({
 //     scenes: [
@@ -28,9 +28,9 @@ export class StoryDialogueBox {
     this._build();
   }
 
-  // ── 构建 DOM ────────────────────────────────────────────────────────
+  // ── Build DOM ──────────────────────────────────────────────────────
   _build() {
-    // 整体容器
+    // Main container
     const wrap = document.createElement('div');
     wrap.id = 'story-dialogue-wrap';
     wrap.style.cssText = `
@@ -44,7 +44,7 @@ export class StoryDialogueBox {
       pointer-events: all;
     `;
 
-    // 内容容器
+    // Content container
     const container = document.createElement('div');
     container.style.cssText = `
       position: relative;
@@ -58,7 +58,7 @@ export class StoryDialogueBox {
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
     `;
 
-    // ── 图片区 ────────────────────────────────────────────────────────
+    // ── Image area ───────────────────────────────────────────────────
     this._imageEl = document.createElement('img');
     this._imageEl.style.cssText = `
       width: 100%;
@@ -69,7 +69,7 @@ export class StoryDialogueBox {
       background: #1a1a1a;
     `;
 
-    // ── 文字区 ────────────────────────────────────────────────────────
+    // ── Text area ────────────────────────────────────────────────────
     const textContainer = document.createElement('div');
     textContainer.style.cssText = `
       padding: 24px 32px;
@@ -79,7 +79,7 @@ export class StoryDialogueBox {
       justify-content: space-between;
     `;
 
-    // 对话文字
+    // Dialogue text
     this._textEl = document.createElement('p');
     this._textEl.style.cssText = `
       font-family: 'Press Start 2P', monospace;
@@ -90,7 +90,7 @@ export class StoryDialogueBox {
       min-height: 48px;
     `;
 
-    // 底部：页码 + 按钮
+    // Bottom: page number + button
     const footer = document.createElement('div');
     footer.style.cssText = `
       display: flex;
@@ -123,7 +123,7 @@ export class StoryDialogueBox {
     this._btnEl.textContent = ' Continue >>';
     this._btnEl.addEventListener('click', () => this._next());
     
-    // 按钮hover效果
+    // Button hover effect
     this._btnEl.addEventListener('mouseover', () => {
       this._btnEl.style.background = 'rgba(251, 191, 36, 0.1)';
       this._btnEl.style.borderColor = 'rgba(251, 191, 36, 0.8)';
@@ -146,11 +146,11 @@ export class StoryDialogueBox {
     this._el = wrap;
   }
 
-  // ── 公开：显示故事对话 ────────────────────────────────────────────
+  // ── Public: show story dialogue ───────────────────────────────────
   /**
    * @param {object} config
-   * @param {Array} config.scenes  场景数组，每个包含 { image, lines }
-   * @param {Function} onDone      全部读完后的回调
+  * @param {Array} config.scenes  Array of scenes, each contains { image, lines }
+  * @param {Function} onDone      Callback after all lines are read
    */
   show(config, onDone) {
     this._scenes = config.scenes ?? [];
@@ -164,17 +164,17 @@ export class StoryDialogueBox {
     }
   }
 
-  // ── 公开：隐藏 ─────────────────────────────────────────────────────
+  // ── Public: hide ──────────────────────────────────────────────────
   hide() {
     this._el.style.display = 'none';
   }
 
-  // ── 内部：渲染当前场景和当前行 ────────────────────────────────────
+  // ── Internal: render current scene and current line ───────────────
   _renderScene() {
     const scene = this._scenes[this._currentScene];
     if (!scene) return;
 
-    // 设置图片
+    // Set image
     if (scene.image) {
       this._imageEl.src = scene.image;
       this._imageEl.style.display = 'block';
@@ -182,7 +182,7 @@ export class StoryDialogueBox {
       this._imageEl.style.display = 'none';
     }
 
-    // 渲染当前行的文字
+    // Render the text of the current line
     this._renderLine();
   }
 
@@ -194,35 +194,35 @@ export class StoryDialogueBox {
     const idx = this._currentLine;
     this._textEl.textContent = lines[idx] ?? '';
 
-    // 更新页码
+    // Update page number
     const totalScenes = this._scenes.length;
     const totalLines = lines.length;
     this._pageEl.textContent = `Scene ${this._currentScene + 1}/${totalScenes} - Line ${idx + 1}/${totalLines}`;
 
-    // 更新按钮文字
+    // Update button text
     const isLastLineOfLastScene = this._currentScene === totalScenes - 1 && idx === totalLines - 1;
     this._btnEl.textContent = isLastLineOfLastScene ? ' Start >' : ' Continue >>';
   }
 
-  // ── 内部：推进到下一行或下一场景 ────────────────────────────────
+  // ── Internal: advance to next line or next scene ─────────────────
   _next() {
     if (this._currentScene >= this._scenes.length) return;
 
     const scene = this._scenes[this._currentScene];
     const lines = scene.lines ?? [];
 
-    // 如果还有当前场景的下一行
+    // If there is a next line in the current scene
     if (this._currentLine < lines.length - 1) {
       this._currentLine++;
       this._renderLine();
     } 
-    // 否则进入下一场景
+    // Otherwise go to the next scene
     else if (this._currentScene < this._scenes.length - 1) {
       this._currentScene++;
       this._currentLine = 0;
       this._renderScene();
     } 
-    // 全部完成
+    // All done
     else {
       this.hide();
       this._onDone?.();
