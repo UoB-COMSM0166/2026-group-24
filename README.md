@@ -720,6 +720,8 @@ Given the complexity of the turn-based combat system and the variety of status e
 
 Extensive black box testing was carried out throughout the development cycle. A dedicated `develop` branch was used to consolidate and test feature merges before they were promoted to the `main` branch.
 
+A developer mode was implemented to facilitate black box testing, allowing testers to trigger game states (such as skipping to the boss battle, unlocking all equipment, or adjusting enemy stats) without modifying the source code. This enabled rapid validation of edge cases and boundary conditions — such as zero-HP transitions, inventory limits, and boss phase changes 
+
 Particular focus was given to edge cases in combat, such as simultaneous status effects, zero-HP transitions, and boss phase changes. Map generation was also tested to verify that all tile types rendered correctly and that events fired as expected.
 
 ---
