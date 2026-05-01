@@ -1,10 +1,10 @@
 // src/ui/DialogueBox.js
 // ══════════════════════════════════════════════════════════════════════
-// NPC 对话框组件
-// 独立组件，不依赖任何现有代码
-// 用法：
+// NPC dialogue box component
+// Standalone component, does not depend on any existing code
+// Usage:
 //   const box = new DialogueBox();
-//   box.show({ name: '老向导', lines: ['第一句', '第二句'] }, onDone);
+//   box.show({ name: 'Old Guide', lines: ['First line', 'Second line'] }, onDone);
 // ══════════════════════════════════════════════════════════════════════
 
 export class DialogueBox {
@@ -16,9 +16,9 @@ export class DialogueBox {
     this._build();
   }
 
-  // ── 构建 DOM ────────────────────────────────────────────────────────
+  // ── Build DOM ──────────────────────────────────────────────────────
   _build() {
-    // 整体容器（全屏遮罩底部）
+    // Main container (fullscreen mask at the bottom)
     const wrap = document.createElement('div');
     wrap.id = 'dialogue-wrap';
     wrap.style.cssText = `
@@ -32,7 +32,7 @@ export class DialogueBox {
       pointer-events: none;
     `;
 
-    // 对话区域（头像 + 对话框）
+    // Dialogue area (avatar + dialogue box)
     const container = document.createElement('div');
     container.style.cssText = `
       position: relative;
@@ -41,7 +41,7 @@ export class DialogueBox {
       pointer-events: all;
     `;
 
-    // ── 头像区 ────────────────────────────────────────────────────────
+    // ── Avatar area ──────────────────────────────────────────────────
     const avatarWrap = document.createElement('div');
     avatarWrap.style.cssText = `
       position: absolute;
@@ -53,7 +53,7 @@ export class DialogueBox {
       gap: 5px;
     `;
 
-    // 头像圆框（占位用emoji，后续换图片只需替换这里）
+    // Avatar circle (placeholder emoji, just replace here to use an image)
     this._avatarEl = document.createElement('div');
     this._avatarEl.style.cssText = `
       width: 80px;
@@ -70,7 +70,7 @@ export class DialogueBox {
     `;
     this._avatarEl.textContent = '🧙';
 
-    // NPC 名字
+    // NPC name
     this._nameEl = document.createElement('div');
     this._nameEl.style.cssText = `
       background: rgba(10,8,6,0.9);
@@ -88,7 +88,7 @@ export class DialogueBox {
     avatarWrap.appendChild(this._avatarEl);
     avatarWrap.appendChild(this._nameEl);
 
-    // ── 对话框 ────────────────────────────────────────────────────────
+    // ── Dialogue box ─────────────────────────────────────────────────
     const box = document.createElement('div');
     box.style.cssText = `
       background: rgba(10,8,6,0.93);
@@ -99,7 +99,7 @@ export class DialogueBox {
       cursor: pointer;
     `;
 
-    // 对话文字
+    // Dialogue text
     this._textEl = document.createElement('p');
     this._textEl.style.cssText = `
       font-family: 'Press Start 2P', monospace;
@@ -110,7 +110,7 @@ export class DialogueBox {
       min-height: 56px;
     `;
 
-    // 底部：页码 + 继续按钮
+    // Bottom: page number + continue button
     const footer = document.createElement('div');
     footer.style.cssText = `
       display: flex;
@@ -137,7 +137,7 @@ export class DialogueBox {
       cursor: pointer;
     `;
     this._btnEl.textContent = ' Continue >>';
-    // 点击整个对话框也可以推进
+    // Clicking the entire dialogue box can also advance
     this._btnEl.addEventListener('click', (e) => { e.stopPropagation(); this._next(); });
 
     footer.appendChild(this._pageEl);
@@ -153,13 +153,13 @@ export class DialogueBox {
     this._el = wrap;
   }
 
-  // ── 公开：显示对话 ──────────────────────────────────────────────────
+  // ── Public: show dialogue ──────────────────────────────────────────
   /**
    * @param {object} config
-   * @param {string} config.name      NPC 名字
-   * @param {string[]} config.lines   对话内容数组
-   * @param {string} [config.avatar]  头像 emoji 或图片 URL（可选）
-   * @param {Function} onDone         全部读完后的回调
+  * @param {string} config.name      NPC name
+  * @param {string[]} config.lines   Dialogue content array
+  * @param {string} [config.avatar]  Avatar emoji or image URL (optional)
+  * @param {Function} onDone         Callback after all lines are read
    */
   show(config, onDone) {
     this._lines = config.lines ?? [];
@@ -168,7 +168,7 @@ export class DialogueBox {
 
     this._nameEl.textContent = config.name ?? 'NPC';
 
-    // 头像：支持 emoji 字符串或图片 URL
+    // Avatar: supports emoji string or image URL
     if (config.avatar && config.avatar.startsWith('http')) {
       this._avatarEl.innerHTML = `<img src="${config.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
     } else {
@@ -179,12 +179,12 @@ export class DialogueBox {
     this._render();
   }
 
-  // ── 公开：隐藏 ─────────────────────────────────────────────────────
+  // ── Public: hide ──────────────────────────────────────────────────
   hide() {
     this._el.style.display = 'none';
   }
 
-  // ── 内部：渲染当前句子 ──────────────────────────────────────────────
+  // ── Internal: render current line ─────────────────────────────────
   _render() {
     const total = this._lines.length;
     const idx = this._current;
@@ -193,7 +193,7 @@ export class DialogueBox {
     this._btnEl.textContent = idx === total - 1 ? 'Start >' : 'Continue >';
   }
 
-  // ── 内部：推进到下一句 ──────────────────────────────────────────────
+  // ── Internal: advance to next line ────────────────────────────────
   _next() {
     this._current++;
     if (this._current >= this._lines.length) {

@@ -44,14 +44,14 @@ export class ChestAnimation {
 
       const rarityColor = RARITY_COLORS[item.rarity] || RARITY_COLORS.rare;
 
-      // ★ 新增变量 ★
+      // ★ New variables ★
       const isWeapon = Array.isArray(item?.skills) && item.skills.length > 0;
       let lidOffY = 0;
       let lidVelY = 0;
       let fireworks = [];
       let trinketSparkles = [];
       let forgeSparkles = [];
-      // ★ 新增结束 ★
+      // ★ End of new variables ★
 
       sketch.setup = function () {
         const canvas = sketch.createCanvas(W, H);
@@ -73,13 +73,13 @@ export class ChestAnimation {
             if (Math.abs(chestY - chestTargetY) < 2) { phase = 'shake'; timer = 0; }
             break;
           case 'shake':
-            // ★ 修改：更剧烈的抖动 ★
+            // ★ Modified: more intense shaking ★
             shakeOffset = Math.sin(timer * 35) * (10 + timer * 16);
             chestAngle = Math.sin(timer * 28) * 0.09;
             if (timer > 1.2) { phase = 'open'; timer = 0; spawnBurstParticles(); }
             break;
           case 'open':
-            // ★ 修改：盖子飞出屏幕 ★
+            // ★ Modified: lid flies out of the screen ★
             if (lidAngle < Math.PI * 0.75) {
               lidAngle += 0.09;
             } else {
@@ -92,12 +92,12 @@ export class ChestAnimation {
             if (timer > 0.3) spawnLightRays();
             if (timer > 1.5 && itemAlpha > 200) {
               phase = 'reveal'; timer = 0;
-              if (isWeapon) spawnFireworks(); // ★ 新增：武器触发烟花 ★
+              if (isWeapon) spawnFireworks(); // ★ New: weapons trigger fireworks ★
             }
             break;
           case 'reveal':
             textAlpha = Math.min(255, textAlpha + 6);
-            itemY += (cy - 160 - itemY) * 0.05; // ★ 修改：和 open 阶段目标一致 ★
+            itemY += (cy - 160 - itemY) * 0.05; // ★ Modified: same target as open phase ★
             if (timer > 0.8) { phase = 'idle'; canClose = true; }
             break;
           case 'idle': break;
@@ -135,7 +135,7 @@ export class ChestAnimation {
         }
 
         if (textAlpha > 0) {
-          // ★ 修改：文字固定在屏幕底部，不跟随 itemY，避免被箱子遮挡 ★
+          // ★ Modified: text fixed at the bottom of the screen, does not follow itemY, to avoid being covered by the chest ★
           sketch.push();
           const textBase = H - 175;
 
@@ -208,7 +208,7 @@ export class ChestAnimation {
         }
       }
 
-      // ★ 修改：改为闪电效果，范围更大 ★
+      // ★ Modified: changed to lightning effect, larger range ★
       function spawnLightRays() {
         if (lightRays.length < 20 && Math.random() < 0.7) {
           const endX = cx + (Math.random() - 0.5) * W * 0.95;
@@ -232,7 +232,7 @@ export class ChestAnimation {
           });
         }
       }
-      // ★ 修改结束 ★
+      // ★ End of modification ★
 
       function makeSparkle(bx, by, color) {
         return {
@@ -250,7 +250,7 @@ export class ChestAnimation {
       function spawnFireworks() {
         const fx = cx, fy = itemY;
 
-        // 第一轮：大范围扩散，品质颜色，数量大幅增加
+        // First round: large range spread, rarity color, greatly increased quantity
         for (let i = 0; i < 180; i++) {
           const angle = (Math.PI * 2 * i) / 180 + Math.random() * 0.2;
           const speed = 5 + Math.random() * 14;
@@ -265,7 +265,7 @@ export class ChestAnimation {
           });
         }
 
-        // 第二轮：内圈主色，慢速拖尾
+        // Second round: inner circle main color, slow trailing
         for (let i = 0; i < 100; i++) {
           const angle = Math.random() * Math.PI * 2;
           const speed = 2 + Math.random() * 7;
@@ -280,7 +280,7 @@ export class ChestAnimation {
           });
         }
 
-        // ★ 新增第三轮：白色闪光核心，极快扩散后迅速消失
+        // ★ New third round: white flash core, rapid spread and quick disappearance ★
         for (let i = 0; i < 60; i++) {
           const angle = Math.random() * Math.PI * 2;
           const speed = 8 + Math.random() * 18;
@@ -295,69 +295,69 @@ export class ChestAnimation {
           });
         }
       }
-// ★ 新增：生成单颗菱形星星 ★
+// ★ New: generate a single diamond star ★
       function spawnTrinketSparkle(originX, originY) {
-        // 随机散落在物品图标周围
+        // Randomly scattered around the item icon
         const spread = 90;
         const x = originX + (Math.random() - 0.5) * spread * 2;
         const y = originY + (Math.random() - 0.5) * spread;
         const size = 6 + Math.random() * 14;
-        const duration = 40 + Math.random() * 40; // 帧数
+        const duration = 40 + Math.random() * 40; // Frame count
         trinketSparkles.push({
           x, y, size,
           frame: 0,
           totalFrames: duration,
           color: rarityColor.main,
           glowColor: rarityColor.glow,
-          angle: Math.random() * Math.PI, // 旋转角度
+          angle: Math.random() * Math.PI, // Rotation angle
         });
       }
 
-// ★ 新增：更新并绘制所有菱形星星 ★
+// ★ New: update and draw all diamond stars ★
       function updateAndDrawTrinketSparkles(s, sparkles) {
         for (let i = sparkles.length - 1; i >= 0; i--) {
           const sp = sparkles[i];
           sp.frame++;
           if (sp.frame >= sp.totalFrames) { sparkles.splice(i, 1); continue; }
 
-          // 生命周期：0→0.5 渐入，0.5→1 渐出，中间最亮
+          // Life cycle: 0→0.5 fade in, 0.5→1 fade out, brightest in the middle
           const t = sp.frame / sp.totalFrames;
           const lifeAlpha = t < 0.5 ? t * 2 : (1 - t) * 2;
-          // 尺寸也随生命周期缩放：先大后小
+          // Size also scales with life cycle: large first then small
           const scale = 0.3 + Math.sin(t * Math.PI) * 0.7;
 
           s.push();
           s.translate(sp.x, sp.y);
-          s.rotate(sp.angle + t * 0.5); // 缓慢旋转
+          s.rotate(sp.angle + t * 0.5); // Slow rotation
 
           const sz = sp.size * scale;
           const alpha = Math.floor(lifeAlpha * 255);
 
-          // 外层发光晕
+          // Outer glow
           const glowC = s.color(sp.glowColor);
           glowC.setAlpha(alpha * 0.35);
           s.noStroke(); s.fill(glowC);
           drawDiamond(s, sz * 2.2);
 
-          // 主体菱形，品质颜色
+          // Main diamond, rarity color
           const mainC = s.color(sp.color);
           mainC.setAlpha(alpha * 0.85);
           s.fill(mainC);
           drawDiamond(s, sz);
 
-          // 内芯白色高光
+          // Inner white highlight
           const whiteC = s.color(255, 255, 255);
           whiteC.setAlpha(alpha);
           s.fill(whiteC);
           drawDiamond(s, sz * 0.35);
 
-          // 四个方向的细长光芒
+          // Four-direction slender rays
           s.stroke(255, 255, 255, alpha * 0.8);
           s.strokeWeight(1.2);
           const rayLen = sz * 1.8;
-          s.line(0, -rayLen, 0, rayLen);   // 竖
-          s.line(-rayLen, 0, rayLen, 0);   // 横
-          // 斜向细光芒（更短）
+          s.line(0, -rayLen, 0, rayLen);   // Vertical
+          s.line(-rayLen, 0, rayLen, 0);   // Horizontal
+          // Diagonal slender rays (shorter)
           const dRay = rayLen * 0.5;
           s.strokeWeight(0.7);
           s.line(-dRay, -dRay, dRay, dRay);
@@ -367,7 +367,7 @@ export class ChestAnimation {
         }
       }
 
-// ★ 新增：绘制菱形（以原点为中心）★
+// ★ New: draw diamond (centered at origin) ★
       function drawDiamond(s, size) {
         s.beginShape();
         s.vertex(0, -size);
@@ -377,11 +377,11 @@ export class ChestAnimation {
         s.endShape(s.CLOSE);
       }
 
-// ★ 新增：生成单颗锻造火花 ★
+// ★ New: generate a single forge spark ★
       function spawnForgeSpark(originX, originY) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 5 + Math.random() * 16;
-        // 颜色在金黄、橙红之间随机
+        // Color randomly between gold and orange-red
         const colors = ['#fbbf24', '#f59e0b', '#fb923c', '#fde68a', '#ff6b00'];
         const color = colors[Math.floor(Math.random() * colors.length)];
         forgeSparkles.push({
@@ -393,28 +393,28 @@ export class ChestAnimation {
           decay: 0.015 + Math.random() * 0.015,
           size: 4 + Math.random() * 9,
           color,
-          trail: [], // 拖尾记录
+          trail: [], // Trail record
         });
       }
 
-// ★ 新增：更新并绘制锻造火花 ★
+// ★ New: update and draw forge sparks ★
       function updateAndDrawForgeSparkles(s, sparks) {
         for (let i = sparks.length - 1; i >= 0; i--) {
           const sp = sparks[i];
 
-          // 记录拖尾位置（最多保留5个）
+          // Record trail positions (keep up to 5)
           sp.trail.push({ x: sp.x, y: sp.y });
           if (sp.trail.length > 5) sp.trail.shift();
 
           sp.x += sp.vx;
           sp.y += sp.vy;
-          sp.vy += 0.18; // 重力，让火花抛物线下落
-          sp.vx *= 0.96; // 空气阻力
+          sp.vy += 0.18; // Gravity, let the spark fall in a parabola
+          sp.vx *= 0.96; // Air resistance
           sp.life -= sp.decay;
 
           if (sp.life <= 0) { sparks.splice(i, 1); continue; }
 
-          // 绘制拖尾
+          // Draw trail
           for (let j = 0; j < sp.trail.length; j++) {
             const trailAlpha = (j / sp.trail.length) * sp.life * 160;
             const trailSize = sp.size * (j / sp.trail.length) * 0.6;
@@ -424,14 +424,14 @@ export class ChestAnimation {
             s.ellipse(sp.trail[j].x, sp.trail[j].y, trailSize, trailSize);
           }
 
-          // 绘制主体火花
+          // Draw main spark
           const alpha = sp.life * 255;
           const c = s.color(sp.color);
           c.setAlpha(alpha);
           s.noStroke(); s.fill(c);
           s.ellipse(sp.x, sp.y, sp.size, sp.size);
 
-          // 白色核心高光
+          // White core highlight
           const wc = s.color(255, 255, 255);
           wc.setAlpha(alpha * 0.7);
           s.fill(wc);
@@ -481,7 +481,7 @@ function drawChest(s, lidAngle, accentColor, lidOffY = 0) {
   s.ellipse(0, 0, 8, 8);
 
   s.push();
-  s.translate(0, -bh / 2 + lidOffY); // ★ 修改：加上飞出偏移 ★
+  s.translate(0, -bh / 2 + lidOffY); // ★ Modified: add fly-out offset ★
   s.rotate(-lidAngle);
 
   s.fill(110, 70, 30);

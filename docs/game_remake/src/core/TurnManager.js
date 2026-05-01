@@ -1,43 +1,43 @@
 // src/core/TurnManager.js
 // ══════════════════════════════════════════════════════════════════════════════
-// 回合管理器 - 集中管理回合计数和进度条
+// Turn Manager - Centralized management of turn count and progress bar
 //
-// 职责：
-//   1. 管理回合计数器 (turnCount, currentMaxTurns)
-//   2. 管理进度条UI (宽度、标题、危险状态)
-//   3. 处理任务开始/结束逻辑
-//   4. 提供存档/读档支持
-//   5. 与UI和GameController协调
+// Responsibilities:
+//   1. Manage turn counters (turnCount, currentMaxTurns)
+//   2. Manage progress bar UI (width, title, danger state)
+//   3. Handle task start/end logic
+//   4. Provide save/load support
+//   5. Coordinate with UI and GameController
 // 
-// 设计模式：关注点分离
-//   - GameController 调用 TurnManager 方法
-//   - TurnManager 通过传入的 UI 引用调用 UI 方法
-//   - TaskList 保持独立处理任务特定的逻辑
+// Design Pattern: Separation of concerns
+//   - GameController calls TurnManager methods
+//   - TurnManager calls UI methods via passed UI reference
+//   - TaskList remains independent for task-specific logic
 // ══════════════════════════════════════════════════════════════════════════════
 
 /**
- * 回合条 UI 文本常量 - 统一管理所有进度条相关文本
+ * Turn bar UI text constants - unified management of all progress bar related texts
  */
 export const PROGRESS_BAR_TEXTS = {
-  // 地图标题
+  // Map titles
   NOVICE_VILLAGE: '🏘️ Novice Village',
   MAIN_MAP: '🗺️ Explore the map',
   FIND_VILLAGE: 'Find Village',
   
-  // 任务/特殊标题格式
+  // Mission/special title format
   MISSION_PREFIX: '🎯 ',
   SEARCH_RUINS: '🎯 Search ruins',
   
-  // Boss 模式
+  // Boss mode
   BOSS_MODE_TITLE: 'Warning',
   BOSS_MODE_DESC: 'Complete the task as soon as possible!',
 };
 
 export class TurnManager {
   /**
-   * 构造函数
-   * @param {UIManager} ui - UIManager 的引用，用于更新进度条
-   * @param {number} initialMaxTurns - 初始回合上限
+   * Constructor
+   * @param {UIManager} ui - Reference to UIManager, used to update progress bar
+   * @param {number} initialMaxTurns - Initial turn limit
    */
   constructor(ui, initialMaxTurns = 20) {
     this.ui = ui;
@@ -46,15 +46,15 @@ export class TurnManager {
     this.currentMissionName = null;
     this._progressBarTitle = null;
     this.bossMode = false;
-    this._preBossModeTurns = null;  // ── 保存进入Boss模式前的回合上限 ──
+    this._preBossModeTurns = null;  // ── Save turn limit before entering Boss mode ──
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 回合计数管理
+  // Turn count management
   // ══════════════════════════════════════════════════════════════════════════
 
   /**
-   * 回合计数加 1 并更新进度条
+   * Increment turn count by 1 and update progress bar
    */
   incrementTurn() {
     this.turnCount += 1;
@@ -62,7 +62,7 @@ export class TurnManager {
   }
 
   /**
-   * 重置回合计数为 0
+   * Reset turn count to 0
    */
   resetTurnCount() {
     this.turnCount = 0;
@@ -70,8 +70,8 @@ export class TurnManager {
   }
 
   /**
-   * 设置回合计数为指定值
-   * @param {number} value - 新的回合计数
+   * Set turn count to specified value
+   * @param {number} value - New turn count
    */
   setTurnCount(value) {
     this.turnCount = Math.max(0, value);
@@ -79,15 +79,15 @@ export class TurnManager {
   }
 
   /**
-   * 检查是否达到回合上限
-   * @returns {boolean} 如果 turnCount >= currentMaxTurns 返回 true
+   * Check if turn limit is reached
+   * @returns {boolean} Returns true if turnCount >= currentMaxTurns
    */
   isTurnLimitReached() {
     return this.turnCount >= this.currentMaxTurns;
   }
 
   /**
-   * 获取剩余回合数
+   * Get remaining turns
    * @returns {number} currentMaxTurns - turnCount
    */
   getRemainingTurns() {
@@ -95,12 +95,12 @@ export class TurnManager {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 回合上限管理
+  // Turn limit management
   // ══════════════════════════════════════════════════════════════════════════
 
   /**
-   * 设置最大回合上限
-   * @param {number} maxTurns - 新的最大回合数
+   * Set maximum turn limit
+   * @param {number} maxTurns - New maximum number of turns
    */
   setMaxTurns(maxTurns) {
     this.currentMaxTurns = Math.max(1, maxTurns);
@@ -108,11 +108,11 @@ export class TurnManager {
   }
 
   /**
-   * 进入 Boss 模式（特殊的UI状态）
-   * @param {number} maxTurns - Boss 战斗的回合上限（默认 10）
+   * Enter Boss mode (special UI state)
+   * @param {number} maxTurns - Turn limit for Boss battle (default 10)
    */
   enterBossMode(maxTurns = 10) {
-    this._preBossModeTurns = this.currentMaxTurns;  // ── 保存Boss模式前的回合上限 ──
+    this._preBossModeTurns = this.currentMaxTurns;  // ── Save turn limit before Boss mode ──
     this.bossMode = true;
     this.currentMaxTurns = maxTurns;
     this.turnCount = 0;
@@ -121,32 +121,32 @@ export class TurnManager {
   }
 
   /**
-   * 退出 Boss 模式
+   * Exit Boss mode
    */
   exitBossMode() {
     this.bossMode = false;
-    this.turnCount = 0;  // ── 重置回合计数 ──
+    this.turnCount = 0;  // ── Reset turn count ──
     if (this._preBossModeTurns !== null) {
-      this.currentMaxTurns = this._preBossModeTurns;  // ── 恢复Boss模式前的回合上限 ──
+      this.currentMaxTurns = this._preBossModeTurns;  // ── Restore turn limit before Boss mode ──
       this._preBossModeTurns = null;
     }
     
-    // ── 确保进度条完全恢复到正常状态 ──
-    this.ui.setProgressBarNormal();  // ── 移除critical样式、闪烁效果、红色背景 ──
-    this._restoreProgressBarTitle();  // ── 恢复原始标题 ──
+    // ── Ensure progress bar is fully restored to normal state ──
+    this.ui.setProgressBarNormal();  // ── Remove critical style, blinking effect, red background ──
+    this._restoreProgressBarTitle();  // ── Restore original title ──
     
-    // ── 强制更新进度条显示，包括描述文字 ──
+    // ── Force update of progress bar display, including description text ──
     this.ui.updateProgressBar(this.turnCount, this.currentMaxTurns);
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 任务管理
+  // Mission management
   // ══════════════════════════════════════════════════════════════════════════
 
   /**
-   * 启动新任务并设置自定义回合上限
-   * @param {string} missionName - 任务名称
-   * @param {number} maxTurns - 该任务的回合上限
+   * Start a new mission and set custom turn limit
+   * @param {string} missionName - Mission name
+   * @param {number} maxTurns - Turn limit for this mission
    */
   startMission(missionName, maxTurns = 5) {
     this.currentMissionName = missionName;
@@ -154,23 +154,23 @@ export class TurnManager {
     this.currentMaxTurns = maxTurns;
     this.bossMode = false;
 
-    // ──更新UI──
+    // ──Update UI──
     this.ui.updateProgressBar(0, maxTurns);
     this.setProgressBarTitle(PROGRESS_BAR_TEXTS.MISSION_PREFIX + missionName);
   }
 
   /**
-   * 结束当前任务并恢复视图
+   * End current mission and restore view
    */
   endMission() {
     this.currentMissionName = null;
-    this.exitBossMode();  // ── 清除 Boss 模式状态 ──
+    this.exitBossMode();  // ── Clear Boss mode state ──
     this._restoreProgressBarTitle();
   }
 
   /**
-   * 清除 Boss 模式相关的所有惩罚状态（需要由 GameController 调用）
-   * @param {GameController} gameController - 游戏控制器引用
+   * Clear all penalty states related to Boss mode (should be called by GameController)
+   * @param {GameController} gameController - Reference to game controller
    */
   clearBossPenalty(gameController) {
     if (gameController) {
@@ -180,16 +180,16 @@ export class TurnManager {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 进度条UI控制
+  // Progress bar UI control
   // ══════════════════════════════════════════════════════════════════════════
 
   /**
-   * 内部方法：更新进度条视觉效果
+   * Internal method: update progress bar visual effect
    */
   _updateProgressBar() {
     this.ui.updateProgressBar(this.turnCount, this.currentMaxTurns);
     
-    // ──只在达到回合上限时触发临界状态──
+    // ──Only trigger critical state when turn limit is reached──
     if (this.turnCount >= this.currentMaxTurns && !this.bossMode) {
       this.ui.setProgressBarCritical();
     } else {
@@ -198,8 +198,8 @@ export class TurnManager {
   }
 
   /**
-   * 设置进度条标题（例如："🏘️ Novice Village"）
-   * @param {string} title - 新标题
+   * Set progress bar title (e.g., "🏘️ Novice Village")
+   * @param {string} title - New title
    */
   setProgressBarTitle(title) {
     this._progressBarTitle = title;
@@ -207,9 +207,9 @@ export class TurnManager {
   }
 
   /**
-   * 根据当前上下文恢复默认进度条标题
+   * Restore default progress bar title based on current context
    * @param {string} contextType - 'novice' | 'main' | 'custom'
-   * @param {string} customTitle - 当 contextType 为 'custom' 时的自定义标题
+   * @param {string} customTitle - Custom title when contextType is 'custom'
    */
   restoreProgressBarTitle(contextType = 'novice', customTitle = null) {
     let title = PROGRESS_BAR_TEXTS.NOVICE_VILLAGE;
@@ -224,10 +224,10 @@ export class TurnManager {
   }
 
   /**
-   * 内部方法：恢复进度条标题（私有）
+   * Internal method: restore progress bar title (private)
    */
   _restoreProgressBarTitle() {
-    // ──根据当前上下文恢复──
+    // ──Restore based on current context──
     if (this.currentMissionName) {
       this.setProgressBarTitle(`🎯 ${this.currentMissionName}`);
     } else {
@@ -236,34 +236,34 @@ export class TurnManager {
   }
 
   /**
-   * 显示游戏结束画面
-   * @param {string} message - 游戏结束消息
+   * Show game over screen
+   * @param {string} message - Game over message
    */
   showGameOver(message) {
     this.ui.showGameOver(message);
   }
 
   /**
-   * 手动将进度条设置为危险状态
+   * Manually set progress bar to critical state
    */
   setCritical() {
     this.ui.setProgressBarCritical();
   }
 
   /**
-   * 手动将进度条设置为正常状态
+   * Manually set progress bar to normal state
    */
   setNormal() {
     this.ui.setProgressBarNormal();
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 存档/读档支持
+  // Save/Load support
   // ══════════════════════════════════════════════════════════════════════════
 
   /**
-   * 序列化回合状态用于保存
-   * @returns {Object} 序列化的状态
+   * Serialize turn state for saving
+   * @returns {Object} Serialized state
    */
   serialize() {
     return {
@@ -277,8 +277,8 @@ export class TurnManager {
   }
 
   /**
-   * 从保存文件反序列化回合状态
-   * @param {Object} data - 序列化的状态
+   * Deserialize turn state from save file
+   * @param {Object} data - Serialized state
    */
   deserialize(data) {
     if (data.turnCount !== undefined) this.turnCount = data.turnCount;
@@ -288,7 +288,7 @@ export class TurnManager {
     if (data._progressBarTitle !== undefined) this._progressBarTitle = data._progressBarTitle;
     if (data._preBossModeTurns !== undefined) this._preBossModeTurns = data._preBossModeTurns;
     
-    // ──刷新UI──
+    // ──Refresh UI──
     this._updateProgressBar();
     if (this._progressBarTitle) {
       this.ui.updateProgressBarTitle(this._progressBarTitle);
@@ -296,36 +296,36 @@ export class TurnManager {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // 工具方法
+  // Utility methods
   // ══════════════════════════════════════════════════════════════════════════
 
   /**
-   * 获取回合状态字符串
-   * @returns {string} 例如："Turn 5/20"
+   * Get turn status string
+   * @returns {string} e.g., "Turn 5/20"
    */
   getStatusString() {
     return `Turn ${this.turnCount}/${this.currentMaxTurns}`;
   }
 
   /**
-   * 检查是否处于 Boss 模式
-   * @returns {boolean} 如果在 Boss 战斗中返回 true
+   * Check if in Boss mode
+   * @returns {boolean} Returns true if in Boss battle
    */
   isInBossMode() {
     return this.bossMode;
   }
 
   /**
-   * 检查是否处于任务中
-   * @returns {boolean} 如果任务激活返回 true
+   * Check if on a mission
+   * @returns {boolean} Returns true if mission is active
    */
   isOnMission() {
     return this.currentMissionName !== null;
   }
 
   /**
-   * 获取当前任务名称
-   * @returns {string|null} 任务名称或 null
+   * Get current mission name
+   * @returns {string|null} Mission name or null
    */
   getCurrentMission() {
     return this.currentMissionName;

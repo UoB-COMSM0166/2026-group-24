@@ -46,7 +46,7 @@ export class UIManager {
 
     ctx.clearRect(0, 0, width, height);
 
-    // --- 在这里定义每个英雄的微调参数 ---
+    // --- Define fine-tuning parameters for each hero here ---
     const configs = {
         'wizard': { width: 220, height: 220, offsetX: 20, offsetY: -10, frameCount: 6 },
         'knight': { width: 272, height: 250, offsetX: 2, offsetY: -120 },
@@ -61,7 +61,7 @@ export class UIManager {
     const renderWidth = heroId === 'wizard' ? drawWidth : Math.round(drawWidth * 1.08);
     const renderHeight = drawHeight;
     const drawSize = heroId === 'wizard' ? drawWidth : renderWidth;
-    // 居中计算公式：(画布宽度 - 绘制宽度) / 2 + 偏移量
+    // Center calculation formula: (canvas width - draw width) / 2 + offset
     const dx = (width - renderWidth) / 2 + cfg.offsetX;
     const dy = (height - renderHeight) / 2 + cfg.offsetY;
 
@@ -159,7 +159,7 @@ export class UIManager {
     charConfirmBtn.disabled = true;
     charSelectedInfo.innerText = 'Please select 2 heroes';
 
-    // 设置难度按钮
+    // Set difficulty buttons
     if (difficultyButtons) {
       const buttons = difficultyButtons.querySelectorAll('.difficulty-btn');
       buttons.forEach(btn => {
@@ -418,9 +418,9 @@ export class UIManager {
     this.els.storyTitle.textContent = title;
     this.els.storyScreen.style.display = 'flex';
 
-    // 分割文本成页面（按行分割，每页最多显示约3-4行）
+    // Split text into pages (split by line, up to about 3-4 lines per page)
     const lines = text.split('\n').filter(line => line.trim());
-    const linesPerPage = 3; // 每页显示3行
+    const linesPerPage = 3; // Show 3 lines per page
     let currentPage = 0;
     let totalPages = Math.ceil(lines.length / linesPerPage);
 
@@ -432,7 +432,7 @@ export class UIManager {
       this.els.storyText.textContent = pageLines.join('\n');
       this.els.storyPage.textContent = `${currentPage + 1} / ${totalPages}`;
       
-      // 更新按钮文字
+      // Update button text
       if (currentPage === totalPages - 1) {
         this.els.storyNextBtn.textContent = 'Start >';
       } else {
@@ -440,7 +440,7 @@ export class UIManager {
       }
     };
 
-    // 处理按钮点击
+    // Handle button click
     this.els.storyNextBtn.onclick = () => {
       currentPage++;
       if (currentPage >= totalPages) {
@@ -451,7 +451,7 @@ export class UIManager {
       }
     };
 
-    // 显示第一页
+    // Show first page
     showPage();
   }
 
@@ -463,11 +463,11 @@ export class UIManager {
   }
 
   /**
-   * 显示分段故事（带背景图和对话框UI风格）
-   * @param {string} title - 故事标题
-   * @param {Array} segments - 分段数组，每个包含 { text, backgroundImage }
-   * @param {Function} onComplete - 故事完成后的回调
-   * @param {string} avatar - 头像键名（可选）
+   * Show segmented story (with background image and dialogue box UI style)
+   * @param {string} title - Story title
+   * @param {Array} segments - Array of segments, each contains { text, backgroundImage }
+   * @param {Function} onComplete - Callback after story is complete
+   * @param {string} avatar - Avatar key (optional)
    */
   showSegmentedStory(title, segments, onComplete = null, avatar = null) {
     const { DataLoader } = window;

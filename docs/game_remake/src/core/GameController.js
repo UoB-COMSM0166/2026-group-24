@@ -31,28 +31,28 @@ export class GameController {
     this.combatManager = null;
     this.currentBossContent = null;
     
-    // ── 使用 TurnManager 集中管理回合条、任务栏、进度显示 ────────────────
+    // ── Use TurnManager to centrally manage turn bar, task bar, and progress display ────────────────
     this.turnManager = new TurnManager(ui, TurnConfig.MAX_TURNS);
     
     this.trapCooldown = 0;
     this.bossModePenaltyActive = false;
     this.bossModePenaltyWarned = false;
     this.merchantEncountered = false;
-    this.villageQuestAccepted = false;  // ── 追踪村庄任务是否已被接受 ──
-    this.villageRestUsed = false;  // ── 追踪村庄Rest是否已被使用 ──
+    this.villageQuestAccepted = false;  // ── Track whether the village quest has been accepted ──
+    this.villageRestUsed = false;  // ── Track whether village Rest has been used ──
     this._isMoving = false;
     this.isDevMode = false;
     this.rangeHighlight = null;
     this.gold = 0;
-    // ── 两步移动新增状态 ──────────────────────────────────────────
-    this.pendingPath = null;      // A* 算出的待确认路径
-    this.pendingTarget = null;    // 待确认目标格 {q, r}
-    this.pathHighlight = null;    // 路径格 Set<"q,r">，供 Renderer 绘制
+    // ── New state for two-step movement ──────────────────────────────────────────
+    this.pendingPath = null;      // Pending path calculated by A*
+    this.pendingTarget = null;    // Pending target cell {q, r}
+    this.pathHighlight = null;    // Path cell Set<"q,r">, for Renderer drawing
     // ─────────────────────────────────────────────────────────────
-    // ── 固定事件触发跟踪：防止重复触发 ────────────────────────────────
-    this.triggeredFixedEvents = new Set();  // 存储已触发过的固定事件坐标，格式："q,r"
-    // ── 特殊事件怪物战斗跟踪 ──────────────────────────────────────────
-    this.hasDefeatedSpecialEventMonster = false;  // 是否击败过特殊事件怪物
+    // ── Fixed event trigger tracking: prevent repeated triggers ────────────────────────────────
+    this.triggeredFixedEvents = new Set();  // Store coordinates of triggered fixed events, format: "q,r"
+    // ── Special event monster battle tracking ──────────────────────────────────────────
+    this.hasDefeatedSpecialEventMonster = false;  // Whether special event monster has been defeated
     // ─────────────────────────────────────────────────────────────
     this.gameStory = new GameStory(ui);
     this.fsm = new StateMachine(GameState.INITIALIZING);
@@ -60,7 +60,7 @@ export class GameController {
   }
 
   // ─────────────────────────────────────────────────────────────────────
-  // 向后兼容性代理：保留原属性名称指向 TurnManager
+  // Backward compatibility proxy: keep original property names pointing to TurnManager
   // ─────────────────────────────────────────────────────────────────────
   get turnCount() { return this.turnManager.turnCount; }
   set turnCount(val) { this.turnManager.setTurnCount(val); }
@@ -79,7 +79,7 @@ export class GameController {
       enter: () => this.ui.showCharacterSelect((heroes, difficulty) => {
         this.selectedHeroes = heroes.map(d => this._createHeroFromData(d));
         this.difficulty = (difficulty || 'normal').toLowerCase();
-        // 开发者模式跳过剧情，直接进地图生成
+        // Developer mode skips story, directly enters map generation
         if (this.isDevMode) {
           this.fsm.transition(GameState.MAP_GENERATION);
         } else {
@@ -96,23 +96,23 @@ export class GameController {
 
     this.fsm.addState(GameState.MAP_GENERATION, {
       enter: () => this.ui.showMapGeneration(this.selectedHeroes, () => {
-        // 主地图 & 新手村
+        // Main map & Novice Village
         this.map = createMapByPreset('main');
         this.noviceVillage = createMapByPreset('novice');
 
-        // 出生地坐标
+        // Birth coordinates
         const mainQ = -MapPresets.main.radius + 1;
         const mainR = MapPresets.main.radius - 1;
         const noviceQ = -MapPresets.novice.radius + 1;
         const noviceR = MapPresets.novice.radius - 1;
 
-        // ── 强制出生格为草地，防止随机地形导致无法行走 ──────────────
+        // ── Force spawn tile to be grass to prevent random terrain from blocking movement ──────────────
         const mainSpawnTile = this.map.getTile(mainQ, mainR);
         if (mainSpawnTile) mainSpawnTile.type = TileType.GRASS;
         const noviceSpawnTile = this.noviceVillage.getTile(noviceQ, noviceR);
         if (noviceSpawnTile) noviceSpawnTile.type = TileType.GRASS;
 
-        // ── 强制所有固定事件坐标为草地，防止被山脉/森林挤占 ─────────────
+        // ── Force all fixed event coordinates to be grass to prevent them from being occupied by mountains/forests ─────────────
         const ensureGrass = (map, items) => {
           items?.forEach(item => {
             const targetMap = item.map === 'main' ? this.map : this.noviceVillage;
@@ -126,122 +126,122 @@ export class GameController {
         ensureGrass(this.map, RUIN_LIST);
         ensureGrass(this.map, CORRUPTED_DEER_LIST);
 
-        // 主地图传送阵指向新手村
+        // Main map portal points to Novice Village
         this.map.placeContent(mainQ, mainR, makePortal('Novice Village', noviceQ, noviceR), 0);
-        // 新手村开局传送阵已删除，任务完成后会动态创建
+        // The initial portal in Novice Village is removed and will be created dynamically after the quest is completed
 
-        // 批量放置 NPC
+        // Batch place NPCs
         for (const npc of NPC_LIST) {
           const targetMap = npc.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(npc.q, npc.r);
           if (tile && tile.type === TileType.GRASS) {
-            tile.isFixedEvent = true;  // 先标记为固定事件，这样 placeContent 中的 revealAround 不会揭示它
+            tile.isFixedEvent = true;  // Mark as fixed event first so revealAround in placeContent won't reveal it
             let content;
             if (npc.name === 'INJURED VILLAGER') {
               content = makeInjuredVillager(npc.name, npc.dialogue);
             } else {
               content = makeNPC(npc.name, npc.dialogue, npc.options || {});
             }
-            // 🎮 强制覆盖已有的随机事件
+            // 🎮 Force overwrite existing random events
             tile.content = content;
-            // ── 启用闪烁效果 ────────────────────────────────────────
+            // ── Enable blinking effect ────────────────────────────────────────
             tile.isBlinking = true;
             tile.blinkStartTime = performance.now();
           }
         }
 
-        // 批量放置村庄
+        // Batch place villages
         for (const village of VILLAGE_LIST) {
           const targetMap = village.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(village.q, village.r);
           if (tile && tile.type === TileType.GRASS) {
-            tile.isFixedEvent = true;  // 先标记为固定事件
-            // 🎮 强制覆盖已有的随机事件
+            tile.isFixedEvent = true;  // Mark as fixed event first
+            // 🎮 Force overwrite existing random events
             tile.content = makeVillage(village.name);
-            // ── 启用闪烁效果 ────────────────────────────────────────
+            // ── Enable blinking effect ────────────────────────────────────────
             tile.isBlinking = true;
             tile.blinkStartTime = performance.now();
           }
         }
 
-        // 批量放置商人
+        // Batch place merchants
         for (const merchant of MERCHANT_LIST) {
           const targetMap = merchant.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(merchant.q, merchant.r);
           if (tile && tile.type === TileType.GRASS) {
-            tile.isFixedEvent = true;  // 先标记为固定事件
-            // 🎮 强制覆盖已有的随机事件
+            tile.isFixedEvent = true;  // Mark as fixed event first
+            // 🎮 Force overwrite existing random events
             tile.content = makeMerchant(merchant.name);
-            // ── 启用闪烁效果 ────────────────────────────────────────
+            // ── Enable blinking effect ────────────────────────────────────────
             tile.isBlinking = true;
             tile.blinkStartTime = performance.now();
           }
         }
 
-        // 批量放置遗迹
+        // Batch place ruins
         for (const ruin of RUIN_LIST) {
           const targetMap = ruin.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(ruin.q, ruin.r);
           if (tile && tile.type === TileType.GRASS) {
-            tile.isFixedEvent = true;  // 先标记为固定事件
+            tile.isFixedEvent = true;  // Mark as fixed event first
             const content = makeRuin(ruin.name, ruin.enemyName);
             content.description = ruin.description;
             content.postCombatMessage = ruin.postCombatMessage;
             content.monsterType = ruin.monsterType;  // 🎮 Copy monster type for specific encounters
             if (ruin.contentImageType) {
-              content.contentImageType = ruin.contentImageType;  // 🎮 自定义贴图类型
+              content.contentImageType = ruin.contentImageType;  // 🎮 Custom image type
             }
             if (ruin.isEndGame) {
-              content.isEndGame = ruin.isEndGame;  // 🎮 标记为结局事件
+              content.isEndGame = ruin.isEndGame;  // 🎮 Mark as endgame event
             }
-            // 🎮 强制覆盖已有的随机事件
-            tile.content = content;  // 直接覆盖，而不是用 placeContent
-            // ── 启用闪烁效果 ────────────────────────────────────────
+            // 🎮 Force overwrite existing random events
+            tile.content = content;  // Overwrite directly instead of using placeContent
+            // ── Enable blinking effect ────────────────────────────────────────
             tile.isBlinking = true;
             tile.blinkStartTime = performance.now();
           }
         }
 
-        // 批量放置被腐化的鹿
+        // Batch place corrupted deer
         for (const deer of CORRUPTED_DEER_LIST) {
           const targetMap = deer.map === 'main' ? this.map : this.noviceVillage;
           const tile = targetMap.getTile(deer.q, deer.r);
           if (tile && tile.type === TileType.GRASS) {
-            tile.isFixedEvent = true;  // 先标记为固定事件
-            // 🎮 强制覆盖已有的随机事件
+            tile.isFixedEvent = true;  // Mark as fixed event first
+            // 🎮 Force overwrite existing random events
             tile.content = makeCorruptedDeer(deer.name, deer.monsterType);
-            // ── 腐化鹿事件不闪烁 ────────────────────────────────────
+            // ── Corrupted deer events do not blink ────────────────────────────────────
           }
         }
 
-        // 批量放置主世界地牢（确保地牢数量不少于10个）
+        // Batch place main world dungeons (ensure at least 10 dungeons)
         for (const dungeon of MAIN_DUNGEON_LIST) {
           const tile = this.map.getTile(dungeon.q, dungeon.r);
           if (tile && tile.type === TileType.GRASS) {
-            tile.isFixedEvent = true;  // 先标记为固定事件
-            // 🎮 强制覆盖已有的随机事件
+            tile.isFixedEvent = true;  // Mark as fixed event first
+            // 🎮 Force overwrite existing random events
             tile.content = makeDungeon(dungeon.name, dungeon.level, dungeon.difficulty);
-            // ── 地牢事件不闪烁 ────────────────────────────────────
+            // ── Dungeon events do not blink ────────────────────────────────────
           }
         }
 
-        // 🎮 锁定解锁链中的格子（除了第一个） - 在所有内容放置后进行此操作
+        // 🎮 Lock cells in the unlock chain (except the first one) - do this after all content is placed
         for (let i = 1; i < UNLOCK_CHAIN.length; i++) {
           const event = UNLOCK_CHAIN[i];
           const tile = this.map.getTile(event.q, event.r);
           if (tile) {
-            // 改为山脉，使其无法到达
+            // Change to mountain so it cannot be reached
             tile.type = TileType.MOUNTAIN;
-            tile.content = null;  // 清除事件内容
+            tile.content = null;  // Clear event content
             console.log(`🎮 锁定事件格子 (${event.q}, ${event.r}) - ${event.name}`);
           }
         }
 
-        // 玩家出生位置：dev 模式直接生成在主世界，否则在新手村
+        // Player spawn location: dev mode spawns directly in main world, otherwise in Novice Village
         if (this.isDevMode) {
           this.currentMapName = 'Main Map';
           this.player.setGridPos(mainQ, mainR, this.map);
-          // Dev 模式：全屏视野
+          // Dev mode: full screen vision
           this.map.revealAround(mainQ, mainR, 100);
         } else {
           this.currentMapName = 'Novice Village';
@@ -300,7 +300,7 @@ export class GameController {
           }
         }
 
-        // ── 启动教程系统 ────────────────────────────────────────
+        // ── Start tutorial system ────────────────────────────────────────
         if (!this.isDevMode) {
           this.tutorial = new TutorialManager(this);
         }
@@ -314,15 +314,15 @@ export class GameController {
       enter: () => {
         this.ui.showMapUI();
         
-        // ── 只在首次进入地图或明确需要时才重置回合 ──────────────────────────
-        // 从 COMBAT 返回时不应该重置（保持战前的回合数）
+        // ── Only reset turn count on first entering map or when explicitly needed ──────────────────────────
+        // Should not reset when returning from COMBAT (keep pre-combat turn count)
         const prevState = this.fsm._previousState;
         if (prevState !== GameState.COMBAT) {
           this.turnManager.resetTurnCount();
         }
         
-        // 根据当前地图设置进度条标题
-        // ── 如果有当前任务，不要重置标题 ──────────────────────────────
+        // Set progress bar title based on current map
+        // ── If there is a current mission, do not reset the title ──────────────────────────────
         if (!this.turnManager.currentMissionName) {
           if (this.currentMapName === 'Novice Village') {
             this.turnManager.restoreProgressBarTitle('novice');
@@ -341,7 +341,7 @@ export class GameController {
         this._exitCombat();
         this.ui.updatePartyStatus(this.selectedHeroes);
         if (won) {
-          // ── 检查是否在特殊事件坐标击败怪物 ────────────────────────────
+          // ── Check if monster was defeated at special event coordinates ────────────────────────────
           const SPECIAL_EVENT_COORDS = [
             { q: 6, r: 0 },
             { q: 6, r: 1 },
@@ -359,18 +359,18 @@ export class GameController {
           this.gold = (this.gold ?? 0) + goldGained;
           this.ui.updateGold?.(this.gold);
 
-          // 先显示战斗后的故事对话（如果存在）
+          // Show post-combat story dialogue first (if exists)
           if (this.currentBossContent?.postCombatMessage) {
             const msg = this.currentBossContent.postCombatMessage;
-            // 🎮 保存 isEndGame 标志，因为回调执行时 currentBossContent 可能已被清空
+            // 🎮 Save isEndGame flag because currentBossContent may be cleared when callback executes
             const isEndGame = this.currentBossContent?.isEndGame;
             console.log('🎮 战斗胜利，当前 isEndGame=', isEndGame, 'postCombatMessage=', msg);
             
-            // 处理新的故事对话框格式（带图片）
+            // Handle new story dialogue box format (with images)
             if (msg.type === 'storyDialogue' && msg.scenes) {
               this.ui.storyDialogueBox.show({ scenes: msg.scenes }, () => {
                 console.log('🎮 故事对话完成，isEndGame=', isEndGame);
-                // 🎮 如果是结局事件，故事对话后直接返回主界面
+                // 🎮 If it's an endgame event, return to main screen after story dialogue
                 if (isEndGame) {
                   console.log('🎮 执行返回主界面');
                   setTimeout(() => {
@@ -378,10 +378,10 @@ export class GameController {
                   }, 300);
                 } else {
                   setTimeout(() => {
-                    console.log(`🎮 [storyDialogue] 显示宝箱奖励`);
+                    console.log(`🎮 [storyDialogue] Show chest reward`);
                     this.ui.showChestReward(loot, () => {
-                      console.log(`🎮 [storyDialogue] 宝箱关闭回调，调用解锁处理`);
-                      this._handlePostCombatUnlock();  // 🎮 在宝箱关闭时调用
+                      console.log(`🎮 [storyDialogue] Chest close callback, call unlock handler`);
+                      this._handlePostCombatUnlock();  // 🎮 Call unlock handler when chest closes
                       setTimeout(() => {
                         this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
                           const hero = this.selectedHeroes?.[heroIndex];
@@ -412,7 +412,7 @@ export class GameController {
                 }
               });
             } 
-            // 处理传统的文字对话框格式
+            // Handle traditional text dialogue box format
             else {
               console.log(`🎮 显示传统对话框格式的 postCombatMessage`);
               this.ui.showEvent(
@@ -420,18 +420,18 @@ export class GameController {
                 typeof msg === 'string' ? msg : msg,
                 [{
                   text: 'Continue', onClick: () => {
-                    console.log(`🎮 战斗后对话 Continue 被点击，isEndGame=${isEndGame}`);
-                    // 🎮 如果是结局事件，故事对话后直接返回主界面
+                    console.log(`🎮 Post-combat dialogue Continue clicked, isEndGame=${isEndGame}`);
+                    // 🎮 If it's an endgame event, return to main screen after story dialogue
                     if (isEndGame) {
                       setTimeout(() => {
                         this.fsm.transition(GameState.CHARACTER_SELECT);
                       }, 300);
                     } else {
                       setTimeout(() => {
-                        console.log(`🎮 显示宝箱奖励`);
+                        console.log(`🎮 Show chest reward`);
                         this.ui.showChestReward(loot, () => {
-                          console.log(`🎮 宝箱关闭回调，调用解锁处理`);
-                          // 🎮 宝箱关闭时处理解锁链
+                          console.log(`🎮 Chest close callback, call unlock handler`);
+                          // 🎮 Handle unlock chain when chest closes
                           this._handlePostCombatUnlock();
                           setTimeout(() => {
                             this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
@@ -469,7 +469,7 @@ export class GameController {
           } else {
             setTimeout(() => {
               this.ui.showChestReward(loot, () => {
-                // 🎮 宝箱关闭时处理解锁链
+                // 🎮 Handle unlock chain when chest closes
                 this._handlePostCombatUnlock();
                 setTimeout(() => {
                   this.ui.showLootAssign(loot, this.selectedHeroes, ({ heroIndex, action }) => {
@@ -513,10 +513,10 @@ export class GameController {
 
   _enterCombat(contentData) {
     this.currentBossContent = contentData;
-    // 🎮 保存战斗位置用于解锁链
+    // 🎮 Save combat location for unlock chain
     this.combatLocationQ = this.player.q;
     this.combatLocationR = this.player.r;
-    console.log(`🎮 进入战斗，位置: (${this.combatLocationQ}, ${this.combatLocationR})`);
+    console.log(`🎮 Entering combat, location: (${this.combatLocationQ}, ${this.combatLocationR})`);
     const isBoss = contentData.type === TileContentType.BOSS || contentData.type === 'boss';
     const level = contentData.level ?? 1;
 
@@ -605,9 +605,9 @@ export class GameController {
 
     if (this.isDevMode) {
       const enemyKeys = Object.keys(ENEMY_TYPES);
-      const selected = [];   // 已选中的 key 列表，最多3个
+      const selected = [];   // List of selected keys, up to 3
 
-      // ── 创建 overlay 容器 ────────────────────────────────────────
+      // ── Create overlay container ────────────────────────────────────────
       const overlay = document.createElement('div');
       overlay.style.cssText = `
     position: fixed; inset: 0; background: rgba(0,0,0,0.75);
@@ -623,29 +623,29 @@ export class GameController {
     color: white;
   `;
 
-      // 标题
+      // Title
       const title = document.createElement('div');
       title.style.cssText = 'font-size: 15px; font-weight: bold; color: #fbbf24; letter-spacing: 0.05em;';
-      title.textContent = `🛠️ Dev：选择上场敌人（最多3个，Level ${level}）`;
+      title.textContent = `🛠️ Dev: Select Enemies (up to 3, Level ${level})`;
 
-      // 已选列表显示
+      // Display selected list
       const selectedInfo = document.createElement('div');
       selectedInfo.style.cssText = 'font-size: 12px; color: #aaa; min-height: 18px;';
       const refreshInfo = () => {
         selectedInfo.textContent = selected.length === 0
-            ? '尚未选择任何敌人'
-            : '已选：' + selected.map(k => ENEMY_TYPES[k].name).join(' / ');
+          ? 'No enemies selected yet'
+          : 'Selected: ' + selected.map(k => ENEMY_TYPES[k].name).join(' / ');
       };
       refreshInfo();
 
-      // 敌人按钮列表（可滚动）
+      // Enemy button list (scrollable)
       const list = document.createElement('div');
       list.style.cssText = `
     display: flex; flex-direction: column; gap: 8px;
     overflow-y: auto; max-height: 340px; padding-right: 4px;
   `;
 
-      const btnMap = {};  // key -> button element，方便刷新样式
+      const btnMap = {};  // key -> button element, for refreshing style
 
       const refreshBtnStyle = (key) => {
         const btn = btnMap[key];
@@ -669,9 +669,9 @@ export class GameController {
         btn.onclick = () => {
           const idx = selected.indexOf(key);
           if (idx !== -1) {
-            selected.splice(idx, 1);   // 取消选择
+            selected.splice(idx, 1);   // Deselect
           } else if (selected.length < 3) {
-            selected.push(key);        // 添加选择
+            selected.push(key);        // Add selection
           }
           refreshBtnStyle(key);
           refreshInfo();
@@ -682,12 +682,12 @@ export class GameController {
         list.appendChild(btn);
       });
 
-      // 底部按钮行
+      // Bottom button row
       const footer = document.createElement('div');
       footer.style.cssText = 'display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px;';
 
       const randomBtn = document.createElement('button');
-      randomBtn.textContent = '🎲 随机';
+      randomBtn.textContent = '🎲 Random';
       randomBtn.style.cssText = `
     padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 13px;
     border: 1px solid rgba(255,255,255,0.25); background: transparent; color: #d1d5db;
@@ -796,7 +796,7 @@ export class GameController {
 
     if (this.trapCooldown > 0) this.trapCooldown--;
 
-    // Boss 惩罚阶段：每回合扣除英雄最大血量的 5%
+    // Boss penalty phase: deduct 5% of each hero's max HP per turn
     if (this.bossModePenaltyActive) {
       let totalDamage = 0;
       for (const hero of this.selectedHeroes) {

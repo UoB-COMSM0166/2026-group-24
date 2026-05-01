@@ -309,12 +309,12 @@ export class TutorialManager {
   // Callback when mission is switched (auto transition)
   // ══════════════════════════════════════════════════════════════════
   _onMissionSwitch(missionName) {
-    // ── 任务切换时，清除 Boss 模式惩罚状态 ──────────────────────────────
+
     this.gc.bossModePenaltyActive = false;
     this.gc.bossModePenaltyWarned = false;
-    this.gc.turnManager.clearBossPenalty(this.gc);  // ── 额外确保清除 ──
+    this.gc.turnManager.clearBossPenalty(this.gc);  
 
-    // ── 获取新任务的回合限制，并调用 _startMission 重置进度条 ────────────────
+
     const maxTurns = this.taskList.getMissionMaxTurns();
     this.gc._startMission(missionName, maxTurns);
   }

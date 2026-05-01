@@ -1,5 +1,5 @@
 // src/ui/TitleScreen.js
-// 采用 p5.js 绘制像素奇幻风背景，叠加 HTML/CSS 响应式 UI 菜单
+// Use p5.js to draw a pixel fantasy style background, overlay with HTML/CSS responsive UI menu
 
 export class TitleScreen {
   constructor(onStart, onContinue, onDevMode) {
@@ -14,7 +14,7 @@ export class TitleScreen {
   show() {
     const onStart = this.onStart;
     
-    // 1. 引入像素字体 (Google Fonts: Press Start 2P)
+    // 1. Import pixel font (Google Fonts: Press Start 2P)
     if (!document.getElementById('pixel-font')) {
       const fontLink = document.createElement('link');
       fontLink.id = 'pixel-font';
@@ -23,7 +23,7 @@ export class TitleScreen {
       document.head.appendChild(fontLink);
     }
 
-    // 2. 注入像素风格 UI 的 CSS 样式
+    // 2. Inject CSS styles for pixel-style UI
     if (!document.getElementById('ts-styles')) {
       const style = document.createElement('style');
       style.id = 'ts-styles';
@@ -74,7 +74,7 @@ export class TitleScreen {
       document.head.appendChild(style);
     }
 
-    // 3. 创建 Overlay 容器
+    // 3. Create Overlay container
     const overlay = document.createElement('div');
     overlay.id = 'title-screen-overlay';
     Object.assign(overlay.style, {
@@ -86,7 +86,7 @@ export class TitleScreen {
     document.body.appendChild(overlay);
     this._overlay = overlay;
 
-    // 4. 创建 UI 菜单层
+    // 4. Create UI menu layer
     const uiLayer = document.createElement('div');
     Object.assign(uiLayer.style, {
       position: 'absolute', zIndex: '510',
@@ -115,7 +115,7 @@ export class TitleScreen {
     `;
     overlay.appendChild(uiLayer);
 
-    // 独立出来的设置模态框容器
+    // Separate settings modal container
     const modalLayer = document.createElement('div');
     modalLayer.innerHTML = `
       <div id="ts-settings-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 520; justify-content: center; align-items: center; backdrop-filter: blur(3px);">
@@ -135,7 +135,7 @@ export class TitleScreen {
     `;
     overlay.appendChild(modalLayer);
 
-    // ── 拦截音量控制逻辑 ──
+    // ── Intercept volume control logic ──
     if (window.BGMPlayer && !window.BGMPlayer._patchedForVolume) {
       window.BGMPlayer._patchedForVolume = true;
       window.BGMPlayer.globalVolume = this.globalVolume;
@@ -146,7 +146,7 @@ export class TitleScreen {
       };
     }
 
-    // UI 事件绑定
+    // UI event binding
     const btnStart = uiLayer.querySelector('#ts-btn-start');
     const btnContinue = uiLayer.querySelector('#ts-btn-continue');
     const btnSettings = uiLayer.querySelector('#ts-btn-settings');
@@ -212,7 +212,7 @@ export class TitleScreen {
         if (this._overlay) this._overlay.remove();
       }, 1000);
     });
-    // 5. p5.js 画布
+    // 5. p5.js canvas
     this._p5inst = new p5(sketch => {
       const W = window.innerWidth;
       const H = window.innerHeight;

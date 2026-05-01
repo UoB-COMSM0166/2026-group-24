@@ -186,7 +186,7 @@ export class InventoryUI {
             </button>`;
         }).join("");
 
-        // 武器槽
+        // Weapon slots
         const weaponSlotsHTML = `
             <div style="padding:12px;border:1px solid rgba(232,200,134,0.14);border-radius:14px;margin-bottom:12px;background:linear-gradient(180deg, rgba(255,236,194,0.05), rgba(255,255,255,0.01));">
                 <div style="font-weight:700;margin-bottom:8px;">⚔️ Weapon Slots</div>
@@ -207,7 +207,7 @@ export class InventoryUI {
                     </div>`).join('')}
             </div>`;
 
-        // 道具槽
+        // Item slots
         const equippedItems = (hero.equipSlots ?? []).filter(it => it != null);
         const itemSlotsHTML = `
             <div style="padding:12px;border:1px solid rgba(232,200,134,0.14);border-radius:14px;margin-bottom:12px;background:linear-gradient(180deg, rgba(255,236,194,0.05), rgba(255,255,255,0.01));">
@@ -230,7 +230,7 @@ export class InventoryUI {
                 </div>
             </div>`;
 
-        // 存放区
+        // Storage area
         const storageWeaponsHTML = this.sharedStorage.weapons.length === 0
             ? `<div style="opacity:.4;font-size:12px;">No weapons</div>`
             : this.sharedStorage.weapons.map((w, i) => `
@@ -321,14 +321,14 @@ export class InventoryUI {
 
             </div>`;
 
-        // 启动立绘动画
+        // Start portrait animation
         const portraitCanvas = this.panel.querySelector('#inv-portrait-canvas');
         if (portraitCanvas) this._startPortraitAnim(portraitCanvas, hero.id);
 
-        // 关闭
+        // Close
         this.panel.querySelector("#inv-close")?.addEventListener("click", () => this.close());
 
-        // Tab 切换
+        // Tab switch
         this.panel.querySelectorAll(".inv-tab").forEach((b) => {
             b.addEventListener("click", () => {
                 this.activeIndex = Number(b.getAttribute("data-i") ?? 0);
@@ -336,7 +336,7 @@ export class InventoryUI {
             });
         });
 
-        // 存放区拖拽 + 双击装备
+        // Storage area drag & drop + double-click to equip
         this.panel.querySelectorAll(".storage-item").forEach((el) => {
             el.addEventListener("dragstart", (e) => {
                 e.dataTransfer.setData("dragFrom", "storage");
@@ -375,7 +375,7 @@ export class InventoryUI {
             el.addEventListener("mouseleave", () => this._hideTooltip());
         });
 
-        // 已装备武器拖拽 + 双击卸下
+        // Equipped weapon drag & drop + double-click to unequip
         this.panel.querySelectorAll(".equipped-weapon").forEach((el) => {
             el.addEventListener("dragstart", (e) => {
                 e.dataTransfer.setData("dragFrom", "equipped-weapon");
@@ -401,7 +401,7 @@ export class InventoryUI {
             el.addEventListener("mouseleave", () => this._hideTooltip());
         });
 
-        // 已装备道具拖拽 + 双击卸下
+        // Equipped item drag & drop + double-click to unequip
         this.panel.querySelectorAll(".equipped-item").forEach((el) => {
             el.addEventListener("dragstart", (e) => {
                 e.stopPropagation();
@@ -426,7 +426,7 @@ export class InventoryUI {
             el.addEventListener("mouseleave", () => this._hideTooltip());
         });
 
-        // 武器槽接受拖拽
+        // Weapon slot accepts drag & drop
         this.panel.querySelectorAll(".weapon-slot").forEach((slotEl) => {
             slotEl.addEventListener("dragover", (e) => { e.preventDefault(); slotEl.style.background = "rgba(243,156,18,0.12)"; });
             slotEl.addEventListener("dragleave", () => { slotEl.style.background = "transparent"; });
@@ -451,7 +451,7 @@ export class InventoryUI {
             });
         });
 
-        // 道具槽接受拖拽
+        // Item slot accepts drag & drop
         this.panel.querySelectorAll(".item-slot").forEach((slotEl) => {
             slotEl.addEventListener("dragover", (e) => { e.preventDefault(); slotEl.style.background = "rgba(52,211,153,0.12)"; });
             slotEl.addEventListener("dragleave", () => { slotEl.style.background = "transparent"; });
@@ -473,10 +473,10 @@ export class InventoryUI {
             });
         });
 
-        // 图标渲染
+        // Icon rendering
         this.panel.querySelectorAll(".item-icon").forEach((cvs) => { drawItemIconMini(cvs, cvs.dataset.icon); });
 
-        // 左侧存放区接受从右侧拖回
+        // Left storage area accepts drag back from right
         const sharedStorageEl = this.panel.querySelector("#shared-storage");
         if (sharedStorageEl) {
             sharedStorageEl.addEventListener("dragover", (e) => { e.preventDefault(); sharedStorageEl.style.background = "rgba(255,255,255,0.05)"; });
