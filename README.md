@@ -558,13 +558,13 @@ Three evaluators played through the game and assessed it against Nielsen's 10 us
 ### 5.2 Quantitative Evaluation
 
 To measure both perceived workload and usability more rigorously, we administered two validated questionnaire instruments alongside statistical testing:
-- **Raw NASA TLX** — to quantify perceived cognitive workload across difficulty modes
+- **Raw NASA TLX** — to quantify perceived cognitive workload across difficulty modes(Hart, 2006)
 - **System Usability Scale (SUS)** — to assess overall interface usability
 - **Wilcoxon Signed-Rank Test** — to determine whether observed differences were statistically significant
 
 ### 5.2.1 Process
 
-Ten participants each played the game in both Easy and Hard difficulty modes (Kosch et al., 2023). Early sessions revealed that participants were unfamiliar with turn-based combat and equipment mechanics, so a short live demonstration was incorporated before testing. Following gameplay, participants completed both questionnaires. To mitigate learning effects, the order in which participants experienced each difficulty was counterbalanced.
+Ten participants each played the game in both Easy and Hard difficulty modes. Early sessions revealed that participants were unfamiliar with turn-based combat and equipment mechanics, so a short live demonstration was incorporated before testing. Following gameplay, participants completed both questionnaires. To mitigate learning effects, the order in which participants experienced each difficulty was counterbalanced.
 
 ### 5.2.2 Raw NASA TLX
 
@@ -629,7 +629,7 @@ Given that Hard difficulty produced statistically significant increases in Frust
 
 **5.2.3.1 Process**
 
-Immediately following the NASA TLX, all 10 participants completed the SUS — a standardised 10-question instrument for assessing system usability (Lewis, 2018). Scores were derived using the standard SUS calculation method.
+Immediately following the NASA TLX, all 10 participants completed the SUS — a standardised 10-question instrument for assessing system usability. Scores were derived using the standard SUS calculation method.
 
 **5.2.3.2 Raw Data**
 
@@ -929,3 +929,8 @@ These outputs were not used directly; rather, they served as a starting point wh
 In both cases, AI was used as a practical tool to reduce repetitive workload and improve the quality of specific outputs, rather than to replace our own thinking or decision-making. All core contributions — including system design, user interface planning, and project logic — reflect the independent work of our team members.
 
 We believe our use of AI was responsible, transparent, and consistent with the spirit of the project requirements.
+## 12. References
+
+Nielsen, J. (1994) *Usability Engineering*. Morgan Kaufmann.
+
+Hart, S. G. (2006) 'NASA task load index (NASA-TLX); 20 years later', *Proceedings of the Human Factors and Ergonomics Society Annual Meeting*, 50(9), pp. 904–908. doi:10.1177/154193120605000909.
