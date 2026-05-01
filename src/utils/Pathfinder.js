@@ -1,20 +1,20 @@
 // src/utils/Pathfinder.js
 
 /**
- * 六边形网格寻路工具
+ * Hex grid pathfinding utility
  *
- * 坐标系：轴坐标（axial coordinates），flat-top 布局
- * 六个方向邻格偏移：[1,0], [1,-1], [0,-1], [-1,0], [-1,1], [0,1]
+ * Coordinate system: axial coordinates, flat-top layout
+ * Six direction neighbor offsets: [1,0], [1,-1], [0,-1], [-1,0], [-1,1], [0,1]
  *
- * 通行规则：
- *   - moveCost = Infinity 的地形永远不可通行
- *   - 带有事件内容（tile.content != null）的格子：
- *       • 不能作为途经节点（路径不穿越它）
- *       • 可以作为寻路终点（玩家主动点击触发事件）
+ * Passability rules:
+ *   - Terrain with moveCost = Infinity is always impassable
+ *   - Tiles with event content (tile.content != null):
+ *       • Cannot be used as a transit node (path cannot pass through)
+ *       • Can be used as a pathfinding goal (player actively clicks to trigger event)
  *
- * 性能优化：
- *   - A* 和 Dijkstra 均使用 MinHeap 优先队列，时间复杂度 O(n log n)，
- *     替代原来每次出队都排序的 O(n² log n) 实现。
+ * Performance optimization:
+ *   - Both A* and Dijkstra use MinHeap priority queue, time complexity O(n log n),
+ *     replaces the old O(n² log n) implementation that sorted on every dequeue.
  */
 
 const HEX_DIRS = [
@@ -22,10 +22,10 @@ const HEX_DIRS = [
   [-1, 0], [-1, 1], [0, 1],
 ];
 
-// ── MinHeap（最小二叉堆）─────────────────────────────────────────
+// ── MinHeap (minimum binary heap) ────────────────────────────────
 /**
- * 通用最小堆，按节点 .g 字段排序。
- * 相比 Array.sort，每次 push/pop 仅 O(log n)。
+ * General min-heap, sorted by node .g field.
+ * Compared to Array.sort, each push/pop is only O(log n).
  */
 class MinHeap {
   constructor() {
@@ -79,10 +79,10 @@ class MinHeap {
   }
 }
 
-// ── 工具函数 ──────────────────────────────────────────────────────
+// ── Utility functions ────────────────────────────────────────────
 const key = (q, r) => `${q},${r}`;
 
-/** 六边形曼哈顿距离（cube 坐标等价） */
+/** Hex Manhattan distance (cube coordinates equivalent) */
 function hexDist(aq, ar, bq, br) {
   return Math.max(
     Math.abs(aq - bq),
@@ -92,9 +92,9 @@ function hexDist(aq, ar, bq, br) {
 }
 
 /**
- * 判断格子是否可作为"途经节点"。
+ * Determine if a tile can be used as a "transit node".
  * @param {object}  tile
- * @param {boolean} isGoal  该格是否就是寻路终点
+ * @param {boolean} isGoal  Whether this tile is the pathfinding goal
  */
 function isPassable(tile, isGoal = false) {
   if (!tile || !isFinite(tile.type.moveCost)) return false;
@@ -102,9 +102,9 @@ function isPassable(tile, isGoal = false) {
   return true;
 }
 
-// ── A* 寻路 ───────────────────────────────────────────────────────
+// ── A* Pathfinding ───────────────────────────────────────────────
 /**
- * A* 寻路
+ * A* pathfinding
  *
  * @param {import('../world/HexMap.js').HexMap} map
  * @param {number} startQ
@@ -113,7 +113,7 @@ function isPassable(tile, isGoal = false) {
  * @param {number} goalR
  * @param {number} [maxCost=Infinity]
  * @returns {{ path: Array<{q:number, r:number}>, cost: number } | null}
- *   path 包含目标但不含起点；不可达或超出移动力时返回 null
+ *   path includes the goal but not the start; returns null if unreachable or exceeds movement points
  */
 export function findPath(map, startQ, startR, goalQ, goalR, maxCost = Infinity) {
   const goalTile = map.getTile(goalQ, goalR);
@@ -136,10 +136,10 @@ export function findPath(map, startQ, startR, goalQ, goalR, maxCost = Infinity) 
     const current = openSet.pop();
     const cKey = key(current.q, current.r);
 
-    if (closedSet.has(cKey)) continue;   // 堆中可能有旧节点，跳过
+    if (closedSet.has(cKey)) continue;   // There may be old nodes in the heap, skip
     closedSet.add(cKey);
 
-    // 到达目标
+    // Reached the goal
     if (current.q === goalQ && current.r === goalR) {
       const path = [];
       let node = current;
@@ -178,21 +178,21 @@ export function findPath(map, startQ, startR, goalQ, goalR, maxCost = Infinity) 
     }
   }
 
-  return null;   // 不可达
+  return null;   // Unreachable
 }
 
-// ── Dijkstra 可达范围 ─────────────────────────────────────────────
+// ── Dijkstra reachable range ────────────────────────────────────
 /**
- * 获取当前移动力内所有可达格坐标（用于高亮显示可移动范围）。
+ * Get all reachable tile coordinates within current movement points (for highlighting movable range).
  *
- * 规则与 findPath 相同：
- *   - 有 content 的格子出现在结果集（可作为目标），但不继续向外扩展。
+ * Rules are the same as findPath:
+ *   - Tiles with content appear in the result set (can be a goal), but do not continue to expand outward.
  *
  * @param {import('../world/HexMap.js').HexMap} map
  * @param {number} startQ
  * @param {number} startR
  * @param {number} maxCost
- * @returns {Set<string>}  可达格的 "q,r" key 集合（含起点）
+ * @returns {Set<string>}  Set of reachable tile "q,r" keys (including the start)
  */
 export function getReachableTiles(map, startQ, startR, maxCost) {
   const dist = new Map();
@@ -206,10 +206,10 @@ export function getReachableTiles(map, startQ, startR, maxCost) {
     const { q, r, g } = heap.pop();
     const curKey = key(q, r);
 
-    // 已被更短路径更新则跳过（堆中可能残留旧节点）
+    // Skip if already updated by a shorter path (old nodes may remain in the heap)
     if (dist.get(curKey) < g) continue;
 
-    // 有事件内容的格子：加入可达集合，但不从此继续扩展（终点语义）
+    // Tiles with event content: add to reachable set, but do not expand further from here (goal semantics)
     const curTile = map.getTile(q, r);
     const isStart = (q === startQ && r === startR);
     if (!isStart && curTile?.content != null) continue;

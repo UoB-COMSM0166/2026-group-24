@@ -50,11 +50,11 @@ export const ENEMY_TYPES = {
     name: 'Infernal Demon',
     type: 'dungeon',
     statMod: {
-      toughness: 28,   // 远高于普通值5，防御极高
-      strength: 10,    // 攻击偏低
-      agility: 4,      // 速度很慢
+      toughness: 28,   // Much higher than normal value 5, extremely high defense
+      strength: 10,    // Low attack
+      agility: 4,      // Very slow speed
     },
-    hpMulti: 2.0,      // 血量翻倍（在 GameController 里处理）
+    hpMulti: 2.0,      // HP doubled (handled in GameController)
     desc: 'Elite: high DEF and HP, self-heal + shield',
     skills: [
       {
@@ -68,9 +68,9 @@ export const ENEMY_TYPES = {
       {
         id: 'golem_restore',
         name: 'Stone Mending',
-        type: 'self_restore',   // 自定义类型，handleAI 处理
+        type: 'self_restore',   // Custom type, handled by handleAI
         target: 'self',
-        healPct: 0.10,          // 回复最大血量10%
+        healPct: 0.10,          // Restore 10% max HP
         statusEffect: 'rock_shield',
       },
       {
@@ -84,16 +84,16 @@ export const ENEMY_TYPES = {
     ],
   },
 
-  // ↓ 新增：迅捷刺客
+  // ↓ New: Swift Assassin
   swift_assassin: {
     name: 'Swift Assassin',
     type: 'dungeon',
     statMod: {
-      strength: 28,    // 攻击极高
-      agility: 22,     // 速度极快
-      toughness: 3,    // 防御很低
+      strength: 28,    // Extremely high attack
+      agility: 22,     // Extremely fast speed
+      toughness: 3,    // Very low defense
     },
-    hpMulti: 1.2,      // 血量略高于普通
+    hpMulti: 1.2,      // HP slightly higher than normal
     desc: 'Elite: high ATK and SPD, anti-heal debuff',
     skills: [
       {
@@ -111,8 +111,8 @@ export const ENEMY_TYPES = {
         target: 'single',
         power: 90,
         statKey: 'strength',
-        statusEffect: 'anti_heal',   // 新状态：禁疗
-        statusChance: 1.0,           // 命中必定附加
+        statusEffect: 'anti_heal',   // New status: anti-heal
+        statusChance: 1.0,           // Always applies on hit
       },
       {
         id: 'assassin_freeze',
@@ -122,7 +122,7 @@ export const ENEMY_TYPES = {
         power: 100,
         statKey: 'strength',
         statusEffect: 'frozen',
-        statusChance: 0.6,           // 60% 概率冻结
+        statusChance: 0.6,           // 60% chance to freeze
       },
     ],
   },
@@ -132,19 +132,19 @@ export const ENEMY_TYPES = {
     hpMulti: 2.0,
     desc: 'Boss: overwhelming power, multi-status attacks, self-empowerment',
     skills: [
-      // ① 单体高伤 + 100% 冻结
+      // ① High single-target damage + 100% freeze
       {
         id:           'boss_glacial_judgment',
         name:         'Glacial Judgment',
         type:         'attack',
         target:       'single',
-        power:        190,           // 普通小怪约 100，高伤定为 160
+        power:        190,           // Normal mob about 100, high damage set to 160
         statKey:      'strength',
         statusEffect: 'frozen',
-        statusChance: 1.0,           // 100% 冻结
+        statusChance: 1.0,           // 100% freeze
         desc:         '160% STR single strike — always Freezes target',
       },
-      // ② 群体攻击 + 40% 概率同时附加感电+燃烧
+      // ② AOE attack + 40% chance to apply Shock + Burn
       {
         id:                 'boss_infernal_storm',
         name:               'Infernal Storm',
@@ -152,15 +152,15 @@ export const ENEMY_TYPES = {
         target:             'aoe',
         power:              150,
         statKey:            'strength',
-        multiStatusEffects: ['shock', 'burn'],  // 新字段：同时触发两个状态
-        statusChance:       0.4,                 // 40% 概率
+        multiStatusEffects: ['shock', 'burn'],  // New field: trigger two statuses at once
+        statusChance:       0.4,                 // 40% chance
         desc:               '120% STR AOE — 40% to apply Shock + Burn to all',
       },
-      // ③ 给自己附加全部正面效果
+      // ③ Grant self all positive effects
       {
         id:            'boss_dark_empowerment',
         name:          'Dark Empowerment',
-        type:          'multi_buff',    // 新技能类型
+        type:          'multi_buff',    // New skill type
         target:        'self',
         statusEffects: ['rock_shield', 'warcry', 'heal_aura'],
         desc:          'Grant self Rock Shield + Warcry + Heal Aura simultaneously',

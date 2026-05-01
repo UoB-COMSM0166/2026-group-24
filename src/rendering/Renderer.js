@@ -4,19 +4,19 @@ import { hexToPixel } from '../world/Tile.js';
 
 export class Renderer {
   static debugMode = false;
-  static selectedKey = null;   // 当前选中格 "q,r" 字符串（由 InputHandler 更新）
+  static selectedKey = null;   // Currently selected tile "q,r" string (updated by InputHandler)
 
-  // ── 探索场景渲染 ──────────────────────────────────────────────────
+  // ── Exploration Scene Rendering ───────────────────────────────────────────────
   /**
    * @param {CanvasRenderingContext2D} ctx
    * @param {Camera}   camera
    * @param {HexMap}   map
    * @param {Player}   player
-   * @param {Set<string>|null} rangeHighlight  可达格 key 集合（红线轮廓）
-   * @param {Set<string>|null} pathHighlight   路径格 key 集合（蓝色预览）
+  * @param {Set<string>|null} rangeHighlight  Reachable tile key set (red outline)
+  * @param {Set<string>|null} pathHighlight   Path tile key set (blue preview)
    */
   static renderExploration(ctx, camera, map, player, rangeHighlight = null, pathHighlight = null) {
-    // 1. 清理背景
+    // 1. Clear background
     ctx.fillStyle = '#1a1a2e';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -25,20 +25,20 @@ export class Renderer {
       ctx.drawImage(bgImg, 0, 0, ctx.canvas.width, ctx.canvas.height);
     }
 
-    // 2. 绘制地图（内部含视口裁剪，仅渲染可见格子）
+    // 2. Draw map (with viewport clipping, only render visible tiles)
     map.draw(ctx, camera, Renderer.selectedKey, Renderer.debugMode);
 
-    // 3a. 绘制路径预览（蓝色半透明高亮）
+    // 3a. Draw path preview (blue translucent highlight)
     if (pathHighlight && pathHighlight.size > 0) {
       Renderer.drawPathHighlight(ctx, camera, map, pathHighlight);
     }
 
-    // 3b. 绘制可移动范围红线轮廓
+    // 3b. Draw movable range red outline
     if (rangeHighlight && rangeHighlight.size > 0) {
       Renderer.drawRangeBorder(ctx, camera, map, rangeHighlight);
     }
 
-    // 4. 绘制玩家角色
+    // 4. Draw player character
     ctx.save();
     ctx.translate(Math.round(camera.x), Math.round(camera.y));
     ctx.scale(camera.zoom ?? 1, camera.zoom ?? 1);
@@ -46,7 +46,7 @@ export class Renderer {
     ctx.restore();
   }
 
-  // ── 战斗场景渲染 ──────────────────────────────────────────────────
+  // ── Combat Scene Rendering ───────────────────────────────────────────────
   static renderCombat(ctx, heroes, combatManager) {
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -66,7 +66,7 @@ export class Renderer {
     }
   }
 
-  // ── 血条 ─────────────────────────────────────────────────────────
+  // ── Health Bar ──────────────────────────────────────────────────
   static _drawHealthBar(ctx, unit) {
     const BAR_W = 80, BAR_H = 8;
     const x = unit.x - BAR_W / 2;
@@ -84,10 +84,10 @@ export class Renderer {
     ctx.strokeRect(x, y, BAR_W, BAR_H);
   }
 
-  // ── 路径预览高亮（蓝色半透明填充 + 呼吸灯描边）──────────────────
+  // ── Path Preview Highlight (Blue Translucent Fill + Breathing Light Stroke) ──────
   /**
-   * 在路径经过的每个格子上绘制蓝色半透明填充和发光描边。
-   * 终点格（路径末尾）使用稍高的不透明度，与其余格区分。
+  * Draw blue translucent fill and glowing stroke on each tile along the path.
+  * The destination tile (end of path) uses higher opacity to distinguish from others.
    *
    * @param {CanvasRenderingContext2D} ctx
    * @param {Camera} camera
@@ -103,7 +103,7 @@ export class Renderer {
     ctx.translate(Math.round(camera.x), Math.round(camera.y));
     ctx.scale(zoom, zoom);
 
-    // 把 pathSet 转为有序数组，让终点格可以特殊处理
+    // Convert pathSet to an ordered array so the destination tile can be specially handled
     const keys = [...pathSet];
 
     for (let i = 0; i < keys.length; i++) {
@@ -112,7 +112,7 @@ export class Renderer {
       const isStart = (i === 0);
       const isDestination = (i === keys.length - 1);
 
-      // flat-top 六边形路径
+      // flat-top hexagon path
       ctx.beginPath();
       for (let v = 0; v < 6; v++) {
         const angle = (Math.PI / 3) * v;
@@ -122,19 +122,19 @@ export class Renderer {
       }
       ctx.closePath();
 
-      // 终点格填充更亮
+      // Destination tile fill is brighter
       const fillAlpha = isDestination ? pulse * 0.55 : pulse * 0.28;
       ctx.fillStyle = `rgba(80, 180, 255, ${fillAlpha})`;
       ctx.fill();
 
-      // 描边（呼吸灯）
+      // Stroke (breathing light)
       ctx.strokeStyle = `rgba(120, 210, 255, ${pulse * 0.95})`;
       ctx.lineWidth = (isDestination ? 2.5 : 1.8) / zoom;
       ctx.shadowColor = 'rgba(60, 180, 255, 0.85)';
       ctx.shadowBlur = isDestination ? 12 : 6;
       ctx.stroke();
 
-      // 步数编号（起点不显示，从第 1 步开始）
+      // Step number (not shown for start, starts from step 1)
       if (!isStart) {
         const stepNum = String(i); // i=1 → "1", i=2 → "2" ...
         const fontSize = Math.max(10, size * 0.45);
@@ -143,13 +143,13 @@ export class Renderer {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        // 描边（黑色轮廓，让数字在任何地形上都清晰）
+        // Stroke (black outline, makes numbers clear on any terrain)
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
         ctx.lineWidth = fontSize * 0.25;
         ctx.lineJoin = 'round';
         ctx.strokeText(stepNum, x, y);
 
-        // 填充（白色或终点用亮蓝色）
+        // Fill (white or bright blue for destination)
         ctx.fillStyle = isDestination ? '#7df4ff' : 'rgba(255, 255, 255, 0.95)';
         ctx.fillText(stepNum, x, y);
       }
@@ -158,19 +158,19 @@ export class Renderer {
     ctx.restore();
   }
 
-  // ── 可移动范围红线轮廓（呼吸灯）─────────────────────────────────
+  // ── Movable Range Red Outline (Breathing Light) ───────────────────────────────
   /**
-   * flat-top 六边形顶点（从右侧顺时针编号）：
-   *   V0(1,0)  V1(0.5,+√3/2)  V2(-0.5,+√3/2)
-   *   V3(-1,0) V4(-0.5,-√3/2) V5(0.5,-√3/2)
-   *
-   * 邻格方向 → 共享边的两端顶点：
-   *   [1,0]  右     → V0-V1
-   *   [1,-1] 右上   → V5-V0
-   *   [0,-1] 左上   → V4-V5
-   *   [-1,0] 左     → V3-V4
-   *   [-1,1] 左下   → V2-V3
-   *   [0,1]  右下   → V1-V2
+  * flat-top hexagon vertices (numbered clockwise from the right):
+  *   V0(1,0)  V1(0.5,+√3/2)  V2(-0.5,+√3/2)
+  *   V3(-1,0) V4(-0.5,-√3/2) V5(0.5,-√3/2)
+
+  * Neighbor directions → shared edge's two vertices:
+  *   [1,0]  right     → V0-V1
+  *   [1,-1] upper right   → V5-V0
+  *   [0,-1] upper left   → V4-V5
+  *   [-1,0] left     → V3-V4
+  *   [-1,1] lower left   → V2-V3
+  *   [0,1]  lower right   → V1-V2
    */
   static drawRangeBorder(ctx, camera, map, reachableSet) {
     const size = map.tileSize;

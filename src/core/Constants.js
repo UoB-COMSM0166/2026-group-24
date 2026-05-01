@@ -1,6 +1,6 @@
 // src/core/Constants.js
 
-// ── 游戏状态机 ────────────────────────────────────────────────────
+// ── Game State Machine ────────────────────────────────────────────────────
 export const GameState = {
   INITIALIZING: 'INITIALIZING',
   CHARACTER_SELECT: 'CHARACTER_SELECT',
@@ -26,14 +26,14 @@ export const CombatPhase = {
   LOSE: 'LOSE',
 };
 
-// ── 多地图参数预设（唯一数据源）─────────────────────────────────────
-// 注意：MapConfig 直接引用此处，不再另立一份，避免两处数值不同步。
+// ── Multi-map parameter presets (single source of truth) ─────────────────────────────────────
+// Note: MapConfig directly references here, do not duplicate to avoid inconsistent values.
 export const MapPresets = {
   main: {
     name: 'Lost Forest',
     radius: 11,
     tileSize: 40,
-    padding: 100,  // 初始相机边缘留白
+    padding: 100,  // Initial camera edge padding
     eventLogic: 'default',
   },
   novice: {
@@ -43,18 +43,18 @@ export const MapPresets = {
     padding: 80,
     eventLogic: 'default',
   },
-  // 在此继续添加更多地图预设 ↓
+  // Add more map presets below ↓
 };
 
-// ── MapConfig：从 main 预设派生，供 main.js / GameController 使用 ──
-// 只读快捷方式，勿在此处直接修改数值，应改动 MapPresets.main。
+// ── MapConfig: Derived from main preset, for main.js / GameController use ──
+// Read-only shortcut, do not modify values here, change MapPresets.main instead.
 export const MapConfig = {
   RADIUS: MapPresets.main.radius,
   TILE_SIZE: MapPresets.main.tileSize,
   PADDING: MapPresets.main.padding,
 };
 
-// ── 回合进度配置 ─────────────────────────────────────────────────
+// ── Turn progress configuration ─────────────────────────────────────────────────
 export const TurnConfig = {
   MAX_TURNS: 20,
 };

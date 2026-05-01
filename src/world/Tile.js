@@ -132,11 +132,11 @@ export class Tile {
   });
 
   /**
-   * @param {number} q
-   * @param {number} r
-   * @param {TileType} type
-   * @param {SeededRandom} [rng]  传入种子随机器以保证地图可复现；
-   *                              Omit to fall back to Math.random (not reproducible, backward compatible only).
+  * @param {number} q
+  * @param {number} r
+  * @param {TileType} type
+  * @param {SeededRandom} [rng]  Pass in seeded random to ensure map reproducibility;
+  *                              Omit to fall back to Math.random (not reproducible, backward compatible only).
    */
   constructor(q, r, type = TileType.GRASS, rng = null) {
     this.q = q;
@@ -144,9 +144,9 @@ export class Tile {
     this.type = type;
     this.content = null;
     this.isRevealed = false;
-    this.isFixedEvent = false;  // 标记：是否为固定特殊事件（如NPC、村庄、商人等）
-    this.isBlinking = false;    // ── 固定事件闪烁状态 ──
-    this.blinkStartTime = 0;    // ── 闪烁开始时间（毫秒）──
+    this.isFixedEvent = false;  // Flag: whether this is a fixed special event (e.g., NPC, village, merchant, etc.)
+    this.isBlinking = false;    // ── Blinking state for fixed event ──
+    this.blinkStartTime = 0;    // ── Blinking start time (ms) ──
     this.variant = rng
       ? Math.floor(rng.next() * 4) + 1
       : Math.floor(Math.random() * 4) + 1;
@@ -157,8 +157,8 @@ export class Tile {
   }
 
   /**
-   * 绘制单个 Tile。
-   * 调用方需已执行 ctx.save() / ctx.translate(cameraX, cameraY) / ctx.scale(zoom, zoom)。
+  * Draw a single Tile.
+  * The caller should have already executed ctx.save() / ctx.translate(cameraX, cameraY) / ctx.scale(zoom, zoom).
    *
    * @param {CanvasRenderingContext2D} ctx
    * @param {number}  size         tileSize
@@ -168,13 +168,13 @@ export class Tile {
    */
   draw(ctx, size, isSelected = false, visState = 'visible', debugMode = false) {
     const { x, y } = this.getCanvasPos(size);
-    const hexPath = Tile.getHexPath(size);   // 从缓存取，零分配
+    const hexPath = Tile.getHexPath(size);   // Get from cache, zero allocation
 
-    // ── 辅助：在 (x,y) 处应用缓存路径 ─────────────────────────────
+    // ── Helper: apply cached path at (x,y) ─────────────────────────────
     const applyPath = () => {
       ctx.save();
       ctx.translate(x, y);
-      return hexPath;           // 交由调用方 fill / stroke
+      return hexPath;           // Hand over to caller fill / stroke
     };
     const useHex = (fill) => {
       ctx.save();
@@ -185,13 +185,13 @@ export class Tile {
       ctx.restore();
     };
 
-    // 1. 战争迷雾（完全未探索）
+    // 1. Fog of war (completely unexplored)
     if (visState === 'hidden') {
       useHex('#0a0a14');
       return;
     }
 
-    // 2. 底色 + 描边
+    // 2. Base color + stroke
     ctx.save();
     ctx.translate(x, y);
     ctx.fillStyle = '#4a7c2c';
@@ -201,7 +201,7 @@ export class Tile {
     ctx.stroke(hexPath);
     ctx.restore();
 
-    // 3. 地形图片
+    // 3. Terrain image
     const terrainKey = `${Tile.TERRAIN_KEYS[this.type.id] ?? 'grass'}_${this.variant}`;
     const terrainImg = DataLoader.getImage(terrainKey);
     if (terrainImg) {
@@ -211,7 +211,7 @@ export class Tile {
       ctx.drawImage(terrainImg, x - size - bleed / 2, y - imgH / 2, imgW, imgH);
     }
 
-    // 4. 内容图标（仅 visible 状态，或 debug 模式下显示隐藏的固定事件）
+    // 4. Content icon (only in visible state, or show hidden fixed events in debug mode)
     const shouldShowContent = visState === 'visible' || 
                               (this.isFixedEvent && DebugConfig.showHiddenFixedEvents);
     if (this.content && shouldShowContent) {
@@ -237,7 +237,7 @@ export class Tile {
           ctx.restore();
         }
       } else {
-        // 🎮 使用 contentImageType 如果存在，否则使用 content.type
+        // 🎮 Use contentImageType if exists, otherwise use content.type
         const imageType = this.content.contentImageType || this.content.type;
         const contentImg = DataLoader.getImage(imageType);
         if (contentImg) {
@@ -262,7 +262,7 @@ export class Tile {
       ctx.restore();
     }
 
-    // 6. 已探索但视野外：半透明暗色蒙版
+    // 6. Explored but out of vision: semi-transparent dark overlay
     if (visState === 'explored') {
       ctx.save();
       ctx.translate(x, y);
@@ -271,7 +271,7 @@ export class Tile {
       ctx.restore();
     }
 
-    // 7. Debug 坐标
+    // 7. Debug coordinates
     if (debugMode && visState !== 'hidden') {
       ctx.save();
       ctx.font = `${Math.floor(size * 0.45)}px 'Press Start 2P', monospace`;

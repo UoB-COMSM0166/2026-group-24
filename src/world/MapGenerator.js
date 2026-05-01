@@ -1,5 +1,5 @@
 // src/world/MapGenerator.js
-// 地块生成器 —— 统一封装地形生成、屏障生成、事件放置逻辑
+// Tile generator — unified encapsulation of terrain generation, barrier generation, and event placement logic
 
 import {
   Tile, TileType, TileContentType,
@@ -11,19 +11,19 @@ import { HexMap } from './HexMap.js';
 /**
  * MapGenerator
  *
- * 负责对一个已存在的 HexMap 实例执行所有生成步骤：
- *   1. generateTerrain  —— 填充地形 Tile（传入 rng，保证 variant 可复现）
- *   2. generateBarrier  —— 标记最外层为 BOUNDARY（由 generateTerrain 自动调用）
- *   3. generateEvents   —— 按概率放置随机事件内容
+ * Responsible for executing all generation steps on an existing HexMap instance:
+ *   1. generateTerrain  — fill terrain Tiles (pass in rng to ensure variant is reproducible)
+ *   2. generateBarrier  — mark the outermost layer as BOUNDARY (automatically called by generateTerrain)
+ *   3. generateEvents   — place random event content by probability
  *
- * 优化点：
- *  - 内圈保底 shuffle 改为无偏的 Fisher-Yates 算法。
- *  - Tile 构造时传入 rng，消除 Math.random() 非种子调用。
- *  - 使用 HexMap.setTile() 而非直接操作 map.tiles，兼容整数 key。
+ * Optimizations:
+ *  - Inner ring guaranteed shuffle changed to unbiased Fisher-Yates algorithm.
+ *  - Pass rng to Tile constructor to eliminate non-seeded Math.random() calls.
+ *  - Use HexMap.setTile() instead of directly operating map.tiles, compatible with integer keys.
  */
 export class MapGenerator {
 
-  // ── 概率表（roll > threshold 则命中，从高到低依次匹配）──────────
+  // ── Probability table (roll > threshold hits, match from high to low) ──────
   static ROLL_TABLE = [
     { threshold: 0.975, type: 'ALTAR' },
     { threshold: 0.950, type: 'DUNGEON' },
@@ -33,17 +33,17 @@ export class MapGenerator {
     { threshold: 0.850, type: 'LIGHTHOUSE' },
   ];
 
-  // 内圈必出的事件类型（顺序即优先级）
+  // Event types guaranteed to appear in the inner ring (order is priority)
   static GUARANTEED_EVENTS = ['ALTAR', 'DUNGEON', 'TREASURE_COMMON', 'LIGHTHOUSE'];
 
   /**
-   * @param {SeededRandom} rng - 与 HexMap 共享同一实例，保证种子一致性
+   * @param {SeededRandom} rng - Shared with HexMap to ensure seed consistency
    */
   constructor(rng) {
     this.rng = rng;
   }
 
-  // ── 1. 地形生成 ───────────────────────────────────────────────────
+  // ── 1. Terrain generation ───────────────────────────────────────
   generateTerrain(map) {
     const { radius, rng } = map;
     for (let q = -radius; q <= radius; q++) {
@@ -55,7 +55,7 @@ export class MapGenerator {
         if (roll > 0.85) type = TileType.MOUNTAIN;
         else if (roll > 0.75) type = TileType.FOREST;
 
-        // 传入 rng 保证 variant 随种子确定，地图可复现
+        // Pass in rng to ensure variant is determined by seed, map is reproducible
         const tile = new Tile(q, r, type, this.rng);
         map.setTile(q, r, tile);
       }
@@ -63,7 +63,7 @@ export class MapGenerator {
     this.generateBarrier(map);
   }
 
-  // ── 2. 屏障生成 ───────────────────────────────────────────────────
+  // ── 2. Barrier generation ───────────────────────────────────────
   generateBarrier(map) {
     for (const tile of map.tiles.values()) {
       const dist = Math.max(Math.abs(tile.q), Math.abs(tile.r), Math.abs(tile.q + tile.r));
@@ -74,12 +74,12 @@ export class MapGenerator {
     }
   }
 
-  // ── 3. 事件生成 ───────────────────────────────────────────────────
+  // ── 3. Event generation ─────────────────────────────────────────
   generateEvents(map) {
     const origin = { q: -map.radius, r: map.radius };
     const generatedTypes = new Set();
 
-    // 3a. 收集内圈 Tile，用无偏 Fisher-Yates 洗牌后保底生成
+    // 3a. Collect inner ring Tiles, guarantee generation after unbiased Fisher-Yates shuffle
     const internalTiles = this._collectInternalTiles(map, origin, 4);
     MapGenerator.shuffle(internalTiles, this.rng);
 
@@ -88,7 +88,7 @@ export class MapGenerator {
       if (tile && !tile.content) {
         tile.content = MapGenerator.createContent(eventType);
         generatedTypes.add(MapGenerator.getDedupeKey(tile.content));
-        // 确保事件周围至少有一个可通行的格子
+        // Ensure there is at least one passable tile around the event
         this._ensureAccessibilityAroundEvent(map, tile);
       }
     });
@@ -102,7 +102,7 @@ export class MapGenerator {
       const eventType = MapGenerator.rollEventType(this.rng.next());
       if (!eventType) continue;
 
-      // 内圈同类去重
+      // Deduplicate same type in inner ring
       if (isInside) {
         const key = MapGenerator.getDedupeKey(MapGenerator.createContent(eventType));
         if (generatedTypes.has(key)) continue;
@@ -110,15 +110,15 @@ export class MapGenerator {
       }
 
       tile.content = MapGenerator.createContent(eventType);
-      // 确保事件周围至少有一个可通行的格子
+      // Ensure there is at least one passable tile around the event
       this._ensureAccessibilityAroundEvent(map, tile);
     }
   }
 
-  // ── 静态工具：无偏 Fisher-Yates 洗牌 ────────────────────────────
+  // ── Static utility: unbiased Fisher-Yates shuffle ───────────────
   /**
-   * 原地洗牌（Fisher-Yates），使用种子 rng，结果无偏。
-   * 替代原有的 .sort(() => rng.next() - 0.5)（有偏，不均匀）。
+  * In-place shuffle (Fisher-Yates), uses seeded rng, result is unbiased.
+  * Replaces old .sort(() => rng.next() - 0.5) (biased, uneven).
    *
    * @template T
    * @param {T[]} arr
@@ -135,7 +135,7 @@ export class MapGenerator {
     return arr;
   }
 
-  // ── 静态工具：概率 → 事件类型 ──────────────────────────────────
+  // ── Static utility: probability → event type ──────────────────
   static rollEventType(roll) {
     for (const entry of MapGenerator.ROLL_TABLE) {
       if (roll > entry.threshold) return entry.type;
@@ -143,7 +143,7 @@ export class MapGenerator {
     return null;
   }
 
-  // ── 静态工具：事件类型 → 内容对象 ──────────────────────────────
+  // ── Static utility: event type → content object ───────────────
   static createContent(eventType) {
     switch (eventType) {
       case 'ALTAR': return makeAltar(1);
@@ -157,13 +157,13 @@ export class MapGenerator {
     }
   }
 
-  // ── 静态工具：内容对象 → 去重键 ────────────────────────────────
+  // ── Static utility: content object → dedupe key ───────────────
   static getDedupeKey(content) {
     if (!content) return null;
     return content.type === TileContentType.TREASURE ? 'treasure' : content.type;
   }
 
-  // ── 私有：收集内圈可用 Tile ────────────────────────────────────
+  // ── Private: collect available Tiles in inner ring ────────────
   _collectInternalTiles(map, origin, maxDist) {
     const result = [];
     for (const tile of map.tiles.values()) {
@@ -173,14 +173,14 @@ export class MapGenerator {
     return result;
   }
 
-  /** 不应放置事件的格子 */
+  /** Tiles where events should not be placed */
   _skipTile(tile) {
     return tile.content !== null ||
       tile.type.moveCost === Infinity ||
       tile.type === TileType.BOUNDARY;
   }
 
-  /** 六边形轴坐标曼哈顿距离 */
+  /** Hex axial coordinate Manhattan distance */
   _distFromOrigin(tile, origin) {
     return Math.max(
       Math.abs(tile.q - origin.q),
@@ -189,10 +189,10 @@ export class MapGenerator {
     );
   }
 
-  /** 获取周围一格范围内的所有邻居格子 */
+  /** Get all neighboring tiles within one tile range */
   _getNeighbors(map, q, r) {
     const neighbors = [];
-    // 六边形周围 6 个邻居
+    // 6 neighbors around a hex
     const directions = [
       [1, 0], [1, -1], [0, -1],
       [-1, 0], [-1, 1], [0, 1]
@@ -207,8 +207,8 @@ export class MapGenerator {
   }
 
   /**
-   * 确保事件周围至少有一个可通行的格子。
-   * 如果周围全是山脉/森林/边界，则随机选一个改为草地。
+   * Ensure there is at least one passable tile around the event.
+   * If all are mountains/forest/boundary, randomly change one to grassland.
    */
   _ensureAccessibilityAroundEvent(map, eventTile) {
     const neighbors = this._getNeighbors(map, eventTile.q, eventTile.r);
@@ -217,14 +217,14 @@ export class MapGenerator {
     const hasAccessible = neighbors.some(tile => tile.type.moveCost < Infinity);
     
     if (!hasAccessible) {
-      // 收集所有可以改为草地的格子（不是事件所在格和边界）
+      // Collect all tiles that can be changed to grassland (not the event tile or boundary)
       const modifiable = neighbors.filter(tile => 
         tile.type !== TileType.BOUNDARY && 
         !tile.content
       );
       
       if (modifiable.length > 0) {
-        // 随机选择一个改为草地
+        // Randomly select one to change to grassland
         const idx = Math.floor(this.rng.next() * modifiable.length);
         modifiable[idx].type = TileType.GRASS;
       }

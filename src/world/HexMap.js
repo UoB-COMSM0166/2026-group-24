@@ -5,7 +5,7 @@ import { MapPresets } from '../core/Constants.js';
 import { SeededRandom } from '../utils/SeededRandom.js';
 import { hexToPixel } from './Tile.js';
 
-// ── 地图工厂（按预设名创建）────────────────────────────────────────
+// ── Map factory (create by preset name) ───────────────────────────
 export function createMapByPreset(presetName) {
   const preset = MapPresets[presetName];
   if (!preset) throw new Error('Map preset not found: ' + presetName);
@@ -16,17 +16,17 @@ export function createMapByPreset(presetName) {
 /**
  * HexMap
  *
- * 六边形地图的数据容器，只负责存储 Tile 和提供查询/操作接口。
- * 所有生成逻辑（地形、屏障、事件）均委托给 MapGenerator。
+ * Data container for hexagonal map, only responsible for storing Tiles and providing query/operation interfaces.
+ * All generation logic (terrain, barriers, events) is delegated to MapGenerator.
  *
- * 性能优化要点：
- *  1. tiles 的 key 改为整数，消除每次查询的字符串拼接和 GC。
- *  2. draw() 执行视口裁剪，仅绘制屏幕可见范围内的格子。
- *  3. worldBounds 预计算，供 Camera.setBounds 使用。
+ * Performance optimization points:
+ *  1. Key of tiles changed to integer to eliminate string concatenation and GC on each query.
+ *  2. draw() performs viewport clipping, only draws tiles visible on screen.
+ *  3. worldBounds precomputed for Camera.setBounds use.
  */
 export class HexMap {
 
-  // key 编码偏移量，支持 radius ≤ 99 的地图
+  // Key encoding offset, supports maps with radius ≤ 99
   static KEY_OFFSET = 100;
   static KEY_STRIDE = 200; // 2 * KEY_OFFSET
 
@@ -44,20 +44,20 @@ export class HexMap {
     this.worldBounds = this._computeWorldBounds();
   }
 
-  // ── Key 编码 ───────────────────────────────────────────────────
-  /** 将 (q, r) 轴坐标编码为单个整数 key，避免字符串分配。 */
+  // ── Key encoding ───────────────────────────────────────────────
+  /** Encode (q, r) axial coordinates as a single integer key to avoid string allocation. */
   static encodeKey(q, r) {
     return (q + HexMap.KEY_OFFSET) * HexMap.KEY_STRIDE + (r + HexMap.KEY_OFFSET);
   }
 
-  /** 整数 key 解码回 (q, r)（调试用）。 */
+  /** Decode integer key back to (q, r) (for debugging). */
   static decodeKey(key) {
     const r = (key % HexMap.KEY_STRIDE) - HexMap.KEY_OFFSET;
     const q = Math.floor(key / HexMap.KEY_STRIDE) - HexMap.KEY_OFFSET;
     return { q, r };
   }
 
-  // ── 查询 ───────────────────────────────────────────────────────
+  // ── Query ─────────────────────────────────────────────────────
   getTile(q, r) {
     return this.tiles.get(HexMap.encodeKey(q, r));
   }
@@ -66,7 +66,7 @@ export class HexMap {
     this.tiles.set(HexMap.encodeKey(q, r), tile);
   }
 
-  // ── 揭示周围格 ─────────────────────────────────────────────────
+  // ── Reveal surrounding tiles ──────────────────────────────────
   revealAround(q, r, revealRadius = 1) {
     for (let dq = -revealRadius; dq <= revealRadius; dq++) {
       for (let dr = -revealRadius; dr <= revealRadius; dr++) {
@@ -78,8 +78,8 @@ export class HexMap {
   }
 
   /**
-   * 放置事件内容，并自动揭示该格 + 周围几圈战争迷雾。
-   * 同时确保周围至少有一个可通行的格子。
+   * Place event content and automatically reveal this tile + several rings of fog of war around it.
+   * Also ensure there is at least one passable tile around.
    */
   placeContent(q, r, content, revealRadius = 2) {
     const tile = this.getTile(q, r);
@@ -93,12 +93,12 @@ export class HexMap {
   }
 
   /**
-   * 确保指定格子周围至少有一个可通行的格子。
-   * 如果周围全是山脉/森林/边界，则随机选一个改为草地。
+   * Ensure there is at least one passable tile around the specified tile.
+   * If all surrounding tiles are mountains/forest/boundary, randomly change one to grassland.
    * @private
    */
   _ensureAccessibilityAroundTile(q, r) {
-    // 获取周围 6 个邻居
+    // Get 6 neighbors around
     const directions = [
       [1, 0], [1, -1], [0, -1],
       [-1, 0], [-1, 1], [0, 1]
@@ -109,25 +109,25 @@ export class HexMap {
       if (tile) neighbors.push(tile);
     }
 
-    // 检查是否至少有一个可通行的格子
+    // Check if there is at least one passable tile
     const hasAccessible = neighbors.some(tile => tile.type.moveCost < Infinity);
     
     if (!hasAccessible && neighbors.length > 0) {
-      // 收集所有可以改为草地的格子
+      // Collect all tiles that can be changed to grassland
       const modifiable = neighbors.filter(tile => 
         tile.type.moveCost === Infinity &&  // 当前不可通行
         !tile.content  // 没有其他事件内容
       );
       
       if (modifiable.length > 0) {
-        // 随机选择一个改为草地
+        // Randomly select one to change to grassland
         const idx = Math.floor(Math.random() * modifiable.length);
         modifiable[idx].type = TileType.GRASS;
       }
     }
   }
 
-  // ── 坐标转换 ───────────────────────────────────────────────────
+  // ── Coordinate conversion ─────────────────────────────────────
   pixelToHex(x, y) {
     const q = (2 / 3 * x) / this.tileSize;
     const r = (-1 / 3 * x + Math.sqrt(3) / 3 * y) / this.tileSize;
@@ -147,7 +147,7 @@ export class HexMap {
     return { q: rq, r: rr };
   }
 
-  // ── 绘制（含视口裁剪）─────────────────────────────────────────
+  // ── Drawing (with viewport clipping) ─────────────────────────
   /**
    * 绘制地图，仅渲染相机视口内可见的格子。
    *
@@ -164,17 +164,17 @@ export class HexMap {
     ctx.translate(Math.round(camera.x), Math.round(camera.y));
     ctx.scale(zoom, zoom);
 
-    // ── 视口裁剪：求可见世界矩形，转换为 hex 范围 ──────────────
+    // ── Viewport clipping: get visible world rectangle, convert to hex range ──
     const cw = ctx.canvas.width;
     const ch = ctx.canvas.height;
 
-    // 屏幕四角 → 世界坐标
+    // Four corners of the screen → world coordinates
     const wx0 = (0 - camera.x) / zoom;
     const wy0 = (0 - camera.y) / zoom;
     const wx1 = (cw - camera.x) / zoom;
     const wy1 = (ch - camera.y) / zoom;
 
-    // 世界像素 → hex 坐标（粗估，各加 2 格缓冲防边缘裁切）
+    // World pixels → hex coordinates (rough estimate, add 2-tile margin to avoid edge clipping)
     // x = size * 1.5 * q  =>  q ≈ x / (size * 1.5)
     const MARGIN = 2;
     const qMin = Math.floor(wx0 / (size * 1.5)) - MARGIN;
@@ -185,7 +185,7 @@ export class HexMap {
     const rMin = Math.floor((wy0 / size - SQ3 / 2 * qMax) / SQ3) - MARGIN;
     const rMax = Math.ceil((wy1 / size - SQ3 / 2 * qMin) / SQ3) + MARGIN;
 
-    // ── 遍历可见范围，绘制对应 Tile ─────────────────────────────
+    // ── Traverse visible range, draw corresponding Tile ─────────────
     for (let q = qMin; q <= qMax; q++) {
       for (let r = rMin; r <= rMax; r++) {
         if (Math.abs(q) > this.radius ||
@@ -202,7 +202,7 @@ export class HexMap {
       }
     }
 
-    // ── 在所有格子上方绘制光晕效果 ────────────────────────────────
+    // ── Draw glow effect above all tiles ───────────────────────────
     for (let q = qMin; q <= qMax; q++) {
       for (let r = rMin; r <= rMax; r++) {
         if (Math.abs(q) > this.radius ||
@@ -215,7 +215,7 @@ export class HexMap {
         const visState = this._visStateOf(tile);
         if (visState !== 'visible') continue;
 
-        // 绘制黄色光晕
+        // Draw yellow glow
         const { x, y } = tile.getCanvasPos(size);
         const hexPath = Tile.getHexPath(size);
         
@@ -241,13 +241,13 @@ export class HexMap {
     ctx.restore();
   }
 
-  // ── 辅助：计算单个格子的可见状态 ──────────────────────────────
+  // ── Helper: calculate the visibility state of a single tile ─────
   _visStateOf(tile) {
     if (!tile.isRevealed) return 'hidden';
     return 'visible';   // 若需"已探索但视野外"，在此扩展 fog-of-war 逻辑
   }
 
-  // ── 辅助：预计算整张地图的世界像素边界 ────────────────────────
+  // ── Helper: precompute world pixel bounds for the entire map ────
   _computeWorldBounds() {
     const size = this.tileSize;
     const r = this.radius;
